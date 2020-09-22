@@ -33,13 +33,13 @@ protected:
 	virtual void mouseReleaseEvent( QGraphicsSceneMouseEvent* event ) override;
 
 private:
+	QGraphicsView* m_view;
 	MapInfo m_mapInfo;
 	QList<Tile*> m_tileList;
 	WorkspaceWidget* m_parentWidget;
 
 	QList<TileInfo> m_beforeDrawTileInfo;
 	QUndoStack* m_undoStack;
-
 };
 
 class Tile : public QGraphicsRectItem

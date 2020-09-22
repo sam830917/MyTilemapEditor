@@ -92,14 +92,19 @@ void MainWindow::initialToolBar()
 	m_paintToolToolbar = new ToolBar( tr( "paint tool" ), this );
 	addToolBar( m_paintToolToolbar );
 
+	m_moveToolAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/move.png" ), tr( "&Move (V)" ) );
+	m_moveToolAction->setData( QVariant::fromValue( eDrawTool::MOVE ) );
+	m_moveToolAction->setShortcut( tr( "V" ) );
 	m_brushAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/pencil.png" ), tr( "&Brush (B)" ) );
 	m_eraserAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/eraser.png" ), tr( "&Eraser (E)" ) );
 	QActionGroup* alignmentGroup = new QActionGroup( this );
 	alignmentGroup->addAction( m_brushAction );
 	alignmentGroup->addAction( m_eraserAction );
+	alignmentGroup->addAction( m_moveToolAction );
 	m_brushAction->setCheckable(true);
 	m_eraserAction->setCheckable(true);
-	m_brushAction->setChecked(true);
+	m_moveToolAction->setCheckable(true);
+	m_moveToolAction->setChecked(true);
 
 	m_brushAction->setData( QVariant::fromValue( eDrawTool::BRUSH ) );
 	m_brushAction->setShortcut( tr( "B" ) );

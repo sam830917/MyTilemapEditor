@@ -6,5 +6,6 @@
         <file>Icon/eraser.png</file>
         <file>Icon/redo.png</file>
         <file>Icon/undo.png</file>
+        <file>Icon/move.png</file>
     </qresource>
 </RCC>

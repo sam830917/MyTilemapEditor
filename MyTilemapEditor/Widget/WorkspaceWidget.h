@@ -9,6 +9,7 @@ QT_FORWARD_DECLARE_CLASS( QPushButton )
 
 enum class eDrawTool
 {
+	MOVE,
 	BRUSH,
 	ERASER
 };
@@ -41,5 +42,5 @@ public:
 	QPushButton* m_openProjectButton;
 	QTabWidget* m_mapTabWidget;
 	QList<MapScene*> m_mapSceneList;
-	eDrawTool m_drawTool = eDrawTool::BRUSH;
+	eDrawTool m_drawTool = eDrawTool::MOVE;
 };

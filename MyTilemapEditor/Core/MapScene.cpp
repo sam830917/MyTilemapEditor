@@ -7,12 +7,16 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QDebug>
 #include <QtMath>
+#include <QGraphicsView>
+#include <QScrollBar>
 
 MapScene::MapScene( MapInfo mapInfo, WorkspaceWidget* parent /*= Q_NULLPTR*/ )
 	:QGraphicsScene( parent ), 
 	m_mapInfo(mapInfo),
 	m_parentWidget( parent )
 {
+	m_view = new QGraphicsView( this );
+	m_view->setScene( this );
 	m_undoStack = new QUndoStack( this );
 
 	QPen linePen( Qt::black );
@@ -110,6 +114,11 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 	QGraphicsScene::mousePressEvent( event );
 	if( event->button() & Qt::LeftButton )
 	{
+		if ( eDrawTool::MOVE == m_parentWidget->m_drawTool )
+		{
+			m_parentWidget->setCursor( Qt::ClosedHandCursor );
+			return;
+		}
 		m_beforeDrawTileInfo.clear();
 		for( Tile* tile : m_tileList )
 		{
@@ -129,6 +138,14 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 void MapScene::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
 {
 	QGraphicsScene::mouseMoveEvent( event );
+	if( m_parentWidget->m_drawTool == eDrawTool::MOVE )
+	{
+		QPoint currentPosition = event->screenPos();
+		QPoint lastPosition = event->lastScreenPos();
+		m_view->verticalScrollBar()->setValue( m_view->verticalScrollBar()->value() - ( currentPosition.y() - lastPosition.y()) );
+		m_view->horizontalScrollBar()->setValue( m_view->horizontalScrollBar()->value() - ( currentPosition.x() - lastPosition.x()) );
+		return;
+	}
 	QPointF mousePos = event->scenePos();
 	if( mousePos == QPointF() )
 	{
@@ -142,6 +159,7 @@ void MapScene::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 	QGraphicsScene::mouseReleaseEvent( event );
 	if( event->button() & Qt::LeftButton )
 	{
+		m_parentWidget->setCursor( Qt::ArrowCursor );
 		QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, m_tileList );
 		m_undoStack->push( command );
 		m_parentWidget->disableShortcut( false );

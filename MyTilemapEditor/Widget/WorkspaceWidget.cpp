@@ -76,9 +76,7 @@ void WorkspaceWidget::insertMap( MapInfo* mapInfo )
 
 	MapScene* mapScene = new MapScene( *mapInfo, this );
 	m_mapSceneList.push_back( mapScene );
-	QGraphicsView* view = new QGraphicsView( this );
-	view->setScene( mapScene );
-	m_mapTabWidget->addTab( view, mapInfo->getName() );
+	m_mapTabWidget->addTab( mapScene->m_view, mapInfo->getName() );
 }
 
 void WorkspaceWidget::closeTab( int index )
