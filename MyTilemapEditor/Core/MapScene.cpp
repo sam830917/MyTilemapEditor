@@ -162,6 +162,7 @@ void Tile::paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWi
 		QSize tileSize = m_tileInfo.getTileset()->getTileSize();
 		QSize mapTileSize = m_mapScene->getMapInfo().getTileSize();
 		QSize sizeDiff = QSize( mapTileSize.width() - tileSize.width(), mapTileSize.height() - tileSize.height() );
-		painter->drawPixmap( rect.x(), rect.y() + sizeDiff.height(), tileSize.width(), tileSize.height(), m_tileInfo.getTileImage() );
+		QPoint point = QPoint( rect.x() + 0.5f, rect.y() + 0.5f + sizeDiff.height() );
+		painter->drawPixmap( point.x(), point.y(), tileSize.width(), tileSize.height(), m_tileInfo.getTileImage() );
 	}
 }
