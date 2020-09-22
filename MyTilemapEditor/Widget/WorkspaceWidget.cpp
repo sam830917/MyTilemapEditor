@@ -84,7 +84,7 @@ void WorkspaceWidget::insertMap( MapInfo* mapInfo )
 
 	MapScene* mapScene = new MapScene( *mapInfo, this );
 	m_mapSceneList.push_back( mapScene );
-	int currentIndex = m_mapTabWidget->addTab( mapScene->m_view, mapInfo->getName() );
+	m_mapTabWidget->addTab( mapScene->m_view, mapInfo->getName() );
 
 	// Set tiles
 	XmlDocument* mapDoc = new XmlDocument;
@@ -124,6 +124,7 @@ void WorkspaceWidget::insertMap( MapInfo* mapInfo )
 		mapScene->paintMap( index, TileInfo( tilesetsMap.value( tilesetNumber ), tilesetIndex ) );
 	}
 
+	int currentIndex = m_mapTabWidget->currentIndex();
 	m_mapSceneList[currentIndex]->m_isSaved = true;
 	m_mapTabWidget->setTabText( currentIndex, m_mapSceneList[currentIndex]->m_mapInfo.getName() );
 }

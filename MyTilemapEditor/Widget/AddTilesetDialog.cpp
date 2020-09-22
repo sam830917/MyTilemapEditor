@@ -109,6 +109,7 @@ void AddTilesetDialog::addImageFile()
 	QPixmap* img = new QPixmap();
 	if( !(img->load( aFileName )) )
 	{
+		QMessageBox::warning( this, tr( "Warning" ), tr( "Failed to import image!" ) );
 		delete img;
 		return;
 	}

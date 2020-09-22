@@ -56,9 +56,13 @@ void MainWindow::initialMenuBar()
 	m_saveAction = new QAction( tr( "Save" ), this );
 	m_saveAction->setIcon( QIcon(":/MainWindow/Icon/save-file.png") );
 	m_saveAction->setShortcuts( QKeySequence::Save );
+	m_saveAction->setDisabled( true );
+	m_saveAction->setToolTip( tr( "Save (Ctrl+S)" ) );
 	m_saveAllAction = new QAction( tr( "Save All" ), this );
 	m_saveAllAction->setIcon( QIcon( ":/MainWindow/Icon/save-all-files.png" ) );
 	m_saveAllAction->setShortcut( tr( "Ctrl+Shift+S" ) );
+	m_saveAllAction->setDisabled( true );
+	m_saveAllAction->setToolTip( tr( "Save All (Ctrl+Shift+S)" ) );
 	m_fileMenu->addAction( m_saveAction );
 	m_fileMenu->addAction( m_saveAllAction );
 	m_fileMenu->addSeparator();
@@ -189,6 +193,8 @@ void MainWindow::updateToolBar()
 	m_tilesetAction->setDisabled( false );
 	m_mapAction->setDisabled( false );
 	m_basicToolbar->setDisabled( false );
+	m_saveAction->setDisabled( false );
+	m_saveAllAction->setDisabled( false );
 }
 
 void MainWindow::changeDrawTool( QAction* action )
