@@ -77,12 +77,7 @@ void MapScene::editMapOnPoint( const QPointF& point )
 
 void MapScene::paintMap( int index )
 {
-	if ( index < 0 )
-	{
-		return;
-	}
-	m_tileList[index]->m_tileInfo = getCurrentTile();
-	m_tileList[index]->update();
+	paintMap( index, getCurrentTile() );
 }
 
 void MapScene::paintMap( QSize coord )
@@ -90,6 +85,17 @@ void MapScene::paintMap( QSize coord )
 	QSize mapSize = m_mapInfo.getMapSize();
 	int index = coord.height() * mapSize.width() + coord.width();
 	paintMap( index );
+}
+
+void MapScene::paintMap( int index, TileInfo tileInfo )
+{
+	if( index < 0 )
+	{
+		return;
+	}
+	m_tileList[index]->m_tileInfo = tileInfo;
+	m_tileList[index]->update();
+	m_parentWidget->modifiedCurrentScene();
 }
 
 void MapScene::eraseMap( int index )
@@ -100,6 +106,7 @@ void MapScene::eraseMap( int index )
 	}
 	m_tileList[index]->m_tileInfo = TileInfo();
 	m_tileList[index]->update();
+	m_parentWidget->modifiedCurrentScene();
 }
 
 void MapScene::eraseMap( QSize coord )
@@ -138,7 +145,7 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 void MapScene::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
 {
 	QGraphicsScene::mouseMoveEvent( event );
-	if( m_parentWidget->m_drawTool == eDrawTool::MOVE )
+	if( eDrawTool::MOVE == m_parentWidget->m_drawTool )
 	{
 		QPoint currentPosition = event->screenPos();
 		QPoint lastPosition = event->lastScreenPos();
@@ -157,9 +164,13 @@ void MapScene::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
 void MapScene::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 {
 	QGraphicsScene::mouseReleaseEvent( event );
-	if( event->button() & Qt::LeftButton )
+	if ( eDrawTool::MOVE == m_parentWidget->m_drawTool )
 	{
 		m_parentWidget->setCursor( Qt::ArrowCursor );
+		return;
+	}
+	if( event->button() & Qt::LeftButton )
+	{
 		QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, m_tileList );
 		m_undoStack->push( command );
 		m_parentWidget->disableShortcut( false );

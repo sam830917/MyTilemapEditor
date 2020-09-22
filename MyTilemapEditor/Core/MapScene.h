@@ -14,6 +14,7 @@ class WorkspaceWidget;
 class MapScene : public QGraphicsScene
 {
 	friend class WorkspaceWidget;
+	friend class DrawCommand;
 
 public:
 	MapScene( MapInfo mapInfo, WorkspaceWidget* parent = Q_NULLPTR );
@@ -22,6 +23,7 @@ public:
 
 	void editMapOnPoint( const QPointF& point );
 
+	void paintMap( int index, TileInfo tileInfo );
 	void paintMap( int index );
 	void paintMap( QSize coord );
 	void eraseMap( int index );
@@ -33,10 +35,11 @@ protected:
 	virtual void mouseReleaseEvent( QGraphicsSceneMouseEvent* event ) override;
 
 private:
+	bool m_isSaved = true;
 	QGraphicsView* m_view;
+	WorkspaceWidget* m_parentWidget;
 	MapInfo m_mapInfo;
 	QList<Tile*> m_tileList;
-	WorkspaceWidget* m_parentWidget;
 
 	QList<TileInfo> m_beforeDrawTileInfo;
 	QUndoStack* m_undoStack;
@@ -45,6 +48,7 @@ private:
 class Tile : public QGraphicsRectItem
 {
 	friend class MapScene;
+	friend class DrawCommand;
 
 public:
 	Tile( MapScene* scene, QGraphicsItem* parent = Q_NULLPTR );

@@ -45,6 +45,7 @@ private:
 	QAction* m_tilesetAction;
 	QAction* m_mapAction;
 	QAction* m_saveAction;
+	QAction* m_saveAllAction;
 	QAction* m_projectNewAction;
 	QAction* m_projectOpenAction;
 	QAction* m_redoAction;

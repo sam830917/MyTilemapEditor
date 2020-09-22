@@ -24,6 +24,7 @@ public:
 
 	void disableTabWidget( bool disable ) const;
 	eDrawTool getCurrentDrawTool() { return m_drawTool; }
+	void modifiedCurrentScene();
 
 public slots:
 	void addMap();
@@ -31,6 +32,10 @@ public slots:
 	void closeTab( int index );
 	void setDrawTool( eDrawTool drawTool );
 	void changeTab( int index );
+
+	void saveCurrentMap();
+	void saveAllMaps();
+	void saveMap( int tabIndex );
 
 signals:
 	void updateRedo( QAction* action );

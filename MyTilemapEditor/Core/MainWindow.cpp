@@ -56,7 +56,11 @@ void MainWindow::initialMenuBar()
 	m_saveAction = new QAction( tr( "Save" ), this );
 	m_saveAction->setIcon( QIcon(":/MainWindow/Icon/save-file.png") );
 	m_saveAction->setShortcuts( QKeySequence::Save );
+	m_saveAllAction = new QAction( tr( "Save All" ), this );
+	m_saveAllAction->setIcon( QIcon( ":/MainWindow/Icon/save-all-files.png" ) );
+	m_saveAllAction->setShortcut( tr( "Ctrl+Shift+S" ) );
 	m_fileMenu->addAction( m_saveAction );
+	m_fileMenu->addAction( m_saveAllAction );
 	m_fileMenu->addSeparator();
 	m_fileMenu->addAction( tr( "&Quit" ), this, &QWidget::close );
 
@@ -86,6 +90,7 @@ void MainWindow::initialToolBar()
 	basicMenu->addAction( m_tilesetAction );
 	basicMenu->addAction( m_mapAction );
 	m_basicToolbar->addAction( m_saveAction );
+	m_basicToolbar->addAction( m_saveAllAction );
 	m_basicToolbar->addAction( m_undoAction );
 	m_basicToolbar->addAction( m_redoAction );
 
@@ -154,6 +159,8 @@ void MainWindow::initialDockWidgets()
 
 void MainWindow::initialConnections()
 {
+	connect( m_saveAction, &QAction::triggered, m_centralWidget, &WorkspaceWidget::saveCurrentMap );
+	connect( m_saveAllAction, &QAction::triggered, m_centralWidget, &WorkspaceWidget::saveAllMaps );
 	connect( m_projectNewAction, &QAction::triggered, m_projectWidget, &ProjectWidget::newProject );
 	connect( m_projectOpenAction, &QAction::triggered, m_projectWidget, &ProjectWidget::openProject );
 	connect( m_tilesetAction, &QAction::triggered, m_tilesetWidget, &TilesetWidget::addTileset );

@@ -7,5 +7,6 @@
         <file>Icon/redo.png</file>
         <file>Icon/undo.png</file>
         <file>Icon/move.png</file>
+        <file>Icon/save-all-files.png</file>
     </qresource>
 </RCC>

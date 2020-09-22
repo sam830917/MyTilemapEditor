@@ -12,9 +12,11 @@ public:
 	TileInfo( const Tileset* tileset, int index );
 	~TileInfo();
 
-	QPixmap getTileImage();
-	const Tileset* getTileset() const { return m_tileset; }
-	bool isValid() { return m_index != -1 && m_index >=0 && m_tileset; }
+	QPixmap			getTileImage();
+	int				getIndex() const { return m_index; }
+	const Tileset*	getTileset() const { return m_tileset; }
+
+	bool			isValid() { return m_index != -1 && m_index >=0 && m_tileset; }
 private:
 	const Tileset* m_tileset;
 	int m_index = -1;

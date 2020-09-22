@@ -1,4 +1,5 @@
 #include "UndoCommand.h"
+#include "../Widget/WorkspaceWidget.h"
 
 DrawCommand::DrawCommand( QList<TileInfo> tileInfoList, QList<Tile*> tiles, QUndoCommand* parent /*= 0 */ )
 	: QUndoCommand( parent ),
@@ -22,6 +23,7 @@ void DrawCommand::undo()
 		m_tiles[i]->setTileInfo( m_tileInfoBeforeList[i] );
 		m_tiles[i]->update();
 	}
+	m_tiles[0]->m_mapScene->m_parentWidget->modifiedCurrentScene();
 }
 
 void DrawCommand::redo()
@@ -31,4 +33,5 @@ void DrawCommand::redo()
 		m_tiles[i]->setTileInfo( m_tileInfoAfterList[i] );
 		m_tiles[i]->update();
 	}
+	m_tiles[0]->m_mapScene->m_parentWidget->modifiedCurrentScene();
 }
