@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/MainWindow">
+        <file>Icon/new-file.png</file>
+        <file>Icon/save-file.png</file>
+        <file>Icon/pencil.png</file>
+        <file>Icon/eraser.png</file>
+        <file>Icon/redo.png</file>
+        <file>Icon/undo.png</file>
+    </qresource>
+</RCC>

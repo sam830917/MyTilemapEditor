@@ -1,0 +1,152 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{63E8D038-D0C1-4F03-AD4E-1AB94323C845}</ProjectGuid>
+    <Keyword>QtVS_v303</Keyword>
+    <QtMsBuild Condition="'$(QtMsBuild)'=='' OR !Exists('$(QtMsBuild)\qt.targets')">$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
+    <Message Importance="High" Text="QtMsBuild: could not locate qt.targets, qt.props; project may not build correctly." />
+  </Target>
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt_defaults.props')">
+    <Import Project="$(QtMsBuild)\qt_defaults.props" />
+  </ImportGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
+    <QtInstall>msvc2017_64</QtInstall>
+    <QtModules>core;gui;widgets</QtModules>
+    <QtBuildConfig>debug</QtBuildConfig>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
+    <QtInstall>msvc2017_64</QtInstall>
+    <QtModules>core;gui;widgets</QtModules>
+    <QtBuildConfig>release</QtBuildConfig>
+  </PropertyGroup>
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')">
+    <Import Project="$(QtMsBuild)\qt.props" />
+  </ImportGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
+    <ClCompile>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="Configuration">
+    <ClCompile>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DebugInformationFormat>None</DebugInformationFormat>
+      <Optimization>MaxSpeed</Optimization>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Core\MainWindow.cpp" />
+    <ClCompile Include="Core\main.cpp" />
+    <ClCompile Include="Core\MapInfo.cpp" />
+    <ClCompile Include="Core\MapScene.cpp" />
+    <ClCompile Include="Core\Project.cpp" />
+    <ClCompile Include="Core\TileInfo.cpp" />
+    <ClCompile Include="Core\Tileset.cpp" />
+    <ClCompile Include="Core\Toolbar.cpp" />
+    <ClCompile Include="Core\UndoCommand.cpp" />
+    <ClCompile Include="ThirdParty\tinyxml2.cpp" />
+    <ClCompile Include="Utils\ProjectCommon.cpp" />
+    <ClCompile Include="Utils\XmlUtils.cpp" />
+    <ClCompile Include="Widget\AddMapDialog.cpp" />
+    <ClCompile Include="Widget\AddTilesetDialog.cpp" />
+    <ClCompile Include="Widget\LayerWidget.cpp" />
+    <ClCompile Include="Widget\MinimapWidget.cpp" />
+    <ClCompile Include="Widget\ProjectWidget.cpp" />
+    <ClCompile Include="Widget\PropertiesWidget.cpp" />
+    <ClCompile Include="Widget\TilesetWidget.cpp" />
+    <ClCompile Include="Widget\WorkspaceWidget.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="Core\MainWindow.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="Resource Files\UI\AddMapUI.ui" />
+    <QtUic Include="Resource Files\UI\AddTilesetUI.ui" />
+    <QtUic Include="Resource Files\UI\MainWindow.ui" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtRcc Include="Resource Files\ToolbarIcon.qrc" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="Core\Toolbar.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="Widget\ProjectWidget.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="Widget\WorkspaceWidget.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Core\MapInfo.h" />
+    <ClInclude Include="Core\MapScene.h" />
+    <ClInclude Include="Core\Project.h" />
+    <ClInclude Include="Core\TileInfo.h" />
+    <ClInclude Include="Core\Tileset.h" />
+    <ClInclude Include="Core\UndoCommand.h" />
+    <ClInclude Include="ThirdParty\tinyxml2.h" />
+    <ClInclude Include="Utils\ProjectCommon.h" />
+    <ClInclude Include="Utils\XmlUtils.h" />
+    <QtMoc Include="Widget\AddMapDialog.h" />
+    <QtMoc Include="Widget\MinimapWidget.h" />
+    <QtMoc Include="Widget\PropertiesWidget.h" />
+    <QtMoc Include="Widget\LayerWidget.h" />
+    <QtMoc Include="Widget\TilesetWidget.h" />
+    <QtMoc Include="Widget\AddTilesetDialog.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
+    <Import Project="$(QtMsBuild)\qt.targets" />
+  </ImportGroup>
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

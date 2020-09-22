@@ -1,0 +1,51 @@
+#pragma once
+
+#include <QDockWidget>
+#include <QString>
+#include <QList>
+#include <QQueue>
+#include <QModelIndex>
+#include "../Core/Project.h"
+
+class Tileset;
+class MapInfo;
+
+QT_FORWARD_DECLARE_CLASS( QFileSystemModel )
+QT_FORWARD_DECLARE_CLASS( QStandardItemModel )
+QT_FORWARD_DECLARE_CLASS( QTreeView )
+QT_FORWARD_DECLARE_CLASS( QVBoxLayout )
+QT_FORWARD_DECLARE_CLASS( QMenu )
+
+class ProjectWidget : public QDockWidget
+{
+	Q_OBJECT
+
+public:
+	explicit ProjectWidget( const QString &title, QWidget *parent = Q_NULLPTR );
+
+	void addFolderPathToWatingList( const QString& path );
+
+private:
+	void initialTreeView();
+
+public slots:
+	void newProject();
+	void openProject();
+	void refresh();
+	void addFolder();
+	void fileRenamed(const QString &path, const QString &oldName, const QString &newName);
+	void openFile( QModelIndex index );
+
+private slots:
+	void popupMenu( const QPoint& pos );
+
+signals:
+	void loadProjectSuccessfully();
+	void loadTilesetSuccessfully( Tileset* tileset );
+	void loadMapSuccessfully( MapInfo* mapInfo );
+	void tilesetRenamed( const QString& path, const QString& oldName, const QString& newName );
+
+private:
+	QTreeView* m_treeView;
+	QFileSystemModel* m_fileModel;
+};
