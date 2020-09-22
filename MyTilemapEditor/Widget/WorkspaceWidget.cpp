@@ -6,6 +6,7 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QGraphicsView>
+#include <QMessageBox>
 
 WorkspaceWidget::WorkspaceWidget( QWidget* parent /*= Q_NULLPTR */ )
 	:QWidget(parent)
@@ -131,9 +132,32 @@ void WorkspaceWidget::insertMap( MapInfo* mapInfo )
 
 void WorkspaceWidget::closeTab( int index )
 {
-	m_mapTabWidget->removeTab(index);
-	m_mapSceneList.removeAt(index);
-	if ( m_mapTabWidget->count() == 0 )
+	if ( !m_mapSceneList[index]->m_isSaved )
+	{
+		QMessageBox msgBox;
+		msgBox.setText( "The map has been modified." );
+		msgBox.setInformativeText( "Do you want to save your changes?" );
+		msgBox.setStandardButtons( QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel );
+		msgBox.setDefaultButton( QMessageBox::Save );
+		int ret = msgBox.exec();
+		switch( ret ) {
+		case QMessageBox::Save:
+			saveMap( index );
+			break;
+		case QMessageBox::Discard:
+			// Don't Save was clicked
+			break;
+		case QMessageBox::Cancel:
+			return;
+			break;
+		default:
+			// should never be reached
+			break;
+		}
+	}
+	m_mapTabWidget->removeTab( index );
+	m_mapSceneList.removeAt( index );
+	if( m_mapTabWidget->count() == 0 )
 	{
 		disableTabWidget( true );
 	}
@@ -160,6 +184,36 @@ void WorkspaceWidget::changeTab( int index )
 			updateRedo( mapScene->m_undoStack->createRedoAction( this, tr( "&Redo" ) ) );
 		}
 	}
+}
+
+bool WorkspaceWidget::isReadyToClose()
+{
+	for ( MapScene* scene : m_mapSceneList )
+	{
+		if ( !scene->m_isSaved )
+		{
+			QMessageBox msgBox;
+			msgBox.setText( "The maps has been modified." );
+			msgBox.setInformativeText( "Do you want to save your changes?" );
+			msgBox.setStandardButtons( QMessageBox::SaveAll | QMessageBox::Discard | QMessageBox::Cancel );
+			msgBox.setDefaultButton( QMessageBox::SaveAll );
+			int ret = msgBox.exec();
+			switch( ret ) {
+			case QMessageBox::SaveAll:
+				saveAllMaps();
+				return true;
+			case QMessageBox::Discard:
+				return true;
+			case QMessageBox::Cancel:
+				return false;
+			default:
+				// should never be reached
+				break;
+			}
+		}
+	}
+
+	return true;
 }
 
 void WorkspaceWidget::saveCurrentMap()

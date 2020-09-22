@@ -3,6 +3,7 @@
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
+#include <QCloseEvent>
 #include "Toolbar.h"
 #include "../Widget/ProjectWidget.h"
 #include "../Widget/WorkspaceWidget.h"
@@ -20,7 +21,7 @@ public:
     MainWindow(QWidget *parent = Q_NULLPTR);
 
 protected:
-	void checkShortcutsEnabled();
+	void closeEvent( QCloseEvent* event );
 
 private:
     void initialMenuBar();
@@ -30,7 +31,7 @@ private:
 
 public slots:
 	void updateToolBar();
-	void changeDrawTool(QAction* action);
+	void changeDrawTool( QAction* action );
 	void replaceRedoAction( QAction* action );
 	void replaceUndoAction( QAction* action );
 	void disableShortcut( bool isDisable );

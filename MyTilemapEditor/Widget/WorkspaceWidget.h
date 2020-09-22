@@ -23,8 +23,10 @@ public:
 	explicit WorkspaceWidget( QWidget* parent = Q_NULLPTR );
 
 	void disableTabWidget( bool disable ) const;
-	eDrawTool getCurrentDrawTool() { return m_drawTool; }
 	void modifiedCurrentScene();
+	bool isReadyToClose();
+
+	eDrawTool getCurrentDrawTool() { return m_drawTool; }
 
 public slots:
 	void addMap();

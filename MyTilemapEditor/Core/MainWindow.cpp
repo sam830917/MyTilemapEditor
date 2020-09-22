@@ -18,18 +18,21 @@ MainWindow::MainWindow(QWidget *parent)
 	initialConnections();
 }
 
-void MainWindow::checkShortcutsEnabled()
+void MainWindow::closeEvent( QCloseEvent* event )
 {
-	QList<QAction*> actions = findChildren<QAction*>();
-
-	if( QApplication::mouseButtons() != Qt::NoButton ) 
+	bool isAllReadyToClose = true;
+	if ( !m_centralWidget->isReadyToClose() )
 	{
-		for( QAction* a : actions ) a->setShortcutContext( Qt::WidgetShortcut );
+		isAllReadyToClose = false;
 	}
-	else if( QApplication::keyboardModifiers() == Qt::NoModifier ) 
+
+	if ( isAllReadyToClose )
 	{
-		//Don't re-enable shortcuts until modifers have been released
-		for( QAction* a : actions ) a->setShortcutContext( Qt::WindowShortcut );
+		event->accept();
+	}
+	else
+	{
+		event->ignore();
 	}
 }
 
@@ -247,8 +250,10 @@ void MainWindow::disableShortcut( bool isDisable )
 	{
 		sc = Qt::WidgetShortcut;
 	}
-	m_redoAction->setShortcutContext( sc );
-	m_undoAction->setShortcutContext( sc );
-	m_brushAction->setShortcutContext( sc );
-	m_eraserAction->setShortcutContext( sc );
+	QList<QAction*> actions = findChildren<QAction*>();
+	for( QAction* a : actions ) a->setShortcutContext( sc );
+	//m_redoAction->setShortcutContext( sc );
+	//m_undoAction->setShortcutContext( sc );
+	//m_brushAction->setShortcutContext( sc );
+	//m_eraserAction->setShortcutContext( sc );
 }
