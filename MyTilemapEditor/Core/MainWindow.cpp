@@ -5,6 +5,8 @@
 #include <QTimer>
 #include <QPushButton>
 #include <QEvent>
+#include <QStatusBar>
+#include <QComboBox>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -16,6 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
 	initialToolBar();
 	initialDockWidgets();
 	initialConnections();
+	initialStatusBar();
 }
 
 void MainWindow::closeEvent( QCloseEvent* event )
@@ -123,6 +126,20 @@ void MainWindow::initialToolBar()
 	m_eraserAction->setData( QVariant::fromValue( eDrawTool::ERASER ) );
 	m_eraserAction->setShortcut( tr("E") );
 	connect( alignmentGroup, &QActionGroup::triggered, this, &MainWindow::changeDrawTool );
+}
+
+void MainWindow::initialStatusBar()
+{
+	//QList<QString> scaleTextList;
+	//scaleTextList<< "50 %" << "100 %" << "200 %";
+	//QComboBox* mapScaleBox = new QComboBox;
+	//mapScaleBox->addItems( scaleTextList );
+	//mapScaleBox->setCurrentIndex(1);
+	////mapScaleBox->setEditable( true );
+	////mapScaleBox->setEditText( "100 %" );
+	//mapScaleBox->setValidator( new QIntValidator() );
+	//statusBar()->addPermanentWidget( mapScaleBox );
+	//connect( mapScaleBox, SIGNAL( currentIndexChanged(const QString &) ), m_centralWidget, SLOT( changeMapScale( const QString & ) ) );
 }
 
 void MainWindow::initialDockWidgets()

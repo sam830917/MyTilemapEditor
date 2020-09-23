@@ -137,6 +137,7 @@ void WorkspaceWidget::closeTab( int index )
 		QMessageBox msgBox;
 		msgBox.setText( "The map has been modified." );
 		msgBox.setInformativeText( "Do you want to save your changes?" );
+		msgBox.setIcon( QMessageBox::Warning );
 		msgBox.setStandardButtons( QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel );
 		msgBox.setDefaultButton( QMessageBox::Save );
 		int ret = msgBox.exec();
@@ -186,6 +187,11 @@ void WorkspaceWidget::changeTab( int index )
 	}
 }
 
+void WorkspaceWidget::changeMapScale( const QString& text )
+{
+	int scale = text.split(" ")[0].toInt();
+}
+
 bool WorkspaceWidget::isReadyToClose()
 {
 	for ( MapScene* scene : m_mapSceneList )
@@ -195,6 +201,7 @@ bool WorkspaceWidget::isReadyToClose()
 			QMessageBox msgBox;
 			msgBox.setText( "The maps has been modified." );
 			msgBox.setInformativeText( "Do you want to save your changes?" );
+			msgBox.setIcon( QMessageBox::Warning );
 			msgBox.setStandardButtons( QMessageBox::SaveAll | QMessageBox::Discard | QMessageBox::Cancel );
 			msgBox.setDefaultButton( QMessageBox::SaveAll );
 			int ret = msgBox.exec();

@@ -17,11 +17,11 @@ MapScene::MapScene( MapInfo mapInfo, WorkspaceWidget* parent /*= Q_NULLPTR*/ )
 {
 	m_view = new QGraphicsView( this );
 	m_view->setScene( this );
+	setBackgroundBrush( QBrush( QColor( 170, 170, 170, 255 ) ) );
 	m_undoStack = new QUndoStack( this );
 
 	QPen linePen( Qt::black );
-	linePen.setWidth( 3 );
-	linePen.setWidth( 2 );
+	linePen.setWidth( 1 );
 	linePen.setStyle( Qt::PenStyle::DotLine );
 
 	QSize mapSize = m_mapInfo.getMapSize();
@@ -149,8 +149,8 @@ void MapScene::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
 	{
 		QPoint currentPosition = event->screenPos();
 		QPoint lastPosition = event->lastScreenPos();
-		m_view->verticalScrollBar()->setValue( m_view->verticalScrollBar()->value() - ( currentPosition.y() - lastPosition.y()) );
-		m_view->horizontalScrollBar()->setValue( m_view->horizontalScrollBar()->value() - ( currentPosition.x() - lastPosition.x()) );
+		m_view->verticalScrollBar()->setValue( m_view->verticalScrollBar()->value() - (currentPosition.y() - lastPosition.y()) );
+		m_view->horizontalScrollBar()->setValue( m_view->horizontalScrollBar()->value() - (currentPosition.x() - lastPosition.x()) );
 		return;
 	}
 	QPointF mousePos = event->scenePos();
@@ -176,6 +176,25 @@ void MapScene::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 		m_parentWidget->disableShortcut( false );
 	}
 	update();
+}
+
+void MapScene::wheelEvent( QGraphicsSceneWheelEvent* event )
+{
+	if(event->modifiers().testFlag(Qt::ControlModifier))
+	{
+		if( event->delta() > 0 )
+		{
+			QMatrix m = m_view->matrix();
+			m.scale( 1.25, 1.25 );
+			m_view->setMatrix( m );
+		}
+		else
+		{
+			QMatrix m = m_view->matrix();
+			m.scale( 0.8, 0.8 );
+			m_view->setMatrix( m );
+		}
+	}
 }
 
 Tile::Tile( MapScene* scene, QGraphicsItem* parent /*= Q_NULLPTR */ )

@@ -33,6 +33,7 @@ protected:
 	virtual void mousePressEvent( QGraphicsSceneMouseEvent* event ) override;
 	virtual void mouseMoveEvent( QGraphicsSceneMouseEvent* event ) override;
 	virtual void mouseReleaseEvent( QGraphicsSceneMouseEvent* event ) override;
+	virtual void wheelEvent(QGraphicsSceneWheelEvent *event) override;
 
 private:
 	bool m_isSaved = true;

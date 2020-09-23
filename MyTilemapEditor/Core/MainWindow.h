@@ -26,6 +26,7 @@ protected:
 private:
     void initialMenuBar();
     void initialToolBar();
+    void initialStatusBar();
 	void initialDockWidgets();
 	void initialConnections();
 
