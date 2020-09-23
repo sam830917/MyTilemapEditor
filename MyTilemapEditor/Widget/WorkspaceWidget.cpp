@@ -141,7 +141,8 @@ void WorkspaceWidget::closeTab( int index )
 		msgBox.setStandardButtons( QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel );
 		msgBox.setDefaultButton( QMessageBox::Save );
 		int ret = msgBox.exec();
-		switch( ret ) {
+		switch( ret ) 
+		{
 		case QMessageBox::Save:
 			saveMap( index );
 			break;
@@ -205,7 +206,8 @@ bool WorkspaceWidget::isReadyToClose()
 			msgBox.setStandardButtons( QMessageBox::SaveAll | QMessageBox::Discard | QMessageBox::Cancel );
 			msgBox.setDefaultButton( QMessageBox::SaveAll );
 			int ret = msgBox.exec();
-			switch( ret ) {
+			switch( ret ) 
+			{
 			case QMessageBox::SaveAll:
 				saveAllMaps();
 				return true;

@@ -2,6 +2,7 @@
 #include "../Utils/ProjectCommon.h"
 #include "../Utils/XmlUtils.h"
 #include <QMessageBox>
+#include <QFileInfo>
 
 AddMapDialog::AddMapDialog( QWidget* parent /*= Q_NULLPTR */ )
 	:QDialog( parent )
@@ -28,6 +29,29 @@ void AddMapDialog::saveMap()
 		QMessageBox::warning( this, tr( "Warning" ), tr( "Name cannot be empty!" ) );
 		return;
 	}
+	// Check same name
+	QString filePath = getProjectRootPath() + "/" + m_ui.m_nameBox->text() + ".map";
+	QFileInfo file(filePath);
+	if ( file.exists() )
+	{
+		QMessageBox msgBox;
+		msgBox.setWindowTitle( "Confirm Save As" );
+		msgBox.setText( "Map name \"" + m_ui.m_nameBox->text() + "\" already exists.\n\nDo you want to replace it?" );
+		msgBox.setIcon( QMessageBox::Warning );
+		msgBox.setStandardButtons( QMessageBox::Yes | QMessageBox::No );
+		msgBox.setDefaultButton( QMessageBox::No );
+		int ret = msgBox.exec();
+		switch( ret )
+		{
+		case QMessageBox::Yes:
+			break;
+		case QMessageBox::No:
+			return;
+		default:
+			// should never be reached
+			break;
+		}
+	}
 
 	// Save as XML
 	XmlDocument* xmlDocument = new XmlDocument();
@@ -38,7 +62,6 @@ void AddMapDialog::saveMap()
 	root->SetAttribute( "tileSize", tileSize.toStdString().c_str() );
 	xmlDocument->LinkEndChild( root );
 
-	QString filePath = getProjectRootPath() + "/" + m_ui.m_nameBox->text() + ".map";
 	saveXmlFile( *xmlDocument, filePath );
 	m_filePath = filePath;
 

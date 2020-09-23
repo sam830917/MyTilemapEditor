@@ -75,6 +75,29 @@ void AddTilesetDialog::saveTileset()
 		QMessageBox::warning( this, tr( "Warning" ), tr( "Name cannot be empty!" ) );
 		return;
 	}
+	// Check same name
+	QString filePath = getProjectRootPath() + "/" + m_ui.m_nameBox->text() + ".tileset";
+	QFileInfo file( filePath );
+	if( file.exists() )
+	{
+		QMessageBox msgBox;
+		msgBox.setWindowTitle( "Confirm Save As" );
+		msgBox.setText( "Tileset name \"" + m_ui.m_nameBox->text() + "\" already exists.\n\nDo you want to replace it?" );
+		msgBox.setIcon( QMessageBox::Warning );
+		msgBox.setStandardButtons( QMessageBox::Yes | QMessageBox::No );
+		msgBox.setDefaultButton( QMessageBox::No );
+		int ret = msgBox.exec();
+		switch( ret )
+		{
+		case QMessageBox::Yes:
+			break;
+		case QMessageBox::No:
+			return;
+		default:
+			// should never be reached
+			break;
+		}
+	}
 
 	// Save as XML
 	QFileInfo imgFileInfo(m_imagePath);
@@ -91,7 +114,6 @@ void AddTilesetDialog::saveTileset()
 	xmlDocument->LinkEndChild( root );
 	root->LinkEndChild( tilesetEle );
 
-	QString filePath = getProjectRootPath() + "/" + m_ui.m_nameBox->text() + ".tileset";
 	saveXmlFile( *xmlDocument, filePath );
 	m_saveFilePath = filePath;
 
