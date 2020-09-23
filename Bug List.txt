@@ -1,0 +1,1 @@
+1. when create new tileset or map, check if there have same name.

@@ -25,6 +25,9 @@
     <Filter Include="ThirdParty">
       <UniqueIdentifier>{dde19955-d4bb-4257-b822-07b1fb53181b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Doc">
+      <UniqueIdentifier>{357a748d-9bfb-41e6-9f34-cfb1a8bfd51b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\main.cpp">
@@ -164,5 +167,10 @@
     <ClInclude Include="Core\UndoCommand.h">
       <Filter>Core</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\Bug List.txt">
+      <Filter>Doc</Filter>
+    </Text>
   </ItemGroup>
 </Project>

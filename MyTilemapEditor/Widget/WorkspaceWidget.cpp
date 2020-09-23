@@ -272,7 +272,7 @@ void WorkspaceWidget::saveMap( int tabIndex )
 		{
 			tilesetsMap.insert( tileInfo.getTileset()->getRelativeFilePath(), count++ );
 		}
-		int tilesetNumber = tilesetsMap.value( tileInfo.getTileset()->getFilePath() );
+		int tilesetNumber = tilesetsMap.value( tileInfo.getTileset()->getRelativeFilePath() );
 		XmlElement* mapTileEle = mapDoc->NewElement( "Tile" );
 		mapTileEle->SetAttribute( "index", i );
 		mapTileEle->SetAttribute( "tileset", tilesetNumber );

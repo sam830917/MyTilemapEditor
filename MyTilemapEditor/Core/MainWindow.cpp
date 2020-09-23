@@ -77,10 +77,12 @@ void MainWindow::initialMenuBar()
 	m_editMenu = m_mainMenuBar->addMenu( "Edit" );
 	m_undoAction = new QAction( QIcon( ":/MainWindow/Icon/undo.png" ), tr( "&Undo" ) );
 	m_undoAction->setShortcuts( QKeySequence::Undo );
+	m_undoAction->setToolTip( tr( "Undo (Ctrl+Z)" ) );
 	m_undoAction->setDisabled(true);
 	m_editMenu->addAction( m_undoAction );
 	m_redoAction = new QAction( QIcon( ":/MainWindow/Icon/redo.png" ), tr( "&Redo" ) );
 	m_redoAction->setShortcuts( QKeySequence::Redo );
+	m_redoAction->setToolTip( tr( "Redo (Ctrl+Y)" ) );
 	m_redoAction->setDisabled(true);
 	m_editMenu->addAction( m_redoAction );
 
@@ -234,6 +236,7 @@ void MainWindow::replaceRedoAction( QAction* action )
 	action->setShortcuts( QKeySequence::Redo );
 	action->setIcon( QIcon( ":/MainWindow/Icon/redo.png" ) );
 	action->setText( tr( "&Redo" ) );
+	action->setToolTip( tr( "Redo (Ctrl+Y)" ) );
 	m_editMenu->insertAction( m_redoAction, action );
 	m_basicToolbar->insertAction( m_redoAction, action );
 	m_editMenu->removeAction( m_redoAction );
@@ -252,6 +255,7 @@ void MainWindow::replaceUndoAction( QAction* action )
 	action->setShortcuts( QKeySequence::Undo );
 	action->setIcon( QIcon( ":/MainWindow/Icon/undo.png" ) );
 	action->setText( tr( "&Undo" ) );
+	action->setToolTip( tr( "Undo (Ctrl+Z)" ) );
 	m_editMenu->insertAction( m_undoAction, action );
 	m_basicToolbar->insertAction( m_undoAction, action );
 	m_editMenu->removeAction( m_undoAction );

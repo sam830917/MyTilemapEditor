@@ -52,6 +52,12 @@ MapScene::MapScene( MapInfo mapInfo, WorkspaceWidget* parent /*= Q_NULLPTR*/ )
 
 void MapScene::editMapOnPoint( const QPointF& point )
 {
+	// Check out of bound
+	QSizeF bound = QSizeF( m_mapInfo.getTileSize().width() * m_mapInfo.getMapSize().width(), m_mapInfo.getTileSize().height() * m_mapInfo.getMapSize().height() );
+	if ( point.x() >= bound.width() || point.y() >= bound.height() || point.x() <= 0 || point.y() <= 0 )
+	{
+		return;
+	}
 	QSize coord = QSize( qFloor( point.x() / m_mapInfo.getTileSize().width() ), qFloor( point.y() / m_mapInfo.getTileSize().height() ) );
 	//qDebug() << coord.width() << "," << coord.height();
 	if( coord.width() < 0 || coord.height() < 0 )

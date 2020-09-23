@@ -56,7 +56,7 @@ Tileset* AddTilesetDialog::getResult()
 	{
 		return Q_NULLPTR;
 	}
-	QSize tileSize = QSize( m_ui.m_heightValueBox->value(), m_ui.m_widthValueBox->value() );
+	QSize tileSize = QSize( m_ui.m_widthValueBox->value(), m_ui.m_heightValueBox->value() );
 	Tileset* tileset = new Tileset( m_ui.m_nameBox->text(), m_imagePath, m_tilesetImage, tileSize );
 	tileset->setFilePath( m_saveFilePath );
 
