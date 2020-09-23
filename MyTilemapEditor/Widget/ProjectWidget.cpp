@@ -88,6 +88,7 @@ void ProjectWidget::openFile( QModelIndex index )
 		MapInfo* mapInfo = convertToMapInfo( path );
 		if( mapInfo == nullptr )
 		{
+			QMessageBox::critical( this, tr( "Error" ), tr( "Failed to Load Map File." ) );
 			return;
 		}
 		loadMapSuccessfully( mapInfo );
@@ -97,6 +98,7 @@ void ProjectWidget::openFile( QModelIndex index )
 		Tileset* tileset  = convertToTileset( path );
 		if ( tileset == nullptr )
 		{
+			QMessageBox::critical( this, tr( "Error" ), tr( "Failed to Load Tileset File." ) );
 			return;
 		}
 		loadTilesetSuccessfully( tileset );
@@ -244,6 +246,7 @@ void ProjectWidget::popupMenu( const QPoint& pos )
 	QModelIndex curIndex = m_treeView->indexAt( pos );
 	if ( curIndex.isValid() )
 	{
+		//menu.addAction( "Rename", this, &ProjectWidget::rename );
 		menu.addAction( "Add Folder", this, &ProjectWidget::addFolder );
 		menu.exec( QCursor::pos() );
 	}
@@ -254,4 +257,11 @@ void ProjectWidget::popupMenu( const QPoint& pos )
 		menu.addAction( "Refresh", this, &ProjectWidget::refresh );
 		menu.exec( QCursor::pos() );
 	}
+}
+
+void ProjectWidget::rename()
+{
+	QModelIndexList indexes = m_treeView->selectionModel()->selectedIndexes();
+	QFileInfo fileInfo = m_fileModel->fileInfo( m_treeView->currentIndex() );
+	QString path = fileInfo.absoluteFilePath();
 }

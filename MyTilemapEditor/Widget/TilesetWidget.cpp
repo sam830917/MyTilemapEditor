@@ -8,6 +8,7 @@
 #include <QDebug>
 #include <QtMath>
 #include <QFileInfo>
+#include <QMessageBox>
 
 TilePalette::TilePalette( QObject* parent /*= Q_NULLPTR*/ )
 	:QGraphicsScene( parent )
@@ -122,6 +123,7 @@ void TilesetWidget::addTileset()
 		Tileset* newTileset = dialog.getResult();
 		if( newTileset == Q_NULLPTR )
 		{
+			QMessageBox::critical( this, tr( "Error" ), tr( "Failed to Load Tileset File." ) );
 			return;
 		}
 		addTilesetIntoProject( newTileset );

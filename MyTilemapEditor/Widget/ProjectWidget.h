@@ -38,6 +38,7 @@ public slots:
 
 private slots:
 	void popupMenu( const QPoint& pos );
+	void rename();
 
 signals:
 	void loadProjectSuccessfully();

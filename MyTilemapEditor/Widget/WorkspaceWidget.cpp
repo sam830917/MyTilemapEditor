@@ -7,6 +7,7 @@
 #include <QVBoxLayout>
 #include <QGraphicsView>
 #include <QMessageBox>
+#include <QFileInfo>
 
 WorkspaceWidget::WorkspaceWidget( QWidget* parent /*= Q_NULLPTR */ )
 	:QWidget(parent)
@@ -91,7 +92,10 @@ void WorkspaceWidget::insertMap( MapInfo* mapInfo )
 	XmlDocument* mapDoc = new XmlDocument;
 	mapDoc->LoadFile( mapInfo->getFilePath().toStdString().c_str() );
 	if( mapDoc->Error() )
+	{
+		QMessageBox::critical( this, tr( "Error" ), tr( "Failed to Load Map File." ) );
 		return;
+	}
 
 	XmlElement* mapRoot = mapDoc->RootElement();
 	XmlElement* tilesetsEle = mapRoot->FirstChildElement( "Tilesets" );
@@ -107,7 +111,15 @@ void WorkspaceWidget::insertMap( MapInfo* mapInfo )
 
 		QString relativePath = parseXmlAttribute( *tilesetEle, "path", QString() );
 		QString path = getProjectRootPath() + "/" + relativePath;
-		tilesetsMap.insert( index, convertToTileset( path ) );
+		QFileInfo fileinfo(path);
+		if ( !fileinfo.exists() )
+		{
+			QMessageBox::warning( this, tr( "Warning" ), tr( "Failed to Load Tileset File." ) + "\n\n" + path );
+		}
+		else
+		{
+			tilesetsMap.insert( index, convertToTileset( path ) );
+		}
 	}
 
 	XmlElement* tilesEle = mapRoot->FirstChildElement( "Tiles" );
@@ -122,7 +134,10 @@ void WorkspaceWidget::insertMap( MapInfo* mapInfo )
 		if( tilesetIndex == -1 || index == -1 || tilesetNumber == -1 )
 			return;
 
-		mapScene->paintMap( index, TileInfo( tilesetsMap.value( tilesetNumber ), tilesetIndex ) );
+		if ( tilesetsMap.contains( tilesetNumber ) )
+		{
+			mapScene->paintMap( index, TileInfo( tilesetsMap.value( tilesetNumber ), tilesetIndex ) );
+		}
 	}
 
 	int currentIndex = m_mapTabWidget->currentIndex();
@@ -151,7 +166,6 @@ void WorkspaceWidget::closeTab( int index )
 			break;
 		case QMessageBox::Cancel:
 			return;
-			break;
 		default:
 			// should never be reached
 			break;
