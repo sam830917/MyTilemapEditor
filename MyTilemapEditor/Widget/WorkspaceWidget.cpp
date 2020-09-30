@@ -8,6 +8,8 @@
 #include <QGraphicsView>
 #include <QMessageBox>
 #include <QFileInfo>
+#include <QShortcut>
+#include <QSignalMapper>
 
 WorkspaceWidget::WorkspaceWidget( QWidget* parent /*= Q_NULLPTR */ )
 	:QWidget(parent)
@@ -33,6 +35,10 @@ WorkspaceWidget::WorkspaceWidget( QWidget* parent /*= Q_NULLPTR */ )
 	disableTabWidget( true );
 	connect(m_mapTabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
 	connect(m_mapTabWidget, SIGNAL(currentChanged(int)), this, SLOT(changeTab(int)));
+	QShortcut* switchShortcut = new QShortcut(QKeySequence::NextChild, this);
+	QShortcut* closeShortcut = new QShortcut(tr("Ctrl+W"), this);
+	connect(switchShortcut, SIGNAL(activated()), this, SLOT(nextTab()));
+	connect(closeShortcut, SIGNAL(activated()), this, SLOT(closeCurrentTab()));
 }
 
 void WorkspaceWidget::disableTabWidget( bool disable ) const
@@ -86,7 +92,7 @@ void WorkspaceWidget::insertMap( MapInfo* mapInfo )
 
 	MapScene* mapScene = new MapScene( *mapInfo, this );
 	m_mapSceneList.push_back( mapScene );
-	m_mapTabWidget->addTab( mapScene->m_view, mapInfo->getName() );
+	m_mapTabWidget->setCurrentIndex( m_mapTabWidget->addTab( mapScene->m_view, mapInfo->getName() ) );
 
 	// Set tiles
 	XmlDocument* mapDoc = new XmlDocument;
@@ -205,6 +211,27 @@ void WorkspaceWidget::changeTab( int index )
 void WorkspaceWidget::changeMapScale( const QString& text )
 {
 	int scale = text.split(" ")[0].toInt();
+}
+
+void WorkspaceWidget::nextTab()
+{
+	int index = m_mapTabWidget->currentIndex();
+	if ( index == -1 )
+	{
+		return;
+	}
+
+	m_mapTabWidget->setCurrentIndex( index+1 == m_mapTabWidget->count() ? 0 : index+1 );
+}
+
+void WorkspaceWidget::closeCurrentTab()
+{
+	int index = m_mapTabWidget->currentIndex();
+	if ( index == -1 )
+	{
+		return;
+	}
+	closeTab( index );
 }
 
 bool WorkspaceWidget::isReadyToClose()

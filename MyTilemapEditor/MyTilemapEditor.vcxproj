@@ -94,6 +94,9 @@
     <ClCompile Include="Core\Tileset.cpp" />
     <ClCompile Include="Core\Toolbar.cpp" />
     <ClCompile Include="Core\UndoCommand.cpp" />
+    <ClCompile Include="ThirdParty\framelesswindowDarkStyle\DarkStyle.cpp" />
+    <ClCompile Include="ThirdParty\framelesswindowDarkStyle\framelesswindow\framelesswindow.cpp" />
+    <ClCompile Include="ThirdParty\framelesswindowDarkStyle\framelesswindow\windowdragger.cpp" />
     <ClCompile Include="ThirdParty\tinyxml2.cpp" />
     <ClCompile Include="Utils\ProjectCommon.cpp" />
     <ClCompile Include="Utils\XmlUtils.cpp" />
@@ -113,9 +116,12 @@
     <QtUic Include="Resource Files\UI\AddMapUI.ui" />
     <QtUic Include="Resource Files\UI\AddTilesetUI.ui" />
     <QtUic Include="Resource Files\UI\MainWindow.ui" />
+    <QtUic Include="ThirdParty\framelesswindowDarkStyle\framelesswindow\framelesswindow.ui" />
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="Resource Files\ToolbarIcon.qrc" />
+    <QtRcc Include="ThirdParty\framelesswindowDarkStyle\darkstyle.qrc" />
+    <QtRcc Include="ThirdParty\framelesswindowDarkStyle\framelesswindow.qrc" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Core\Toolbar.h" />
@@ -133,6 +139,9 @@
     <ClInclude Include="Core\TileInfo.h" />
     <ClInclude Include="Core\Tileset.h" />
     <ClInclude Include="Core\UndoCommand.h" />
+    <QtMoc Include="ThirdParty\framelesswindowDarkStyle\DarkStyle.h" />
+    <QtMoc Include="ThirdParty\framelesswindowDarkStyle\framelesswindow\framelesswindow.h" />
+    <QtMoc Include="ThirdParty\framelesswindowDarkStyle\framelesswindow\windowdragger.h" />
     <ClInclude Include="ThirdParty\tinyxml2.h" />
     <ClInclude Include="Utils\ProjectCommon.h" />
     <ClInclude Include="Utils\XmlUtils.h" />
@@ -145,6 +154,9 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\Bug List.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ThirdParty\framelesswindowDarkStyle\frameless_window_dark.pro" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

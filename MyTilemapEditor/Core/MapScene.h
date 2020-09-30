@@ -3,6 +3,7 @@
 #include "MapInfo.h"
 #include "TileInfo.h"
 #include <QGraphicsScene>
+#include <QGraphicsView>
 #include <QGraphicsRectItem>
 #include <QList>
 #include <QSet>
@@ -10,6 +11,16 @@
 
 class Tile;
 class WorkspaceWidget;
+
+class MapView : public QGraphicsView
+{
+public:
+	MapView( WorkspaceWidget* parent = Q_NULLPTR );
+	MapView( QGraphicsScene* scene, QWidget* parent = Q_NULLPTR );
+
+protected:
+	virtual void wheelEvent( QWheelEvent* event );
+};
 
 class MapScene : public QGraphicsScene
 {
@@ -33,11 +44,10 @@ protected:
 	virtual void mousePressEvent( QGraphicsSceneMouseEvent* event ) override;
 	virtual void mouseMoveEvent( QGraphicsSceneMouseEvent* event ) override;
 	virtual void mouseReleaseEvent( QGraphicsSceneMouseEvent* event ) override;
-	virtual void wheelEvent(QGraphicsSceneWheelEvent *event) override;
 
 private:
 	bool m_isSaved = true;
-	QGraphicsView* m_view;
+	MapView* m_view;
 	WorkspaceWidget* m_parentWidget;
 	MapInfo m_mapInfo;
 	QList<Tile*> m_tileList;

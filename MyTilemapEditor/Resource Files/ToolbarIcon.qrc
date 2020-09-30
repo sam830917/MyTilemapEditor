@@ -8,5 +8,10 @@
         <file>Icon/undo.png</file>
         <file>Icon/move.png</file>
         <file>Icon/save-all-files.png</file>
+        <file>Icon/down-arrow.png</file>
+        <file>Icon/minus.png</file>
+        <file>Icon/plus.png</file>
+        <file>Icon/up-arrow.png</file>
+        <file>Icon/delete.png</file>
     </qresource>
 </RCC>

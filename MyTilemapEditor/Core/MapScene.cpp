@@ -10,22 +10,64 @@
 #include <QGraphicsView>
 #include <QScrollBar>
 
+MapView::MapView( WorkspaceWidget* parent /*= Q_NULLPTR */ )
+	:QGraphicsView( parent )
+{
+
+}
+
+MapView::MapView( QGraphicsScene* scene, QWidget* parent /*= Q_NULLPTR */ )
+	: QGraphicsView( parent )
+{
+	setScene(scene);
+}
+
+void MapView::wheelEvent( QWheelEvent* event )
+{
+	if( event->modifiers() & Qt::ControlModifier )
+	{
+		if( event->delta() > 0 )
+		{
+			QMatrix m = matrix();
+			m.scale( 1.25, 1.25 );
+			setMatrix( m );
+		}
+		else
+		{
+			QMatrix m = matrix();
+			m.scale( 0.8, 0.8 );
+			setMatrix( m );
+		}
+	}
+	else
+	{
+		QGraphicsView::wheelEvent( event );
+	}
+}
+
 MapScene::MapScene( MapInfo mapInfo, WorkspaceWidget* parent /*= Q_NULLPTR*/ )
 	:QGraphicsScene( parent ), 
 	m_mapInfo(mapInfo),
 	m_parentWidget( parent )
 {
-	m_view = new QGraphicsView( this );
-	m_view->setScene( this );
-	setBackgroundBrush( QBrush( QColor( 170, 170, 170, 255 ) ) );
+	m_view = new MapView( this );
+	//setBackgroundBrush( QBrush( QColor( 170, 170, 170, 255 ) ) );
 	m_undoStack = new QUndoStack( this );
-
-	QPen linePen( Qt::black );
-	linePen.setWidth( 1 );
-	linePen.setStyle( Qt::PenStyle::DotLine );
 
 	QSize mapSize = m_mapInfo.getMapSize();
 	QSize tileSize = m_mapInfo.getTileSize();
+	// Create background canvas
+	const int canvasLength = 100;
+	QGraphicsRectItem* bgRect = new QGraphicsRectItem();
+	bgRect->setPen( QPen( QColor( 0,0,0,0 ) ) );
+	QSize canvasSize = QSize( tileSize.width() * mapSize.width() + canvasLength * 2, tileSize.height() * mapSize.height() + canvasLength * 2 );
+	bgRect->setRect( -canvasLength, -canvasLength, canvasSize.width(), canvasSize.height() );
+	addItem( bgRect );
+
+	QPen linePen( QColor( 170, 170, 170, 255 ) );
+	linePen.setWidth( 0 );
+	linePen.setStyle( Qt::PenStyle::DotLine );
+
 	int vLineCount = mapSize.width() + 1;
 	int hLineCount = mapSize.height() + 1;
 	for( int v = 0; v < vLineCount; ++v )
@@ -151,20 +193,24 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 void MapScene::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
 {
 	QGraphicsScene::mouseMoveEvent( event );
-	if( eDrawTool::MOVE == m_parentWidget->m_drawTool )
+
+	if( event->buttons() & Qt::LeftButton )
 	{
-		QPoint currentPosition = event->screenPos();
-		QPoint lastPosition = event->lastScreenPos();
-		m_view->verticalScrollBar()->setValue( m_view->verticalScrollBar()->value() - (currentPosition.y() - lastPosition.y()) );
-		m_view->horizontalScrollBar()->setValue( m_view->horizontalScrollBar()->value() - (currentPosition.x() - lastPosition.x()) );
-		return;
+		if( eDrawTool::MOVE == m_parentWidget->m_drawTool )
+		{
+			QPoint currentPosition = event->screenPos();
+			QPoint lastPosition = event->lastScreenPos();
+			m_view->verticalScrollBar()->setValue( m_view->verticalScrollBar()->value() - (currentPosition.y() - lastPosition.y()) );
+			m_view->horizontalScrollBar()->setValue( m_view->horizontalScrollBar()->value() - (currentPosition.x() - lastPosition.x()) );
+			return;
+		}
+		QPointF mousePos = event->scenePos();
+		if( mousePos == QPointF() )
+		{
+			return;
+		}
+		editMapOnPoint( mousePos );
 	}
-	QPointF mousePos = event->scenePos();
-	if( mousePos == QPointF() )
-	{
-		return;
-	}
-	editMapOnPoint( mousePos );
 }
 
 void MapScene::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
@@ -182,25 +228,6 @@ void MapScene::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 		m_parentWidget->disableShortcut( false );
 	}
 	update();
-}
-
-void MapScene::wheelEvent( QGraphicsSceneWheelEvent* event )
-{
-	if(event->modifiers().testFlag(Qt::ControlModifier))
-	{
-		if( event->delta() > 0 )
-		{
-			QMatrix m = m_view->matrix();
-			m.scale( 1.25, 1.25 );
-			m_view->setMatrix( m );
-		}
-		else
-		{
-			QMatrix m = m_view->matrix();
-			m.scale( 0.8, 0.8 );
-			m_view->setMatrix( m );
-		}
-	}
 }
 
 Tile::Tile( MapScene* scene, QGraphicsItem* parent /*= Q_NULLPTR */ )

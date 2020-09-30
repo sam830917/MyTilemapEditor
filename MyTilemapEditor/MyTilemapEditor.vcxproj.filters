@@ -28,6 +28,12 @@
     <Filter Include="Doc">
       <UniqueIdentifier>{357a748d-9bfb-41e6-9f34-cfb1a8bfd51b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ThirdParty\Style">
+      <UniqueIdentifier>{700840b2-6613-4fdd-80d1-60e1f0cf7427}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ThirdParty\Style\framelesswindow">
+      <UniqueIdentifier>{97fe0918-120e-47e1-b8b5-b08168d07a12}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\main.cpp">
@@ -90,6 +96,15 @@
     <ClCompile Include="Core\UndoCommand.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="ThirdParty\framelesswindowDarkStyle\DarkStyle.cpp">
+      <Filter>ThirdParty\Style</Filter>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\framelesswindowDarkStyle\framelesswindow\framelesswindow.cpp">
+      <Filter>ThirdParty\Style\framelesswindow</Filter>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\framelesswindowDarkStyle\framelesswindow\windowdragger.cpp">
+      <Filter>ThirdParty\Style\framelesswindow</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Core\MainWindow.h">
@@ -122,6 +137,15 @@
     <QtMoc Include="Widget\AddMapDialog.h">
       <Filter>Widget</Filter>
     </QtMoc>
+    <QtMoc Include="ThirdParty\framelesswindowDarkStyle\DarkStyle.h">
+      <Filter>ThirdParty\Style</Filter>
+    </QtMoc>
+    <QtMoc Include="ThirdParty\framelesswindowDarkStyle\framelesswindow\framelesswindow.h">
+      <Filter>ThirdParty\Style\framelesswindow</Filter>
+    </QtMoc>
+    <QtMoc Include="ThirdParty\framelesswindowDarkStyle\framelesswindow\windowdragger.h">
+      <Filter>ThirdParty\Style\framelesswindow</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="Resource Files\UI\MainWindow.ui">
@@ -133,10 +157,19 @@
     <QtUic Include="Resource Files\UI\AddMapUI.ui">
       <Filter>Resource Files\UI</Filter>
     </QtUic>
+    <QtUic Include="ThirdParty\framelesswindowDarkStyle\framelesswindow\framelesswindow.ui">
+      <Filter>ThirdParty\Style\framelesswindow</Filter>
+    </QtUic>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="Resource Files\ToolbarIcon.qrc">
       <Filter>Resource Files</Filter>
+    </QtRcc>
+    <QtRcc Include="ThirdParty\framelesswindowDarkStyle\darkstyle.qrc">
+      <Filter>ThirdParty\Style</Filter>
+    </QtRcc>
+    <QtRcc Include="ThirdParty\framelesswindowDarkStyle\framelesswindow.qrc">
+      <Filter>ThirdParty\Style</Filter>
     </QtRcc>
   </ItemGroup>
   <ItemGroup>
@@ -172,5 +205,10 @@
     <Text Include="..\Bug List.txt">
       <Filter>Doc</Filter>
     </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ThirdParty\framelesswindowDarkStyle\frameless_window_dark.pro">
+      <Filter>ThirdParty\Style</Filter>
+    </None>
   </ItemGroup>
 </Project>

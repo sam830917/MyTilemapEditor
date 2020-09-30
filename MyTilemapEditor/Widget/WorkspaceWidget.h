@@ -35,6 +35,8 @@ public slots:
 	void setDrawTool( eDrawTool drawTool );
 	void changeTab( int index );
 	void changeMapScale( const QString& text );
+	void nextTab();
+	void closeCurrentTab();
 
 	void saveCurrentMap();
 	void saveAllMaps();
