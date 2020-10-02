@@ -13,5 +13,9 @@
         <file>Icon/plus.png</file>
         <file>Icon/up-arrow.png</file>
         <file>Icon/delete.png</file>
+        <file>Icon/lock.png</file>
+        <file>Icon/unlock.png</file>
+        <file>Icon/close-eye.png</file>
+        <file>Icon/eye.png</file>
     </qresource>
 </RCC>

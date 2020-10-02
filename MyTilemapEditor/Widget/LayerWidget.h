@@ -2,9 +2,11 @@
 
 #include <QDockWidget>
 #include <QTreeWidget>
+#include <QTreeWidgetItem>
 
 QT_FORWARD_DECLARE_CLASS( QTreeView )
 QT_FORWARD_DECLARE_CLASS( QBoxLayout )
+QT_FORWARD_DECLARE_CLASS( QToolBar )
 
 class LayerWidget : public QDockWidget
 {
@@ -21,4 +23,14 @@ public slots:
 private:
 	QTreeWidget* m_treeWidget;
 	QBoxLayout* m_layout;
+	QToolBar* m_toolbar;
+};
+
+class LayerItem : public QTreeWidgetItem
+{
+
+public:
+	LayerItem( QTreeWidget* view );
+
+private:
 };
