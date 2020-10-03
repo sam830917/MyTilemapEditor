@@ -1,7 +1,8 @@
 #include "XmlUtils.h"
 #include "ProjectCommon.h"
-#include "../Core/Tileset.h"
-#include "../Core/MapInfo.h"
+#include "Core/Tileset.h"
+#include "Core/MapInfo.h"
+#include "Core/LayerInfo.h"
 #include <string>
 #include <QFile>
 #include <QMessageBox>
@@ -140,18 +141,18 @@ Tileset* convertToTileset( const QString& tilesetFilePath )
 	return nullptr;
 }
 
-MapInfo* convertToMapInfo( const QString& mapFilePath )
+void convertToMapInfo( const QString& mapFilePath, MapInfo& mapInfo, QList<LayerInfo>& layerInfo )
 {
 	QFile file( mapFilePath );
 	if( !file.exists() )
 	{
-		return nullptr;
+		return;
 	}
 	XmlDocument* doc = new XmlDocument;
 	doc->LoadFile( mapFilePath.toStdString().c_str() );
 	if( doc->Error() )
 	{
-		return nullptr;
+		return;
 	}
 	XmlElement* root = doc->RootElement();
 	if( root )
@@ -160,12 +161,30 @@ MapInfo* convertToMapInfo( const QString& mapFilePath )
 
 		QSize mapSize = parseXmlAttribute( *root, "mapSize", QSize( 30, 30 ) );
 		QSize tileSize = parseXmlAttribute( *root, "tileSize", QSize( 32, 32 ) );
-		MapInfo* mapInfo = new MapInfo( mapSize, tileSize );
-		mapInfo->setFilePath( mapFilePath );
-		mapInfo->setName( fileInfo.completeBaseName() );
-		return mapInfo;
-		return nullptr;
+		mapInfo = MapInfo( mapSize, tileSize );
+		mapInfo.setFilePath( mapFilePath );
+		mapInfo.setName( fileInfo.completeBaseName() );
+		mapInfo.setIsValid( true );
+
+		// Load Layers
+		XmlElement* layersEle = root->FirstChildElement( "Layers" );
+		if ( layersEle )
+		{
+			LayerInfo emptyInfo;
+			for( XmlElement* layerEle = layersEle->FirstChildElement( "Layer" ); layerEle; layerEle = layerEle->NextSiblingElement( "Layer" ) )
+			{
+				QString name = parseXmlAttribute( *layerEle, "name", emptyInfo.getNmae() );
+				bool isLock = parseXmlAttribute( *layerEle, "isLock", emptyInfo.IsLock() );
+				bool isVisible = parseXmlAttribute( *layerEle, "isVisible", emptyInfo.IsVisible() );
+
+				layerInfo.push_back( LayerInfo( name, isLock, isVisible ) );
+			}
+		}
+		else
+		{
+			layerInfo.push_back( LayerInfo() );
+		}
 	}
 
-	return nullptr;
+	return;
 }

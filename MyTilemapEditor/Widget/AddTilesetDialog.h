@@ -2,7 +2,7 @@
 
 #include <QDialog>
 #include "ui_AddTilesetUI.h"
-#include "../Core/Tileset.h"
+#include "Core/Tileset.h"
 
 QT_FORWARD_DECLARE_CLASS( QPushButton )
 QT_FORWARD_DECLARE_CLASS( QGraphicsView )

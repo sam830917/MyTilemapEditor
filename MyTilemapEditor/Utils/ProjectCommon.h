@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../Core/Project.h"
-#include "../Core/TileInfo.h"
+#include "Core/Project.h"
+#include "Core/TileInfo.h"
 #include <QString>
 
 class Tileset;

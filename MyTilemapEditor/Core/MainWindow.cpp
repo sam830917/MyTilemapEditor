@@ -1,7 +1,7 @@
 #include "MainWindow.h"
-#include "../Widget/AddTilesetDialog.h"
-#include "../Core/Tileset.h"
-#include "../Utils/ProjectCommon.h"
+#include "Widget/AddTilesetDialog.h"
+#include "Core/Tileset.h"
+#include "Utils/ProjectCommon.h"
 #include <QTimer>
 #include <QPushButton>
 #include <QEvent>
@@ -196,10 +196,15 @@ void MainWindow::initialConnections()
 	connect( m_projectWidget, &ProjectWidget::loadTilesetSuccessfully, m_tilesetWidget, &TilesetWidget::addTilesetIntoProject );
 	connect( m_projectWidget, &ProjectWidget::tilesetRenamed, m_tilesetWidget, &TilesetWidget::tilesetRenamed );
 	connect( m_projectWidget, &ProjectWidget::loadMapSuccessfully, m_centralWidget, &WorkspaceWidget::insertMap );
+	connect( m_projectWidget, &ProjectWidget::loadMapSuccessfully, m_layerWidget, &LayerWidget::addNewLayerGroup );
 
 	connect( m_centralWidget, &WorkspaceWidget::updateRedo, this, &MainWindow::replaceRedoAction );
 	connect( m_centralWidget, &WorkspaceWidget::updateUndo, this, &MainWindow::replaceUndoAction );
 	connect( m_centralWidget, &WorkspaceWidget::disableShortcut, this, &MainWindow::disableShortcut );
+	connect( m_centralWidget, &WorkspaceWidget::tabFocusChanged, m_layerWidget, &LayerWidget::changeLayerGroup );
+	connect( m_centralWidget, &WorkspaceWidget::closeTabSuccessfully, m_layerWidget, &LayerWidget::removeLayerGropu );
+
+	connect( m_layerWidget, &LayerWidget::getTabCount,  m_centralWidget, &WorkspaceWidget::getTabCount );
 }
 
 void MainWindow::updateToolBar()

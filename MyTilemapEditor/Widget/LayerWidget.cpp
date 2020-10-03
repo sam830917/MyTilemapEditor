@@ -35,56 +35,164 @@ private:
 	QCheckBox* m_visibleBtn;
 };
 
+class LayerGroup : public QListWidget
+{
+public:
+	LayerGroup( MapInfo mapInfo, QWidget* parent = Q_NULLPTR );
+
+public:
+	MapInfo m_mapInfo;
+};
+
+LayerGroup::LayerGroup( MapInfo mapInfo, QWidget* parent /*= Q_NULLPTR */ )
+	:QListWidget(parent),
+	m_mapInfo(mapInfo)
+{
+}
+
 LayerWidget::LayerWidget( const QString& title, QWidget* parent /*= Q_NULLPTR */ )
 	:QDockWidget( title, parent )
 {
-	m_listWidget = new QListWidget();
-	m_listWidget->setSelectionMode( QAbstractItemView::SelectionMode::SingleSelection );
+	m_emptyListWidget = new QListWidget();
+	m_emptyListWidget->setSelectionMode( QAbstractItemView::SelectionMode::SingleSelection );
 
 	QWidget* placeholder = new QWidget( this );
-	m_layout = new QBoxLayout( QBoxLayout::TopToBottom, placeholder );
+	m_layout = new QBoxLayout( QBoxLayout::BottomToTop, placeholder );
+	initialToolbar();
 	m_layout->setContentsMargins( 0, 0, 0, 0 );
-	m_layout->addWidget( m_listWidget );
+	m_layout->addWidget( m_emptyListWidget );
 	setWidget( placeholder );
 
-	initialToolbar(); 
 	updateToolbarStatus();
-	connect( m_listWidget, &QListWidget::itemSelectionChanged, this, &LayerWidget::updateToolbarStatus );
 }
 
 void LayerWidget::addNewLayer()
 {
-	LayerRow* newRow = new LayerRow( m_listWidget );
-	if ( m_listWidget->count() == 1 )
+	LayerRow* newRow = new LayerRow( m_listWidgetList[m_currentIndex] );
+	if ( m_listWidgetList[m_currentIndex]->count() == 1 )
 	{
-		m_listWidget->setCurrentRow( 0 );
+		m_listWidgetList[m_currentIndex]->setCurrentRow( 0 );
+	}
+	updateToolbarStatus();
+}
+
+void LayerWidget::addNewLayer( LayerInfo layerInfo )
+{
+	LayerRow* newRow = new LayerRow( m_listWidgetList[m_currentIndex], layerInfo );
+	if( m_listWidgetList[m_currentIndex]->count() == 1 )
+	{
+		m_listWidgetList[m_currentIndex]->setCurrentRow( 0 );
 	}
 	updateToolbarStatus();
 }
 
 void LayerWidget::removeLayer()
 {
-	if ( m_listWidget->count() == 1 )
+	if ( m_listWidgetList[m_currentIndex]->count() == 1 )
 	{
 		return;
 	}
-	int currentIndex = m_listWidget->currentRow();
-	m_listWidget->takeItem( currentIndex );
+	int currentIndex = m_listWidgetList[m_currentIndex]->currentRow();
+	m_listWidgetList[m_currentIndex]->takeItem( currentIndex );
 	updateToolbarStatus();
 }
 
 void LayerWidget::raiseCurrentLayer()
 {
-	int currentRow = m_listWidget->currentRow();
+	int currentRow = m_listWidgetList[m_currentIndex]->currentRow();
 	int targetIndex = currentRow - 1;
 	moveItem( currentRow, targetIndex );
 }
 
 void LayerWidget::lowerCurrentLayer()
 {
-	int currentRow = m_listWidget->currentRow();
+	int currentRow = m_listWidgetList[m_currentIndex]->currentRow();
 	int targetIndex = currentRow + 1;
 	moveItem( currentRow, targetIndex );
+}
+
+void LayerWidget::addNewLayerGroup( MapInfo mapInfo, QList<LayerInfo> layerInfoList )
+{
+	if ( !mapInfo.IsValid() )
+	{
+		return;
+	}
+	// check is already exist
+	for ( int i = 0; i < m_listWidgetList.size(); ++i )
+	{
+		if ( m_listWidgetList[i]->m_mapInfo.getFilePath() == mapInfo.getFilePath() )
+		{
+			changeLayerGroup(i);
+			return;
+		}
+	}
+
+	LayerGroup* listWidget = new LayerGroup(mapInfo);
+	listWidget->setSelectionMode( QAbstractItemView::SelectionMode::SingleSelection );
+	m_listWidgetList.push_back( listWidget );
+	m_layout->addWidget( listWidget );
+	connect( listWidget, &QListWidget::itemSelectionChanged, this, &LayerWidget::updateToolbarStatus );
+	m_currentIndex = m_listWidgetList.size() - 1;
+	for ( int i = 0; i < layerInfoList.size(); ++i )
+	{
+		addNewLayer( layerInfoList[i] );
+	}
+
+	for ( int i = 0; i < m_listWidgetList.size() - 1; ++i )
+	{
+		m_listWidgetList[i]->setVisible( false );
+	}
+	m_emptyListWidget->setVisible( false );
+	updateToolbarStatus();
+}
+
+void LayerWidget::removeLayerGropu( int listWidgetIndex )
+{
+	if( m_listWidgetList.size() <= listWidgetIndex )
+	{
+		return;
+	}
+	if( listWidgetIndex == -1 )
+	{
+		return;
+	}
+	delete m_listWidgetList[listWidgetIndex];
+	m_listWidgetList.removeAt( listWidgetIndex );
+	if ( m_listWidgetList.size() == 0 )
+	{
+		m_emptyListWidget->setVisible( true );
+	}
+	else
+	{
+		if ( listWidgetIndex == m_listWidgetList.size() )
+		{
+			changeLayerGroup( listWidgetIndex - 1 );
+		}
+		else
+		{
+			changeLayerGroup( listWidgetIndex );
+		}
+	}
+}
+
+void LayerWidget::changeLayerGroup( int listWidgetIndex )
+{
+	if ( m_listWidgetList.size() <= listWidgetIndex )
+	{
+		return;
+	}
+	m_currentIndex = listWidgetIndex;
+	if ( listWidgetIndex == -1 )
+	{
+		return;
+	}
+	for( int i = 0; i < m_listWidgetList.size(); ++i )
+	{
+		m_listWidgetList[i]->setVisible( false );
+	}
+	m_listWidgetList[m_currentIndex]->setVisible( true );
+	m_emptyListWidget->setVisible( false );
+	updateToolbarStatus();
 }
 
 void LayerWidget::moveItem( int fromItemIndex, int toItemIndex )
@@ -94,18 +202,18 @@ void LayerWidget::moveItem( int fromItemIndex, int toItemIndex )
 		return;
 	}
 
-	LayerRow* currentItem = static_cast<LayerRow*>(m_listWidget->item( fromItemIndex ));
+	LayerRow* currentItem = static_cast<LayerRow*>(m_listWidgetList[m_currentIndex]->item( fromItemIndex ));
 	LayerRowWidget* currentW = currentItem->m_layerRow;
 	QString name = currentW->getName();
 	bool lockChecked = currentW->m_lockBtn->isChecked();
 	bool visibleChecked = currentW->m_visibleBtn->isChecked();
-	m_listWidget->takeItem( fromItemIndex );
-	m_listWidget->insertItem( toItemIndex, currentItem );
+	m_listWidgetList[m_currentIndex]->takeItem( fromItemIndex );
+	m_listWidgetList[m_currentIndex]->insertItem( toItemIndex, currentItem );
 
 	currentItem->m_layerRow = new LayerRowWidget( name, lockChecked, visibleChecked );
-	m_listWidget->setItemWidget( m_listWidget->item( toItemIndex ), currentItem->m_layerRow );
+	m_listWidgetList[m_currentIndex]->setItemWidget( m_listWidgetList[m_currentIndex]->item( toItemIndex ), currentItem->m_layerRow );
 
-	m_listWidget->setCurrentRow( toItemIndex );
+	m_listWidgetList[m_currentIndex]->setCurrentRow( toItemIndex );
 	updateToolbarStatus();
 }
 
@@ -124,7 +232,7 @@ void LayerWidget::initialToolbar()
 	m_deleteAction = new QAction( QIcon( ":/MainWindow/Icon/delete.png" ), tr( "&Delete Layer" ), this );
 	m_toolbar->addAction( m_deleteAction );
 
-	connect( m_newLayerAction, &QAction::triggered, this, &LayerWidget::addNewLayer );
+	connect( m_newLayerAction, SIGNAL(triggered(bool)), this, SLOT(addNewLayer()) );
 	connect( m_deleteAction, &QAction::triggered, this, &LayerWidget::removeLayer );
 	connect( m_raiseAction, &QAction::triggered, this, &LayerWidget::raiseCurrentLayer );
 	connect( m_lowerAction, &QAction::triggered, this, &LayerWidget::lowerCurrentLayer );
@@ -140,23 +248,36 @@ void LayerWidget::updateToolbar( bool enableNewLayer, bool enableRaise, bool ena
 
 void LayerWidget::updateToolbarStatus()
 {
-	int currentRow = m_listWidget->currentRow();
+	if ( m_currentIndex == -1 )
+	{
+		updateToolbar( false, false, false, false );
+		return;
+	}
+	int tabNumber = 0;
+	getTabCount( tabNumber );
+	if ( tabNumber == 0 )
+	{
+		updateToolbar( false, false, false, false );
+		return;
+	}
 
-	if ( m_listWidget->count() == 0 )
+	int currentRow = m_listWidgetList[m_currentIndex]->currentRow();
+
+	if ( m_listWidgetList[m_currentIndex]->count() == 0 )
 	{
 		updateToolbar( true, false, false, false );
 		return;
 	}
-	if( m_listWidget->count() == 1 )
+	if( m_listWidgetList[m_currentIndex]->count() == 1 )
 	{
-		updateToolbar( true, false, false, true );
+		updateToolbar( true, false, false, false );
 		return;
 	}
 	if( currentRow <= 0 )
 	{
 		updateToolbar( true, false, true, true );
 	}
-	else if( currentRow == m_listWidget->count() - 1 )
+	else if( currentRow == m_listWidgetList[m_currentIndex]->count() - 1 )
 	{
 		updateToolbar( true, true, false, true );
 	}
@@ -255,6 +376,15 @@ LayerRow::LayerRow( QListWidget* view )
 	}
 
 	m_layerRow = new LayerRowWidget( name );
+	view->addItem( this );
+	view->setItemWidget( this, m_layerRow );
+	setSizeHint( QSize( 0, 40 ) );
+	view->addItem( this );
+}
+
+LayerRow::LayerRow( QListWidget* view, LayerInfo layerInfo )
+{
+	m_layerRow = new LayerRowWidget( layerInfo.getNmae(), layerInfo.IsLock(), layerInfo.IsVisible() );
 	view->addItem( this );
 	view->setItemWidget( this, m_layerRow );
 	setSizeHint( QSize( 0, 40 ) );

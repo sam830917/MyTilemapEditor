@@ -1,7 +1,7 @@
 #include "TilesetWidget.h"
-#include "../Core/Tileset.h"
-#include "../Widget/AddTilesetDialog.h"
-#include "../Utils/ProjectCommon.h"
+#include "Core/Tileset.h"
+#include "Widget/AddTilesetDialog.h"
+#include "Utils/ProjectCommon.h"
 #include <QGraphicsView>
 #include <QGraphicsPixmapItem>
 #include <QGraphicsSceneMouseEvent>

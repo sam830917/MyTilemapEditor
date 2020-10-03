@@ -4,11 +4,14 @@
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
 #include <QListWidgetItem>
+#include "Core/LayerInfo.h"
+#include "Core/MapInfo.h"
 
 QT_FORWARD_DECLARE_CLASS( QBoxLayout )
 QT_FORWARD_DECLARE_CLASS( QListWidget )
 QT_FORWARD_DECLARE_CLASS( QToolBar )
 class LayerRowWidget;
+class LayerGroup;
 
 class LayerWidget : public QDockWidget
 {
@@ -21,16 +24,29 @@ private:
 	void initialToolbar();
 
 	void updateToolbar( bool enableNewLayer, bool enableRaise, bool enableLower, bool enableDelete );
-	void updateToolbarStatus();
 	void moveItem( int fromItemIndex, int toItemIndex );
+
 public slots:
+	void updateToolbarStatus();
 	void addNewLayer();
 	void removeLayer();
 	void raiseCurrentLayer();
 	void lowerCurrentLayer();
 
+	void addNewLayerGroup( MapInfo mapInfo, QList<LayerInfo> layerInfoList );
+	void removeLayerGropu( int listWidgetIndex );
+	void changeLayerGroup( int listWidgetIndex );
+
+signals:
+	void getTabCount( int& tabCount );
+
 private:
-	QListWidget* m_listWidget;
+	void addNewLayer( LayerInfo layerInfo );
+
+private:
+	QListWidget* m_emptyListWidget;
+	QList<LayerGroup*> m_listWidgetList;
+	int m_currentIndex = -1;
 	QBoxLayout* m_layout;
 
 	QToolBar* m_toolbar;
@@ -46,6 +62,7 @@ class LayerRow : public QListWidgetItem
 
 public:
 	LayerRow( QListWidget* view );
+	LayerRow( QListWidget* view, LayerInfo layerInfo );
 
 private:
 	LayerRowWidget* m_layerRow;

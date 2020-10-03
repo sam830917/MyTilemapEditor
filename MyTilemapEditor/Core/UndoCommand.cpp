@@ -1,5 +1,5 @@
 #include "UndoCommand.h"
-#include "../Widget/WorkspaceWidget.h"
+#include "Widget/WorkspaceWidget.h"
 
 DrawCommand::DrawCommand( QList<TileInfo> tileInfoList, QList<Tile*> tiles, QUndoCommand* parent /*= 0 */ )
 	: QUndoCommand( parent ),

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../Core/Tileset.h"
-#include "../Core/TileInfo.h"
+#include "Core/Tileset.h"
+#include "Core/TileInfo.h"
 #include <QDockWidget>
 #include <QTabWidget>
 #include <QGraphicsScene>

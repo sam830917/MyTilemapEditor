@@ -105,6 +105,9 @@
     <ClCompile Include="ThirdParty\framelesswindowDarkStyle\framelesswindow\windowdragger.cpp">
       <Filter>ThirdParty\Style\framelesswindow</Filter>
     </ClCompile>
+    <ClCompile Include="Core\LayerInfo.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Core\MainWindow.h">
@@ -198,6 +201,9 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\UndoCommand.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\LayerInfo.h">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>

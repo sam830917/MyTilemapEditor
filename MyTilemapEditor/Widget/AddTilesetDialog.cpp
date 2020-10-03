@@ -1,6 +1,6 @@
 #include "AddTilesetDialog.h"
-#include "../Utils/XmlUtils.h"
-#include "../Utils/ProjectCommon.h"
+#include "Utils/XmlUtils.h"
+#include "Utils/ProjectCommon.h"
 #include <QPushButton>
 #include <QHBoxLayout>
 #include <QVBoxLayout>

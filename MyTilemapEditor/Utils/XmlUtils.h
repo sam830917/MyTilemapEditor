@@ -1,11 +1,12 @@
 #pragma once
 
-#include "../ThirdParty/tinyxml2.h"
+#include "ThirdParty/tinyxml2.h"
 #include <QString>
 #include <QSize>
 
 class Tileset;
 class MapInfo;
+class LayerInfo;
 
 typedef tinyxml2::XMLElement XmlElement;
 typedef tinyxml2::XMLDocument XmlDocument;
@@ -22,4 +23,4 @@ void		saveXmlFile( XmlDocument& doc, const QString& filePath );
 
 // convert functions
 Tileset*	convertToTileset( const QString& tilesetFilePath );
-MapInfo*	convertToMapInfo( const QString& mapFilePath );
+void		convertToMapInfo( const QString& mapFilePath, MapInfo& mapInfo, QList<LayerInfo>& layerInfo );

@@ -1,6 +1,7 @@
 #include "ProjectWidget.h"
-#include "../Utils/XmlUtils.h"
-#include "../Utils/ProjectCommon.h"
+#include "Core/MapInfo.h"
+#include "Utils/XmlUtils.h"
+#include "Utils/ProjectCommon.h"
 #include <QFileSystemModel>
 #include <QTreeView>
 #include <QVBoxLayout>
@@ -85,13 +86,15 @@ void ProjectWidget::openFile( QModelIndex index )
 	
 	if ( "map" == fileInfo.suffix() )
 	{
-		MapInfo* mapInfo = convertToMapInfo( path );
-		if( mapInfo == nullptr )
+		MapInfo mapInfo;
+		QList<LayerInfo> layerInfoList;
+		convertToMapInfo( path, mapInfo, layerInfoList );
+		if( !mapInfo.IsValid() )
 		{
 			QMessageBox::critical( this, tr( "Error" ), tr( "Failed to Load Map File." ) );
 			return;
 		}
-		loadMapSuccessfully( mapInfo );
+		loadMapSuccessfully( mapInfo, layerInfoList );
 	}
 	else if ( "tileset" == fileInfo.suffix() )
 	{

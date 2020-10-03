@@ -1,9 +1,11 @@
 #pragma once
 
-#include "../Core/MapScene.h"
-#include "../Core/MapInfo.h"
+#include "Core/MapScene.h"
+#include "Core/MapInfo.h"
+#include "Core/LayerInfo.h"
 #include <QWidget>
 #include <QTabWidget>
+#include <QList>
 
 QT_FORWARD_DECLARE_CLASS( QPushButton )
 
@@ -30,7 +32,7 @@ public:
 
 public slots:
 	void addMap();
-	void insertMap( MapInfo* mapInfo );
+	void insertMap( MapInfo mapInfo );
 	void closeTab( int index );
 	void setDrawTool( eDrawTool drawTool );
 	void changeTab( int index );
@@ -41,11 +43,14 @@ public slots:
 	void saveCurrentMap();
 	void saveAllMaps();
 	void saveMap( int tabIndex );
+	void getTabCount( int& tabCount );
 
 signals:
 	void updateRedo( QAction* action );
 	void updateUndo( QAction* action );
 	void disableShortcut( bool isDisable );
+	void tabFocusChanged( int index );
+	void closeTabSuccessfully( int index );
 
 public:
 	QPushButton* m_newProjectButton;

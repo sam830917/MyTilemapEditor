@@ -1,7 +1,7 @@
 #include "MainWindow.h"
 #include <QtWidgets/QApplication>
-#include "../ThirdParty/framelesswindowDarkStyle/framelesswindow/framelesswindow.h"
-#include "../ThirdParty/framelesswindowDarkStyle/DarkStyle.h"
+#include "ThirdParty/framelesswindowDarkStyle/framelesswindow/framelesswindow.h"
+#include "ThirdParty/framelesswindowDarkStyle/DarkStyle.h"
 
 int main(int argc, char *argv[])
 {

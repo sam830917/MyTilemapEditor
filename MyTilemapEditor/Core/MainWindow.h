@@ -5,12 +5,12 @@
 #include <QtWidgets/QMenuBar>
 #include <QCloseEvent>
 #include "Toolbar.h"
-#include "../Widget/ProjectWidget.h"
-#include "../Widget/WorkspaceWidget.h"
-#include "../Widget/TilesetWidget.h"
-#include "../Widget/LayerWidget.h"
-#include "../Widget/PropertiesWidget.h"
-#include "../Widget/MinimapWidget.h"
+#include "Widget/ProjectWidget.h"
+#include "Widget/WorkspaceWidget.h"
+#include "Widget/TilesetWidget.h"
+#include "Widget/LayerWidget.h"
+#include "Widget/PropertiesWidget.h"
+#include "Widget/MinimapWidget.h"
 
 class MainWindow : public QMainWindow
 {

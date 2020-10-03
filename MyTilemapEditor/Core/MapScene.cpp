@@ -1,8 +1,8 @@
 #include "MapScene.h"
 #include "UndoCommand.h"
 #include "Tileset.h"
-#include "../Widget/WorkspaceWidget.h"
-#include "../Utils/ProjectCommon.h"
+#include "Widget/WorkspaceWidget.h"
+#include "Utils/ProjectCommon.h"
 #include <QPainter>
 #include <QGraphicsSceneMouseEvent>
 #include <QDebug>

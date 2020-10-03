@@ -1,7 +1,7 @@
 #include "WorkspaceWidget.h"
 #include "AddMapDialog.h"
-#include "../Core/Tileset.h"
-#include "../Utils/ProjectCommon.h"
+#include "Core/Tileset.h"
+#include "Utils/ProjectCommon.h"
 #include <QPushButton>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -72,31 +72,31 @@ void WorkspaceWidget::addMap()
 		MapInfo* mapInfo = dialog.getResult();
 
 		disableTabWidget( false );
-		insertMap( mapInfo );
+		insertMap( *mapInfo );
 	}
 }
 
-void WorkspaceWidget::insertMap( MapInfo* mapInfo )
+void WorkspaceWidget::insertMap( MapInfo mapInfo )
 {
 	disableTabWidget( false );
 	// check is already exist
 	for( int i = 0; i < m_mapSceneList.size(); ++i )
 	{
 		MapScene* scene = m_mapSceneList[i];
-		if ( mapInfo->getFilePath() == scene->getMapInfo().getFilePath() )
+		if ( mapInfo.getFilePath() == scene->getMapInfo().getFilePath() )
 		{
 			m_mapTabWidget->setCurrentIndex( i );
 			return;
 		}
 	}
 
-	MapScene* mapScene = new MapScene( *mapInfo, this );
+	MapScene* mapScene = new MapScene( mapInfo, this );
 	m_mapSceneList.push_back( mapScene );
-	m_mapTabWidget->setCurrentIndex( m_mapTabWidget->addTab( mapScene->m_view, mapInfo->getName() ) );
+	m_mapTabWidget->setCurrentIndex( m_mapTabWidget->addTab( mapScene->m_view, mapInfo.getName() ) );
 
 	// Set tiles
 	XmlDocument* mapDoc = new XmlDocument;
-	mapDoc->LoadFile( mapInfo->getFilePath().toStdString().c_str() );
+	mapDoc->LoadFile( mapInfo.getFilePath().toStdString().c_str() );
 	if( mapDoc->Error() )
 	{
 		QMessageBox::critical( this, tr( "Error" ), tr( "Failed to Load Map File." ) );
@@ -179,6 +179,7 @@ void WorkspaceWidget::closeTab( int index )
 	}
 	m_mapTabWidget->removeTab( index );
 	m_mapSceneList.removeAt( index );
+	closeTabSuccessfully( index );
 	if( m_mapTabWidget->count() == 0 )
 	{
 		disableTabWidget( true );
@@ -206,6 +207,7 @@ void WorkspaceWidget::changeTab( int index )
 			updateRedo( mapScene->m_undoStack->createRedoAction( this, tr( "&Redo" ) ) );
 		}
 	}
+	tabFocusChanged( index );
 }
 
 void WorkspaceWidget::changeMapScale( const QString& text )
@@ -339,4 +341,9 @@ void WorkspaceWidget::saveMap( int tabIndex )
 
 	m_mapSceneList[tabIndex]->m_isSaved = true;
 	m_mapTabWidget->setTabText( tabIndex, m_mapSceneList[tabIndex]->m_mapInfo.getName() );
+}
+
+void WorkspaceWidget::getTabCount( int& tabCount )
+{
+	tabCount = m_mapTabWidget->count();
 }

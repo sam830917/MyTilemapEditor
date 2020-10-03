@@ -2,7 +2,7 @@
 
 #include <QDialog>
 #include "ui_AddMapUI.h"
-#include "../Core/MapInfo.h"
+#include "Core/MapInfo.h"
 
 class AddMapDialog : public QDialog
 {

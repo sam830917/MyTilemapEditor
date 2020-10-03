@@ -1,6 +1,6 @@
 #include "Tileset.h"
-#include "../Utils/ProjectCommon.h"
-#include "../Utils/XmlUtils.h"
+#include "Utils/ProjectCommon.h"
+#include "Utils/XmlUtils.h"
 #include <QDir>
 #include <QFileInfo>
 

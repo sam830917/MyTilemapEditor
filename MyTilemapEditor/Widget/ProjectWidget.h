@@ -5,10 +5,11 @@
 #include <QList>
 #include <QQueue>
 #include <QModelIndex>
-#include "../Core/Project.h"
+#include "Core/Project.h"
+#include "Core/LayerInfo.h"
+#include "Core/MapInfo.h"
 
 class Tileset;
-class MapInfo;
 
 QT_FORWARD_DECLARE_CLASS( QFileSystemModel )
 QT_FORWARD_DECLARE_CLASS( QStandardItemModel )
@@ -43,7 +44,7 @@ private slots:
 signals:
 	void loadProjectSuccessfully();
 	void loadTilesetSuccessfully( Tileset* tileset );
-	void loadMapSuccessfully( MapInfo* mapInfo );
+	void loadMapSuccessfully( MapInfo mapInfo, QList<LayerInfo> layerInfoList );
 	void tilesetRenamed( const QString& path, const QString& oldName, const QString& newName );
 
 private:

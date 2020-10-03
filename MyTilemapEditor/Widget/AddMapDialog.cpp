@@ -1,6 +1,6 @@
 #include "AddMapDialog.h"
-#include "../Utils/ProjectCommon.h"
-#include "../Utils/XmlUtils.h"
+#include "Utils/ProjectCommon.h"
+#include "Utils/XmlUtils.h"
 #include <QMessageBox>
 #include <QFileInfo>
 
@@ -60,6 +60,13 @@ void AddMapDialog::saveMap()
 	root->SetAttribute( "mapSize", mapSize.toStdString().c_str() );
 	QString tileSize = QString( "%1,%2" ).arg( m_ui.m_tileWidthValueBox->value() ).arg( m_ui.m_tileHeightValueBox->value() );
 	root->SetAttribute( "tileSize", tileSize.toStdString().c_str() );
+	XmlElement* layersEle = xmlDocument->NewElement( "Layers" );
+	XmlElement* layerEle = xmlDocument->NewElement( "Layer" );
+	layerEle->SetAttribute( "name", "Layer 1" );
+	layerEle->SetAttribute( "isLock", false );
+	layerEle->SetAttribute( "isVisible", true );
+	root->LinkEndChild( layersEle );
+	layersEle->LinkEndChild( layerEle );
 	xmlDocument->LinkEndChild( root );
 
 	saveXmlFile( *xmlDocument, filePath );

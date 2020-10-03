@@ -1,5 +1,5 @@
 #include "ProjectCommon.h"
-#include "../Core/Tileset.h"
+#include "Core/Tileset.h"
 #include "XmlUtils.h"
 #include <QFileInfo>
 

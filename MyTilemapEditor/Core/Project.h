@@ -2,7 +2,7 @@
 
 #include <QString>
 #include <QStringList>
-#include "../Utils/XmlUtils.h"
+#include "Utils/XmlUtils.h"
 
 class Project
 {

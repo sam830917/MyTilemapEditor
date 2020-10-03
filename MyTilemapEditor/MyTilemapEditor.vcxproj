@@ -45,6 +45,16 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
   </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir)/MyTilemapEditor;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir)/MyTilemapEditor;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
     <QtInstall>msvc2017_64</QtInstall>
     <QtModules>core;gui;widgets</QtModules>
@@ -85,6 +95,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Core\LayerInfo.cpp" />
     <ClCompile Include="Core\MainWindow.cpp" />
     <ClCompile Include="Core\main.cpp" />
     <ClCompile Include="Core\MapInfo.cpp" />
@@ -133,6 +144,7 @@
     <QtMoc Include="Widget\WorkspaceWidget.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Core\LayerInfo.h" />
     <ClInclude Include="Core\MapInfo.h" />
     <ClInclude Include="Core\MapScene.h" />
     <ClInclude Include="Core\Project.h" />
