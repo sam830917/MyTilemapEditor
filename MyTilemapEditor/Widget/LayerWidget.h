@@ -3,10 +3,12 @@
 #include <QDockWidget>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
+#include <QListWidgetItem>
 
-QT_FORWARD_DECLARE_CLASS( QTreeView )
 QT_FORWARD_DECLARE_CLASS( QBoxLayout )
+QT_FORWARD_DECLARE_CLASS( QListWidget )
 QT_FORWARD_DECLARE_CLASS( QToolBar )
+class LayerRowWidget;
 
 class LayerWidget : public QDockWidget
 {
@@ -18,19 +20,33 @@ public:
 private:
 	void initialToolbar();
 
+	void updateToolbar( bool enableNewLayer, bool enableRaise, bool enableLower, bool enableDelete );
+	void updateToolbarStatus();
+	void moveItem( int fromItemIndex, int toItemIndex );
 public slots:
+	void addNewLayer();
+	void removeLayer();
+	void raiseCurrentLayer();
+	void lowerCurrentLayer();
 
 private:
-	QTreeWidget* m_treeWidget;
+	QListWidget* m_listWidget;
 	QBoxLayout* m_layout;
+
 	QToolBar* m_toolbar;
+	QAction* m_newLayerAction;
+	QAction* m_raiseAction;
+	QAction* m_lowerAction;
+	QAction* m_deleteAction;
 };
 
-class LayerItem : public QTreeWidgetItem
+class LayerRow : public QListWidgetItem
 {
+	friend class LayerWidget;
 
 public:
-	LayerItem( QTreeWidget* view );
+	LayerRow( QListWidget* view );
 
 private:
+	LayerRowWidget* m_layerRow;
 };
