@@ -134,13 +134,9 @@ void MapScene::paintMap( int index, TileInfo tileInfo, int layerIndex )
 	{
 		return;
 	}
-	if ( m_layers[layerIndex]->m_isLock )
-	{
-		return;
-	}
 	m_layers[layerIndex]->m_tileList[index]->m_tileInfo = tileInfo;
 	m_layers[layerIndex]->m_tileList[index]->update();
-	m_parentWidget->modifiedCurrentScene();
+	m_parentWidget->markCurrentSceneForModified();
 }
 
 void MapScene::paintMap( int index, TileInfo tileInfo )
@@ -174,7 +170,7 @@ void MapScene::eraseMap( int index )
 
 	m_layers[currentIndex]->m_tileList[index]->m_tileInfo = TileInfo();
 	m_layers[currentIndex]->m_tileList[index]->update();
-	m_parentWidget->modifiedCurrentScene();
+	m_parentWidget->markCurrentSceneForModified();
 }
 
 void MapScene::eraseMap( QSize coord )
@@ -184,16 +180,17 @@ void MapScene::eraseMap( QSize coord )
 	eraseMap( index );
 }
 
-void MapScene::addNewLayer( int zValue )
+Layer* MapScene::addNewLayer( int zValue )
 {
 	Layer* newLayer = new Layer( this, zValue );
-	m_layers.push_front( newLayer );
+	m_layers.insert( zValue, newLayer );
 
 	// reorder z value
 	for ( int i = 0; i < m_layers.size(); ++i )
 	{
 		m_layers[i]->setOrder(i);
 	}
+	return newLayer;
 }
 
 void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
@@ -209,7 +206,7 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 		m_beforeDrawTileInfo.clear();
 		int currentIndex = -1;
 		m_parentWidget->getLayerIndex( currentIndex );
-		if( currentIndex == -1 )
+		if( currentIndex == -1 || m_layers[currentIndex]->m_isLock )
 		{
 			return;
 		}
@@ -243,6 +240,12 @@ void MapScene::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
 			m_view->horizontalScrollBar()->setValue( m_view->horizontalScrollBar()->value() - (currentPosition.x() - lastPosition.x()) );
 			return;
 		}
+		int currentIndex = -1;
+		m_parentWidget->getLayerIndex( currentIndex );
+		if( currentIndex == -1 || m_layers[currentIndex]->m_isLock )
+		{
+			return;
+		}
 		QPointF mousePos = event->scenePos();
 		if( mousePos == QPointF() )
 		{
@@ -264,7 +267,7 @@ void MapScene::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 	{
 		int currentIndex = -1;
 		m_parentWidget->getLayerIndex( currentIndex );
-		if( currentIndex == -1 )
+		if( currentIndex == -1 || m_layers[currentIndex]->m_isLock )
 		{
 			return;
 		}

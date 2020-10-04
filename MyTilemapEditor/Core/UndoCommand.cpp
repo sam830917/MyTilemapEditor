@@ -23,7 +23,7 @@ void DrawCommand::undo()
 		m_tiles[i]->setTileInfo( m_tileInfoBeforeList[i] );
 		m_tiles[i]->update();
 	}
-	m_tiles[0]->m_mapScene->m_parentWidget->modifiedCurrentScene();
+	m_tiles[0]->m_mapScene->m_parentWidget->markCurrentSceneForModified();
 }
 
 void DrawCommand::redo()
@@ -33,5 +33,5 @@ void DrawCommand::redo()
 		m_tiles[i]->setTileInfo( m_tileInfoAfterList[i] );
 		m_tiles[i]->update();
 	}
-	m_tiles[0]->m_mapScene->m_parentWidget->modifiedCurrentScene();
+	m_tiles[0]->m_mapScene->m_parentWidget->markCurrentSceneForModified();
 }

@@ -8,6 +8,7 @@ class Tile;
 
 class Layer
 {
+	friend class WorkspaceWidget;
 	friend class MapScene;
 	friend class Tile;
 
@@ -17,8 +18,8 @@ public:
 
 	void setOrder( int value );
 
-public slots:
 	void setIsLock( bool islock ) { m_isLock = islock; }
+	void setIsVisible( bool isVisible ) { m_isVisible = isVisible; }
 
 private:
 	MapScene* m_mapScene;

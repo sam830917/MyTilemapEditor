@@ -25,7 +25,7 @@ public:
 	explicit WorkspaceWidget( QWidget* parent = Q_NULLPTR );
 
 	void disableTabWidget( bool disable ) const;
-	void modifiedCurrentScene();
+	void markCurrentSceneForModified();
 	bool isReadyToClose();
 
 	eDrawTool getCurrentDrawTool() { return m_drawTool; }
@@ -48,7 +48,8 @@ public slots:
 	void addNewLayerIntoMap( int index );
 	void changeLayerOrder( int indexA, int indexB );
 	void deleteLayer( int index );
-	void setLockLayer( int index, bool isLock );
+	void lockLayer( int index, bool isLock );
+	void setLayerVisible( int index, bool isVisible );
 
 signals:
 	void updateRedo( QAction* action );
@@ -57,6 +58,7 @@ signals:
 	void tabFocusChanged( int index );
 	void closeTabSuccessfully( int index );
 	void getLayerIndex( int& index );
+	void getLayerGroupInfoList( int index, QList<LayerInfo>& layerInfoList );
 
 public:
 	QPushButton* m_newProjectButton;

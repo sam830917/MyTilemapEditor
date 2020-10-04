@@ -41,13 +41,15 @@ public slots:
 	void removeLayerGropu( int listWidgetIndex );
 	void changeLayerGroup( int listWidgetIndex );
 	void getLayerIndex( int& index );
-// 	void setIsLock( int index, bool isLock );
+	void getLayerGroupInfoList( int index, QList<LayerInfo>& layerInfoList );
 
 signals:
 	void getTabCount( int& tabCount );
 	void addedNewLayerGroup( int index );
 	void movedLayerGroup( int fromItemIndex, int toItemIndex );
 	void deletedLayerGroup( int index );
+	void setLayerIsLock( int index, bool isLock );
+	void setLayerIsVisible( int index, bool isVisible );
 
 private:
 	void addNewLayer( LayerInfo layerInfo );
@@ -77,6 +79,7 @@ public:
 private:
 	LayerRowWidget* m_layerRowWidget;
 	LayerGroup* m_layerGroup;
+	int m_index = -1;
 };
 
 class LayerRowWidget : public QWidget
@@ -93,6 +96,7 @@ public:
 
 public slots:
 	void setIsLock();
+	void setIsVisible();
 
 protected:
 	virtual bool eventFilter( QObject* obj, QEvent* event );
@@ -109,11 +113,13 @@ private:
 class LayerGroup : public QListWidget
 {
 	friend class LayerWidget;
+	friend class LayerRowWidget;
 	Q_OBJECT
 
 public:
-	LayerGroup( MapInfo mapInfo, QWidget* parent = Q_NULLPTR );
+	LayerGroup( MapInfo mapInfo, LayerWidget* parent = Q_NULLPTR );
 
 private:
 	MapInfo m_mapInfo;
+	LayerWidget* m_layerWidget;
 };

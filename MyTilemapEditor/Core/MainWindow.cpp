@@ -204,11 +204,14 @@ void MainWindow::initialConnections()
 	connect( m_centralWidget, &WorkspaceWidget::tabFocusChanged, m_layerWidget, &LayerWidget::changeLayerGroup );
 	connect( m_centralWidget, &WorkspaceWidget::closeTabSuccessfully, m_layerWidget, &LayerWidget::removeLayerGropu );
 	connect( m_centralWidget, &WorkspaceWidget::getLayerIndex, m_layerWidget, &LayerWidget::getLayerIndex );
+	connect( m_centralWidget, &WorkspaceWidget::getLayerGroupInfoList, m_layerWidget, &LayerWidget::getLayerGroupInfoList );
 
 	connect( m_layerWidget, &LayerWidget::getTabCount,  m_centralWidget, &WorkspaceWidget::getTabCount );
 	connect( m_layerWidget, &LayerWidget::addedNewLayerGroup,  m_centralWidget, &WorkspaceWidget::addNewLayerIntoMap );
 	connect( m_layerWidget, &LayerWidget::movedLayerGroup,  m_centralWidget, &WorkspaceWidget::changeLayerOrder );
 	connect( m_layerWidget, &LayerWidget::deletedLayerGroup,  m_centralWidget, &WorkspaceWidget::deleteLayer );
+	connect( m_layerWidget, &LayerWidget::setLayerIsLock,  m_centralWidget, &WorkspaceWidget::lockLayer );
+	connect( m_layerWidget, &LayerWidget::setLayerIsVisible,  m_centralWidget, &WorkspaceWidget::setLayerVisible );
 }
 
 void MainWindow::updateToolBar()

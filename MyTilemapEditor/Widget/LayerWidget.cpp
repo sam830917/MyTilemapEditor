@@ -15,9 +15,10 @@
 #include <QPushButton>
 #include <QDebug>
 
-LayerGroup::LayerGroup( MapInfo mapInfo, QWidget* parent /*= Q_NULLPTR */ )
+LayerGroup::LayerGroup( MapInfo mapInfo, LayerWidget* parent /*= Q_NULLPTR */ )
 	:QListWidget(parent),
-	m_mapInfo(mapInfo)
+	m_mapInfo(mapInfo),
+	m_layerWidget(parent)
 {
 }
 
@@ -101,7 +102,7 @@ void LayerWidget::addNewLayerGroup( MapInfo mapInfo, QList<LayerInfo> layerInfoL
 		}
 	}
 
-	LayerGroup* listWidget = new LayerGroup(mapInfo);
+	LayerGroup* listWidget = new LayerGroup(mapInfo, this);
 	listWidget->setSelectionMode( QAbstractItemView::SelectionMode::SingleSelection );
 	m_listWidgetList.push_back( listWidget );
 	m_layout->addWidget( listWidget );
@@ -178,6 +179,17 @@ void LayerWidget::getLayerIndex( int& index )
 	index = m_listWidgetList[m_currentIndex]->currentRow();
 }
 
+void LayerWidget::getLayerGroupInfoList( int index, QList<LayerInfo>& layerInfoList )
+{
+	LayerGroup* layerGroup = m_listWidgetList[index];
+	for ( int i = 0; i < layerGroup->count(); ++i )
+	{
+		LayerRowWidget* layerRow = dynamic_cast<LayerRowWidget*>( layerGroup->itemWidget( layerGroup->item(i) ) );
+		LayerInfo layerInfo = LayerInfo( layerRow->getName(), layerRow->m_lockBtn->isChecked(), layerRow->m_visibleBtn->isChecked() );
+		layerInfoList.push_back(layerInfo);
+	}
+}
+
 void LayerWidget::moveItem( int fromItemIndex, int toItemIndex )
 {
 	if( toItemIndex < 0 || fromItemIndex < 0 )
@@ -195,6 +207,13 @@ void LayerWidget::moveItem( int fromItemIndex, int toItemIndex )
 
 	currentItem->m_layerRowWidget = new LayerRowWidget( name, currentItem, lockChecked, visibleChecked );
 	m_listWidgetList[m_currentIndex]->setItemWidget( m_listWidgetList[m_currentIndex]->item( toItemIndex ), currentItem->m_layerRowWidget );
+
+	// reorder index
+	for ( int i = 0; i < m_listWidgetList[m_currentIndex]->count(); ++i )
+	{
+		LayerRow* currentItem = static_cast<LayerRow*>(m_listWidgetList[m_currentIndex]->item( i ));
+		currentItem->m_index = i;
+	}
 
 	m_listWidgetList[m_currentIndex]->setCurrentRow( toItemIndex );
 	updateToolbarStatus();
@@ -304,6 +323,7 @@ LayerRowWidget::LayerRowWidget( const QString& name, LayerRow* layerRow, bool lo
 	).arg( ":/MainWindow/Icon/close-eye.png", ":/MainWindow/Icon/eye.png" );
 	m_visibleBtn->setStyleSheet( visibleStyle );
 	connect( m_lockBtn, SIGNAL( clicked() ), this, SLOT( setIsLock() ) );
+	connect( m_visibleBtn, SIGNAL( clicked() ), this, SLOT( setIsVisible() ) );
 }
 
 QString LayerRowWidget::getName() const
@@ -313,11 +333,20 @@ QString LayerRowWidget::getName() const
 
 void LayerRowWidget::setIsLock()
 {
-	bool checked = m_lockBtn->isChecked();
-	int index = -1;
-	for ( int i =0; i < m_layerRow->m_layerGroup->count(); ++i )
-	{
-	}
+	m_layerRow->setSelected( true );
+	int index = m_layerRow->m_layerGroup->currentRow();
+ 	bool checked = m_lockBtn->isChecked();
+
+	m_layerRow->m_layerGroup->m_layerWidget->setLayerIsLock( m_layerRow->m_index, checked );
+}
+
+void LayerRowWidget::setIsVisible()
+{
+ 	m_layerRow->setSelected( true );
+	int index = m_layerRow->m_layerGroup->currentRow();
+	bool checked = m_visibleBtn->isChecked();
+
+	m_layerRow->m_layerGroup->m_layerWidget->setLayerIsVisible( m_layerRow->m_index, checked );
 }
 
 bool LayerRowWidget::eventFilter( QObject* obj, QEvent* event )
@@ -372,6 +401,7 @@ LayerRow::LayerRow( LayerGroup* view )
 	}
 
 	m_layerRowWidget = new LayerRowWidget( name, this );
+	m_index = 0;
 	view->insertItem( 0, this );
 	view->setItemWidget( this, m_layerRowWidget );
 	setSizeHint( QSize( 0, 40 ) );
@@ -382,7 +412,8 @@ LayerRow::LayerRow( LayerGroup* view, LayerInfo layerInfo )
 	m_layerGroup( view )
 {
 	m_layerRowWidget = new LayerRowWidget( layerInfo.getNmae(), this, layerInfo.IsLock(), layerInfo.IsVisible() );
-	view->insertItem( 0, this );
+	m_index = view->count();
+	view->addItem( this );
 	view->setItemWidget( this, m_layerRowWidget );
 	setSizeHint( QSize( 0, 40 ) );
 }

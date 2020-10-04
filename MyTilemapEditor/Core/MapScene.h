@@ -41,7 +41,7 @@ public:
 	void eraseMap( int index );
 	void eraseMap( QSize coord );
 
-	void addNewLayer( int zValue );
+	Layer* addNewLayer( int zValue );
 
 protected:
 	virtual void mousePressEvent( QGraphicsSceneMouseEvent* event ) override;
