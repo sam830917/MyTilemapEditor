@@ -72,9 +72,6 @@
     <ClCompile Include="Utils\ProjectCommon.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
-    <ClCompile Include="Widget\LayerWidget.cpp">
-      <Filter>Widget</Filter>
-    </ClCompile>
     <ClCompile Include="Widget\PropertiesWidget.cpp">
       <Filter>Widget</Filter>
     </ClCompile>
@@ -107,6 +104,12 @@
     </ClCompile>
     <ClCompile Include="Core\LayerInfo.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Layer.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Widget\LayerWidget.cpp">
+      <Filter>Widget</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -204,6 +207,9 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\LayerInfo.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Layer.h">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>

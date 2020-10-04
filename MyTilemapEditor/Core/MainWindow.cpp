@@ -203,8 +203,12 @@ void MainWindow::initialConnections()
 	connect( m_centralWidget, &WorkspaceWidget::disableShortcut, this, &MainWindow::disableShortcut );
 	connect( m_centralWidget, &WorkspaceWidget::tabFocusChanged, m_layerWidget, &LayerWidget::changeLayerGroup );
 	connect( m_centralWidget, &WorkspaceWidget::closeTabSuccessfully, m_layerWidget, &LayerWidget::removeLayerGropu );
+	connect( m_centralWidget, &WorkspaceWidget::getLayerIndex, m_layerWidget, &LayerWidget::getLayerIndex );
 
 	connect( m_layerWidget, &LayerWidget::getTabCount,  m_centralWidget, &WorkspaceWidget::getTabCount );
+	connect( m_layerWidget, &LayerWidget::addedNewLayerGroup,  m_centralWidget, &WorkspaceWidget::addNewLayerIntoMap );
+	connect( m_layerWidget, &LayerWidget::movedLayerGroup,  m_centralWidget, &WorkspaceWidget::changeLayerOrder );
+	connect( m_layerWidget, &LayerWidget::deletedLayerGroup,  m_centralWidget, &WorkspaceWidget::deleteLayer );
 }
 
 void MainWindow::updateToolBar()

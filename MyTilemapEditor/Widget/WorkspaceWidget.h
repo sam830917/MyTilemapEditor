@@ -32,7 +32,7 @@ public:
 
 public slots:
 	void addMap();
-	void insertMap( MapInfo mapInfo );
+	void insertMap( MapInfo mapInfo, QList<LayerInfo> layerInfoList );
 	void closeTab( int index );
 	void setDrawTool( eDrawTool drawTool );
 	void changeTab( int index );
@@ -45,12 +45,18 @@ public slots:
 	void saveMap( int tabIndex );
 	void getTabCount( int& tabCount );
 
+	void addNewLayerIntoMap( int index );
+	void changeLayerOrder( int indexA, int indexB );
+	void deleteLayer( int index );
+	void setLockLayer( int index, bool isLock );
+
 signals:
 	void updateRedo( QAction* action );
 	void updateUndo( QAction* action );
 	void disableShortcut( bool isDisable );
 	void tabFocusChanged( int index );
 	void closeTabSuccessfully( int index );
+	void getLayerIndex( int& index );
 
 public:
 	QPushButton* m_newProjectButton;

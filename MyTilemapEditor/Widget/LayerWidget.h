@@ -10,6 +10,10 @@
 QT_FORWARD_DECLARE_CLASS( QBoxLayout )
 QT_FORWARD_DECLARE_CLASS( QListWidget )
 QT_FORWARD_DECLARE_CLASS( QToolBar )
+QT_FORWARD_DECLARE_CLASS( QLabel )
+QT_FORWARD_DECLARE_CLASS( QStackedWidget )
+QT_FORWARD_DECLARE_CLASS( QCheckBox )
+QT_FORWARD_DECLARE_CLASS( QLineEdit )
 class LayerRowWidget;
 class LayerGroup;
 
@@ -36,9 +40,14 @@ public slots:
 	void addNewLayerGroup( MapInfo mapInfo, QList<LayerInfo> layerInfoList );
 	void removeLayerGropu( int listWidgetIndex );
 	void changeLayerGroup( int listWidgetIndex );
+	void getLayerIndex( int& index );
+// 	void setIsLock( int index, bool isLock );
 
 signals:
 	void getTabCount( int& tabCount );
+	void addedNewLayerGroup( int index );
+	void movedLayerGroup( int fromItemIndex, int toItemIndex );
+	void deletedLayerGroup( int index );
 
 private:
 	void addNewLayer( LayerInfo layerInfo );
@@ -59,11 +68,52 @@ private:
 class LayerRow : public QListWidgetItem
 {
 	friend class LayerWidget;
+	friend class LayerRowWidget;
 
 public:
-	LayerRow( QListWidget* view );
-	LayerRow( QListWidget* view, LayerInfo layerInfo );
+	LayerRow( LayerGroup* view );
+	LayerRow( LayerGroup* view, LayerInfo layerInfo );
 
 private:
-	LayerRowWidget* m_layerRow;
+	LayerRowWidget* m_layerRowWidget;
+	LayerGroup* m_layerGroup;
+};
+
+class LayerRowWidget : public QWidget
+{
+	friend class LayerItem;
+	friend class LayerWidget;
+	friend class LayerRow;
+	Q_OBJECT
+
+public:
+	LayerRowWidget( const QString& name, LayerRow* layerRow, bool lockChecked = false, bool visibleChecked = true, QWidget* parent = Q_NULLPTR );
+
+	QString getName() const;
+
+public slots:
+	void setIsLock();
+
+protected:
+	virtual bool eventFilter( QObject* obj, QEvent* event );
+
+private:
+	QLineEdit* m_lineEdit;
+	QLabel* m_label;
+	QStackedWidget* m_stackedWidget;
+	QCheckBox* m_lockBtn;
+	QCheckBox* m_visibleBtn;
+	LayerRow* m_layerRow;
+};
+
+class LayerGroup : public QListWidget
+{
+	friend class LayerWidget;
+	Q_OBJECT
+
+public:
+	LayerGroup( MapInfo mapInfo, QWidget* parent = Q_NULLPTR );
+
+private:
+	MapInfo m_mapInfo;
 };

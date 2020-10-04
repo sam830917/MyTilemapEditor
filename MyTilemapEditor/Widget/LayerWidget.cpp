@@ -13,36 +13,7 @@
 #include <QKeyEvent>
 #include <QVariant>
 #include <QPushButton>
-
-class LayerRowWidget : public QWidget
-{
-	friend class LayerItem;
-	friend class LayerWidget;
-
-public:
-	LayerRowWidget( const QString& name, bool lockChecked = false, bool visibleChecked = true, QWidget* parent = Q_NULLPTR );
-
-	QString getName() const;
-
-protected:
-	virtual bool eventFilter( QObject* obj, QEvent* event );
-
-private:
-	QLineEdit* m_lineEdit;
-	QLabel* m_label;
-	QStackedWidget* m_stackedWidget;
-	QCheckBox* m_lockBtn;
-	QCheckBox* m_visibleBtn;
-};
-
-class LayerGroup : public QListWidget
-{
-public:
-	LayerGroup( MapInfo mapInfo, QWidget* parent = Q_NULLPTR );
-
-public:
-	MapInfo m_mapInfo;
-};
+#include <QDebug>
 
 LayerGroup::LayerGroup( MapInfo mapInfo, QWidget* parent /*= Q_NULLPTR */ )
 	:QListWidget(parent),
@@ -74,6 +45,8 @@ void LayerWidget::addNewLayer()
 		m_listWidgetList[m_currentIndex]->setCurrentRow( 0 );
 	}
 	updateToolbarStatus();
+	int count = m_listWidgetList[m_currentIndex]->count();
+	addedNewLayerGroup( 0 );
 }
 
 void LayerWidget::addNewLayer( LayerInfo layerInfo )
@@ -95,6 +68,7 @@ void LayerWidget::removeLayer()
 	int currentIndex = m_listWidgetList[m_currentIndex]->currentRow();
 	m_listWidgetList[m_currentIndex]->takeItem( currentIndex );
 	updateToolbarStatus();
+	deletedLayerGroup( currentIndex );
 }
 
 void LayerWidget::raiseCurrentLayer()
@@ -195,6 +169,15 @@ void LayerWidget::changeLayerGroup( int listWidgetIndex )
 	updateToolbarStatus();
 }
 
+void LayerWidget::getLayerIndex( int& index )
+{
+	if ( m_currentIndex <= -1 )
+	{
+		return;
+	}
+	index = m_listWidgetList[m_currentIndex]->currentRow();
+}
+
 void LayerWidget::moveItem( int fromItemIndex, int toItemIndex )
 {
 	if( toItemIndex < 0 || fromItemIndex < 0 )
@@ -203,18 +186,19 @@ void LayerWidget::moveItem( int fromItemIndex, int toItemIndex )
 	}
 
 	LayerRow* currentItem = static_cast<LayerRow*>(m_listWidgetList[m_currentIndex]->item( fromItemIndex ));
-	LayerRowWidget* currentW = currentItem->m_layerRow;
+	LayerRowWidget* currentW = currentItem->m_layerRowWidget;
 	QString name = currentW->getName();
 	bool lockChecked = currentW->m_lockBtn->isChecked();
 	bool visibleChecked = currentW->m_visibleBtn->isChecked();
 	m_listWidgetList[m_currentIndex]->takeItem( fromItemIndex );
 	m_listWidgetList[m_currentIndex]->insertItem( toItemIndex, currentItem );
 
-	currentItem->m_layerRow = new LayerRowWidget( name, lockChecked, visibleChecked );
-	m_listWidgetList[m_currentIndex]->setItemWidget( m_listWidgetList[m_currentIndex]->item( toItemIndex ), currentItem->m_layerRow );
+	currentItem->m_layerRowWidget = new LayerRowWidget( name, currentItem, lockChecked, visibleChecked );
+	m_listWidgetList[m_currentIndex]->setItemWidget( m_listWidgetList[m_currentIndex]->item( toItemIndex ), currentItem->m_layerRowWidget );
 
 	m_listWidgetList[m_currentIndex]->setCurrentRow( toItemIndex );
 	updateToolbarStatus();
+	movedLayerGroup( fromItemIndex, toItemIndex );
 }
 
 void LayerWidget::initialToolbar()
@@ -287,8 +271,9 @@ void LayerWidget::updateToolbarStatus()
 	}
 }
 
-LayerRowWidget::LayerRowWidget( const QString& name, bool lockChecked, bool visibleChecked, QWidget* parent /*= Q_NULLPTR */ )
-	:QWidget(parent)
+LayerRowWidget::LayerRowWidget( const QString& name, LayerRow* layerRow, bool lockChecked, bool visibleChecked, QWidget* parent /*= Q_NULLPTR */ )
+	:QWidget(parent),
+	m_layerRow(layerRow)
 {
 	m_stackedWidget = new QStackedWidget( this );
 	m_lineEdit = new QLineEdit( m_stackedWidget );
@@ -318,11 +303,21 @@ LayerRowWidget::LayerRowWidget( const QString& name, bool lockChecked, bool visi
 		"QCheckBox::indicator:checked{image:url(%2);}"
 	).arg( ":/MainWindow/Icon/close-eye.png", ":/MainWindow/Icon/eye.png" );
 	m_visibleBtn->setStyleSheet( visibleStyle );
+	connect( m_lockBtn, SIGNAL( clicked() ), this, SLOT( setIsLock() ) );
 }
 
 QString LayerRowWidget::getName() const
 {
 	return m_label->text();
+}
+
+void LayerRowWidget::setIsLock()
+{
+	bool checked = m_lockBtn->isChecked();
+	int index = -1;
+	for ( int i =0; i < m_layerRow->m_layerGroup->count(); ++i )
+	{
+	}
 }
 
 bool LayerRowWidget::eventFilter( QObject* obj, QEvent* event )
@@ -359,8 +354,9 @@ bool LayerRowWidget::eventFilter( QObject* obj, QEvent* event )
 	return QWidget::eventFilter( obj, event );
 }
 
-LayerRow::LayerRow( QListWidget* view )
-	:QListWidgetItem()
+LayerRow::LayerRow( LayerGroup* view )
+	:QListWidgetItem(),
+	m_layerGroup(view)
 {
 	QString name = QString( "Layer 1" );
 	int nameCount = 1;
@@ -368,25 +364,25 @@ LayerRow::LayerRow( QListWidget* view )
 	for ( int i = 0; i < count; ++i )
 	{
 		LayerRow* row = static_cast<LayerRow*>(view->item(i));
-		if ( name == row->m_layerRow->getName() )
+		if ( name == row->m_layerRowWidget->getName() )
 		{
 			name = QString( "Layer %1" ).arg( ++nameCount );
 			i = -1;
 		}
 	}
 
-	m_layerRow = new LayerRowWidget( name );
-	view->addItem( this );
-	view->setItemWidget( this, m_layerRow );
+	m_layerRowWidget = new LayerRowWidget( name, this );
+	view->insertItem( 0, this );
+	view->setItemWidget( this, m_layerRowWidget );
 	setSizeHint( QSize( 0, 40 ) );
-	view->addItem( this );
 }
 
-LayerRow::LayerRow( QListWidget* view, LayerInfo layerInfo )
+LayerRow::LayerRow( LayerGroup* view, LayerInfo layerInfo )
+	:QListWidgetItem(),
+	m_layerGroup( view )
 {
-	m_layerRow = new LayerRowWidget( layerInfo.getNmae(), layerInfo.IsLock(), layerInfo.IsVisible() );
-	view->addItem( this );
-	view->setItemWidget( this, m_layerRow );
+	m_layerRowWidget = new LayerRowWidget( layerInfo.getNmae(), this, layerInfo.IsLock(), layerInfo.IsVisible() );
+	view->insertItem( 0, this );
+	view->setItemWidget( this, m_layerRowWidget );
 	setSizeHint( QSize( 0, 40 ) );
-	view->addItem( this );
 }

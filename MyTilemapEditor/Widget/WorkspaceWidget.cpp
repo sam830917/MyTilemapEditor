@@ -10,13 +10,13 @@
 #include <QFileInfo>
 #include <QShortcut>
 #include <QSignalMapper>
+#include <QDebug>
 
 WorkspaceWidget::WorkspaceWidget( QWidget* parent /*= Q_NULLPTR */ )
 	:QWidget(parent)
 {
 	QVBoxLayout* layoutv = new QVBoxLayout(this);
 	QHBoxLayout* layout = new QHBoxLayout(this);
-	//layout->setMargin(10);
 
 	m_newProjectButton = new QPushButton( this );
 	m_newProjectButton->setText(tr("New Project"));
@@ -72,11 +72,13 @@ void WorkspaceWidget::addMap()
 		MapInfo* mapInfo = dialog.getResult();
 
 		disableTabWidget( false );
-		insertMap( *mapInfo );
+		QList<LayerInfo> layerInfoList;
+		layerInfoList.push_back( LayerInfo() );
+		insertMap( *mapInfo, layerInfoList );
 	}
 }
 
-void WorkspaceWidget::insertMap( MapInfo mapInfo )
+void WorkspaceWidget::insertMap( MapInfo mapInfo, QList<LayerInfo> layerInfoList )
 {
 	disableTabWidget( false );
 	// check is already exist
@@ -93,6 +95,7 @@ void WorkspaceWidget::insertMap( MapInfo mapInfo )
 	MapScene* mapScene = new MapScene( mapInfo, this );
 	m_mapSceneList.push_back( mapScene );
 	m_mapTabWidget->setCurrentIndex( m_mapTabWidget->addTab( mapScene->m_view, mapInfo.getName() ) );
+	mapScene->addNewLayer( 0 );
 
 	// Set tiles
 	XmlDocument* mapDoc = new XmlDocument;
@@ -142,7 +145,7 @@ void WorkspaceWidget::insertMap( MapInfo mapInfo )
 
 		if ( tilesetsMap.contains( tilesetNumber ) )
 		{
-			mapScene->paintMap( index, TileInfo( tilesetsMap.value( tilesetNumber ), tilesetIndex ) );
+			mapScene->paintMap( index, TileInfo( tilesetsMap.value( tilesetNumber ), tilesetIndex ), 0 );
 		}
 	}
 
@@ -306,24 +309,24 @@ void WorkspaceWidget::saveMap( int tabIndex )
 	XmlElement* mapTiles = mapDoc->NewElement( "Tiles" );
 	mapRoot->LinkEndChild( mapTiles );
 	int count = 0;
-	for( int i = 0; i < currentMapScene->m_tileList.size(); ++i )
-	{
-		Tile* tile = currentMapScene->m_tileList[i];
-		TileInfo tileInfo = tile->getTileInfo();
-		if( !tileInfo.isValid() )
-			continue;
-
-		if( !tilesetsMap.contains( tileInfo.getTileset()->getRelativeFilePath() ) )
-		{
-			tilesetsMap.insert( tileInfo.getTileset()->getRelativeFilePath(), count++ );
-		}
-		int tilesetNumber = tilesetsMap.value( tileInfo.getTileset()->getRelativeFilePath() );
-		XmlElement* mapTileEle = mapDoc->NewElement( "Tile" );
-		mapTileEle->SetAttribute( "index", i );
-		mapTileEle->SetAttribute( "tileset", tilesetNumber );
-		mapTileEle->SetAttribute( "tilesetIndex", tileInfo.getIndex() );
-		mapTiles->LinkEndChild( mapTileEle );
-	}
+// 	for( int i = 0; i < currentMapScene->m_tileList.size(); ++i )
+// 	{
+// 		Tile* tile = currentMapScene->m_tileList[i];
+// 		TileInfo tileInfo = tile->getTileInfo();
+// 		if( !tileInfo.isValid() )
+// 			continue;
+// 
+// 		if( !tilesetsMap.contains( tileInfo.getTileset()->getRelativeFilePath() ) )
+// 		{
+// 			tilesetsMap.insert( tileInfo.getTileset()->getRelativeFilePath(), count++ );
+// 		}
+// 		int tilesetNumber = tilesetsMap.value( tileInfo.getTileset()->getRelativeFilePath() );
+// 		XmlElement* mapTileEle = mapDoc->NewElement( "Tile" );
+// 		mapTileEle->SetAttribute( "index", i );
+// 		mapTileEle->SetAttribute( "tileset", tilesetNumber );
+// 		mapTileEle->SetAttribute( "tilesetIndex", tileInfo.getIndex() );
+// 		mapTiles->LinkEndChild( mapTileEle );
+// 	}
 
 	// Save tileset
 	QMap<QString, int>::const_iterator mapIterator = tilesetsMap.constBegin();
@@ -337,7 +340,7 @@ void WorkspaceWidget::saveMap( int tabIndex )
 		++mapIterator;
 	}
 
-	saveXmlFile( *mapDoc, currentMapScene->getMapInfo().getFilePath() );
+// 	saveXmlFile( *mapDoc, currentMapScene->getMapInfo().getFilePath() );
 
 	m_mapSceneList[tabIndex]->m_isSaved = true;
 	m_mapTabWidget->setTabText( tabIndex, m_mapSceneList[tabIndex]->m_mapInfo.getName() );
@@ -346,4 +349,46 @@ void WorkspaceWidget::saveMap( int tabIndex )
 void WorkspaceWidget::getTabCount( int& tabCount )
 {
 	tabCount = m_mapTabWidget->count();
+}
+
+void WorkspaceWidget::addNewLayerIntoMap( int index )
+{
+	m_mapSceneList[m_mapTabWidget->currentIndex()]->addNewLayer( index );
+}
+
+void WorkspaceWidget::changeLayerOrder( int indexA, int indexB )
+{
+	MapScene* mapScene = m_mapSceneList[m_mapTabWidget->currentIndex()];
+
+	Layer* layerA = mapScene->m_layers[indexA];
+	Layer* layerB = mapScene->m_layers[indexB];
+
+	mapScene->m_layers[indexA]->setOrder( indexB );
+	mapScene->m_layers[indexB]->setOrder( indexA );
+	mapScene->m_layers[indexA] = layerB;
+	mapScene->m_layers[indexB] = layerA;
+
+	mapScene->update();
+}
+
+void WorkspaceWidget::deleteLayer( int index )
+{
+	MapScene* mapScene = m_mapSceneList[m_mapTabWidget->currentIndex()];
+
+	Layer* layer = mapScene->m_layers[index];
+	mapScene->m_layers.removeAt(index);
+	delete layer;
+	for ( int i = index; i < mapScene->m_layers.size(); ++i )
+	{
+		mapScene->m_layers[i]->setOrder( i );
+		qDebug() << i;
+	}
+	mapScene->update();
+}
+
+void WorkspaceWidget::setLockLayer( int index, bool isLock )
+{
+	MapScene* mapScene = m_mapSceneList[m_mapTabWidget->currentIndex()];
+
+	mapScene->m_layers[index]->setIsLock( isLock );
 }

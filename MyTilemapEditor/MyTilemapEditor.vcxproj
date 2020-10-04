@@ -95,6 +95,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Core\Layer.cpp" />
     <ClCompile Include="Core\LayerInfo.cpp" />
     <ClCompile Include="Core\MainWindow.cpp" />
     <ClCompile Include="Core\main.cpp" />
@@ -113,7 +114,12 @@
     <ClCompile Include="Utils\XmlUtils.cpp" />
     <ClCompile Include="Widget\AddMapDialog.cpp" />
     <ClCompile Include="Widget\AddTilesetDialog.cpp" />
-    <ClCompile Include="Widget\LayerWidget.cpp" />
+    <ClCompile Include="Widget\LayerWidget.cpp">
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
+    </ClCompile>
     <ClCompile Include="Widget\MinimapWidget.cpp" />
     <ClCompile Include="Widget\ProjectWidget.cpp" />
     <ClCompile Include="Widget\PropertiesWidget.cpp" />
@@ -144,6 +150,7 @@
     <QtMoc Include="Widget\WorkspaceWidget.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Core\Layer.h" />
     <ClInclude Include="Core\LayerInfo.h" />
     <ClInclude Include="Core\MapInfo.h" />
     <ClInclude Include="Core\MapScene.h" />

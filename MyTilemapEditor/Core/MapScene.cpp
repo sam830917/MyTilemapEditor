@@ -13,7 +13,6 @@
 MapView::MapView( WorkspaceWidget* parent /*= Q_NULLPTR */ )
 	:QGraphicsView( parent )
 {
-
 }
 
 MapView::MapView( QGraphicsScene* scene, QWidget* parent /*= Q_NULLPTR */ )
@@ -72,23 +71,17 @@ MapScene::MapScene( MapInfo mapInfo, WorkspaceWidget* parent /*= Q_NULLPTR*/ )
 	int hLineCount = mapSize.height() + 1;
 	for( int v = 0; v < vLineCount; ++v )
 	{
-		addLine( v * tileSize.width(), 0, v * tileSize.width(), tileSize.height() * mapSize.height(), linePen );
+		QGraphicsLineItem* line = new QGraphicsLineItem( QLineF( v * tileSize.width(), 0, v * tileSize.width(), tileSize.height() * mapSize.height() ) );
+		line->setPen( linePen );
+		line->setZValue(1);
+		addItem( line );
 	}
 	for( int h = 0; h < hLineCount; ++h )
 	{
-		addLine( 0, h * tileSize.height(), tileSize.width() * mapSize.width(), h * tileSize.height(), linePen );
-	}
-
-	// Create Tiles
-	for( int y = 0; y < mapSize.height(); ++y )
-	{
-		for( int x = 0; x < mapSize.width(); ++x )
-		{
-			Tile* tile = new Tile( this );
-			tile->setRect( qreal( x * tileSize.width() ), qreal( y * tileSize.height() ), tileSize.width(), tileSize.height() );
-			addItem( tile );
-			m_tileList.push_back( tile );
-		}
+		QGraphicsLineItem* line = new QGraphicsLineItem( QLineF( 0, h * tileSize.height(), tileSize.width() * mapSize.width(), h * tileSize.height() ) );
+		line->setPen( linePen );
+		line->setZValue(1);
+		addItem( line );
 	}
 }
 
@@ -135,15 +128,35 @@ void MapScene::paintMap( QSize coord )
 	paintMap( index );
 }
 
+void MapScene::paintMap( int index, TileInfo tileInfo, int layerIndex )
+{
+	if( index < 0 )
+	{
+		return;
+	}
+	if ( m_layers[layerIndex]->m_isLock )
+	{
+		return;
+	}
+	m_layers[layerIndex]->m_tileList[index]->m_tileInfo = tileInfo;
+	m_layers[layerIndex]->m_tileList[index]->update();
+	m_parentWidget->modifiedCurrentScene();
+}
+
 void MapScene::paintMap( int index, TileInfo tileInfo )
 {
 	if( index < 0 )
 	{
 		return;
 	}
-	m_tileList[index]->m_tileInfo = tileInfo;
-	m_tileList[index]->update();
-	m_parentWidget->modifiedCurrentScene();
+	int currentIndex = -1;
+	m_parentWidget->getLayerIndex( currentIndex );
+	if( currentIndex == -1 )
+	{
+		return;
+	}
+
+	paintMap( index, tileInfo, currentIndex );
 }
 
 void MapScene::eraseMap( int index )
@@ -152,8 +165,15 @@ void MapScene::eraseMap( int index )
 	{
 		return;
 	}
-	m_tileList[index]->m_tileInfo = TileInfo();
-	m_tileList[index]->update();
+	int currentIndex = -1;
+	m_parentWidget->getLayerIndex( currentIndex );
+	if( currentIndex == -1 )
+	{
+		return;
+	}
+
+	m_layers[currentIndex]->m_tileList[index]->m_tileInfo = TileInfo();
+	m_layers[currentIndex]->m_tileList[index]->update();
 	m_parentWidget->modifiedCurrentScene();
 }
 
@@ -162,6 +182,18 @@ void MapScene::eraseMap( QSize coord )
 	QSize mapSize = m_mapInfo.getMapSize();
 	int index = coord.height() * mapSize.width() + coord.width();
 	eraseMap( index );
+}
+
+void MapScene::addNewLayer( int zValue )
+{
+	Layer* newLayer = new Layer( this, zValue );
+	m_layers.push_front( newLayer );
+
+	// reorder z value
+	for ( int i = 0; i < m_layers.size(); ++i )
+	{
+		m_layers[i]->setOrder(i);
+	}
 }
 
 void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
@@ -175,7 +207,14 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 			return;
 		}
 		m_beforeDrawTileInfo.clear();
-		for( Tile* tile : m_tileList )
+		int currentIndex = -1;
+		m_parentWidget->getLayerIndex( currentIndex );
+		if( currentIndex == -1 )
+		{
+			return;
+		}
+
+		for( Tile* tile : m_layers[currentIndex]->m_tileList )
 		{
 			TileInfo info = tile->getTileInfo();
 			m_beforeDrawTileInfo.push_back( info );
@@ -223,27 +262,16 @@ void MapScene::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 	}
 	if( event->button() & Qt::LeftButton )
 	{
-		QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, m_tileList );
+		int currentIndex = -1;
+		m_parentWidget->getLayerIndex( currentIndex );
+		if( currentIndex == -1 )
+		{
+			return;
+		}
+
+		QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, m_layers[currentIndex]->m_tileList );
 		m_undoStack->push( command );
 		m_parentWidget->disableShortcut( false );
 	}
 	update();
-}
-
-Tile::Tile( MapScene* scene, QGraphicsItem* parent /*= Q_NULLPTR */ )
-	:m_mapScene(scene)
-{
-}
-
-void Tile::paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget )
-{
-	if( m_tileInfo.isValid() )
-	{
-		QRectF rect = boundingRect();
-		QSize tileSize = m_tileInfo.getTileset()->getTileSize();
-		QSize mapTileSize = m_mapScene->getMapInfo().getTileSize();
-		QSize sizeDiff = QSize( mapTileSize.width() - tileSize.width(), mapTileSize.height() - tileSize.height() );
-		QPoint point = QPoint( rect.x() + 0.5f, rect.y() + 0.5f + sizeDiff.height() );
-		painter->drawPixmap( point.x(), point.y(), tileSize.width(), tileSize.height(), m_tileInfo.getTileImage() );
-	}
 }
