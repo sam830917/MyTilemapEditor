@@ -155,6 +155,24 @@ void MapScene::paintMap( int index, TileInfo tileInfo )
 	paintMap( index, tileInfo, currentIndex );
 }
 
+void MapScene::paintMap( const QMap<int, TileInfo>& tileInfoMap, int layerIndex )
+{
+	QMap<int, TileInfo>::const_iterator mapIterator = tileInfoMap.constBegin();
+	while( mapIterator != tileInfoMap.constEnd() )
+	{
+		int index = mapIterator.key();
+		TileInfo tileInfo = mapIterator.value();
+		if( index < 0 )
+		{
+			continue;
+		}
+		m_layers[layerIndex]->m_tileList[index]->m_tileInfo = tileInfo;
+
+		++mapIterator;
+	}
+	update();
+}
+
 void MapScene::eraseMap( int index )
 {
 	if( index < 0 )

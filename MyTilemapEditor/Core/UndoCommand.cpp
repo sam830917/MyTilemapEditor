@@ -78,10 +78,11 @@ void LayerMoveCommand::redo()
 	m_mapScene->m_parentWidget->movedLayerOrder( m_indexA, m_indexB );
 }
 
-LayerAddCommand::LayerAddCommand( MapScene* mapScene, int index, QUndoCommand* parent )
+LayerAddCommand::LayerAddCommand( MapScene* mapScene, int index, const QString& name, QUndoCommand* parent )
 	: QUndoCommand( parent ),
 	m_mapScene(mapScene),
-	m_index(index)
+	m_index(index),
+	m_name(name)
 {
 }
 
@@ -91,12 +92,92 @@ LayerAddCommand::~LayerAddCommand()
 
 void LayerAddCommand::undo()
 {
-	m_mapScene->m_parentWidget->deleteLayerFromIndex( m_index );
+	Layer* layer = m_mapScene->m_layers[m_index];
+	m_mapScene->m_layers.removeAt( m_index );
+	delete layer;
+	for( int i = m_index; i < m_mapScene->m_layers.size(); ++i )
+	{
+		m_mapScene->m_layers[i]->setOrder( i );
+	}
+	m_mapScene->update();
 	m_mapScene->m_parentWidget->deletedLayer( m_index );
 }
 
 void LayerAddCommand::redo()
 {
-	m_mapScene->addNewLayer( m_index );
-	m_mapScene->m_parentWidget->addedNewLayer( m_index );
+	Layer* layer = m_mapScene->addNewLayer( m_index );
+	layer->setName(m_name);
+	m_mapScene->m_parentWidget->addedNewLayer( m_index, m_name );
+}
+
+LayerDeleteCommand::LayerDeleteCommand( MapScene* mapScene, int index, QUndoCommand* parent /*= 0 */ )
+	: QUndoCommand( parent ),
+	m_mapScene( mapScene ),
+	m_index( index )
+{
+}
+
+LayerDeleteCommand::~LayerDeleteCommand()
+{
+}
+
+void LayerDeleteCommand::undo()
+{
+	Layer* newLayer = new Layer( m_mapScene, m_index );
+	newLayer->setLayerInfo( m_layerInfo );
+	m_mapScene->m_layers.insert( m_index, newLayer );
+	for( int i = 0; i < newLayer->m_tileList.size(); ++i )
+	{
+		newLayer->m_tileList[i]->m_tileInfo = m_tileInfoList[i];
+	}
+
+	// reorder z value
+	for( int i = 0; i < m_mapScene->m_layers.size(); ++i )
+	{
+		m_mapScene->m_layers[i]->setOrder( i );
+	}
+	m_mapScene->m_parentWidget->addedNewLayerWithInfo( m_index, m_layerInfo );
+}
+
+void LayerDeleteCommand::redo()
+{
+	Layer* layer = m_mapScene->m_layers[m_index];
+	for( Tile* t : layer->m_tileList )
+	{
+		m_tileInfoList.push_back( t->getTileInfo() );
+	}
+	m_layerInfo = layer->getLayerInfo();
+	m_mapScene->m_layers.removeAt( m_index );
+	delete layer;
+	for( int i = m_index; i < m_mapScene->m_layers.size(); ++i )
+	{
+		m_mapScene->m_layers[i]->setOrder( i );
+	}
+	m_mapScene->update();
+	m_mapScene->m_parentWidget->deletedLayer( m_index );
+}
+
+LayerRenameCommand::LayerRenameCommand( MapScene* mapScene, int index, const QString& name, QUndoCommand* parent )
+	: QUndoCommand( parent ),
+	m_mapScene( mapScene ),
+	m_index( index ),
+	m_newName( name )
+{
+	m_oldName = m_mapScene->m_layers[index]->getLayerInfo().getNmae();
+}
+
+LayerRenameCommand::~LayerRenameCommand()
+{
+}
+
+void LayerRenameCommand::undo()
+{
+	m_mapScene->m_layers[m_index]->setName( m_oldName );
+	m_mapScene->m_parentWidget->renamedLayer( m_index, m_oldName );
+}
+
+void LayerRenameCommand::redo()
+{
+	m_mapScene->m_layers[m_index]->setName( m_newName );
+	m_mapScene->m_parentWidget->renamedLayer( m_index, m_newName );
 }

@@ -45,11 +45,12 @@ public slots:
 	void saveMap( int tabIndex );
 	void getTabCount( int& tabCount );
 
-	void addNewLayerIntoMap( int index );
+	void addNewLayerIntoMap( int index, const QString& name );
 	void changeLayerOrder( int indexA, int indexB );
 	void deleteLayerFromIndex( int index );
-	void lockLayer( int index, bool isLock );
+	void setLayerLock( int index, bool isLock );
 	void setLayerVisible( int index, bool isVisible );
+	void setLayerName( int index, const QString& name );
 
 signals:
 	void updateRedo( QAction* action );
@@ -60,8 +61,10 @@ signals:
 	void getLayerIndex( int& index );
 	void getLayerGroupInfoList( int index, QList<LayerInfo>& layerInfoList );
 	void movedLayerOrder( int fromItemIndex, int toItemIndex );
-	void addedNewLayer( int index );
+	void addedNewLayer( int index, const QString& name );
+	void addedNewLayerWithInfo( int index, LayerInfo layerInfo );
 	void deletedLayer( int index );
+	void renamedLayer( int index, const QString& name );
 
 public:
 	QPushButton* m_newProjectButton;

@@ -40,7 +40,20 @@ LayerWidget::LayerWidget( const QString& title, QWidget* parent /*= Q_NULLPTR */
 
 void LayerWidget::addNewLayer()
 {
-	addedNewLayerGroup( 0 );
+	QString name = QString( "Layer 1" );
+	int nameCount = 1;
+	int count = m_listWidgetList[m_currentIndex]->count();
+	for( int i = 0; i < count; ++i )
+	{
+		LayerRow* row = static_cast<LayerRow*>(m_listWidgetList[m_currentIndex]->item( i ));
+		if( name == row->m_layerRowWidget->getName() )
+		{
+			name = QString( "Layer %1" ).arg( ++nameCount );
+			i = -1;
+		}
+	}
+
+	addedNewLayerFromIndex( 0, name );
 }
 
 void LayerWidget::addNewLayer( LayerInfo layerInfo )
@@ -53,26 +66,38 @@ void LayerWidget::addNewLayer( LayerInfo layerInfo )
 	updateToolbarStatus();
 }
 
-void LayerWidget::implementAddNewLayer( int index )
+void LayerWidget::implementAddNewLayer( int index, const QString& name )
 {
-	LayerRow* newRow = new LayerRow( m_listWidgetList[m_currentIndex] );
-	if( m_listWidgetList[m_currentIndex]->count() == 1 )
-	{
-		m_listWidgetList[m_currentIndex]->setCurrentRow( 0 );
-	}
+	LayerRow* newRow = new LayerRow( m_listWidgetList[m_currentIndex], index );
+	newRow->m_layerRowWidget->m_label->setText(name);
+	newRow->m_layerRowWidget->m_lineEdit->setText(name);
+	m_listWidgetList[m_currentIndex]->setCurrentRow( index );
 	updateToolbarStatus();
-	int count = m_listWidgetList[m_currentIndex]->count();
+	modifiedCurrentScene();
+}
+
+void LayerWidget::implementAddNewLayerWithInfo( int index, LayerInfo layerInfo )
+{
+	LayerRow* newRow = new LayerRow( m_listWidgetList[m_currentIndex], index );
+	newRow->setLayerInfo( layerInfo );
+	m_listWidgetList[m_currentIndex]->setCurrentRow( index );
+	updateToolbarStatus();
+	modifiedCurrentScene();
+}
+
+void LayerWidget::implementRenameLayer( int index, const QString& name )
+{
+	LayerRowWidget* layerRow = dynamic_cast<LayerRowWidget*>(m_listWidgetList[m_currentIndex]->itemWidget( m_listWidgetList[m_currentIndex]->item( index ) ));
+	layerRow->m_label->setText( name );
+	layerRow->m_lineEdit->setText( name );
 	modifiedCurrentScene();
 }
 
 void LayerWidget::removeLayerFromIndex( int index )
 {
-	if( m_listWidgetList[m_currentIndex]->count() == 1 )
-	{
-		return;
-	}
 	delete m_listWidgetList[m_currentIndex]->takeItem( index );
 	updateToolbarStatus();
+	modifiedCurrentScene();
 }
 
 void LayerWidget::removeLayer()
@@ -82,10 +107,7 @@ void LayerWidget::removeLayer()
 		return;
 	}
 	int currentIndex = m_listWidgetList[m_currentIndex]->currentRow();
-	delete m_listWidgetList[m_currentIndex]->takeItem( currentIndex );
-	updateToolbarStatus();
 	deletedLayer( currentIndex );
-	modifiedCurrentScene();
 }
 
 void LayerWidget::raiseCurrentLayer()
@@ -350,7 +372,6 @@ QString LayerRowWidget::getName() const
 void LayerRowWidget::setIsLock()
 {
 	m_layerRow->setSelected( true );
-	int index = m_layerRow->m_layerGroup->currentRow();
  	bool checked = m_lockBtn->isChecked();
 
 	m_layerRow->m_layerGroup->m_layerWidget->setLayerIsLock( m_layerRow->m_index, checked );
@@ -360,7 +381,6 @@ void LayerRowWidget::setIsLock()
 void LayerRowWidget::setIsVisible()
 {
  	m_layerRow->setSelected( true );
-	int index = m_layerRow->m_layerGroup->currentRow();
 	bool checked = m_visibleBtn->isChecked();
 
 	m_layerRow->m_layerGroup->m_layerWidget->setLayerIsVisible( m_layerRow->m_index, checked );
@@ -389,38 +409,37 @@ bool LayerRowWidget::eventFilter( QObject* obj, QEvent* event )
 			{
 				m_label->setText( m_lineEdit->text() );
 				m_stackedWidget->setCurrentIndex( 0 );
+
+				m_layerRow->setSelected( true );
+				QString name = m_label->text();
+				m_layerRow->m_layerGroup->m_layerWidget->setLayerName( m_layerRow->m_index, name );
+				m_layerRow->m_layerGroup->m_layerWidget->modifiedCurrentScene();
 			}
 		}
 		else if( event->type() == QEvent::FocusOut )
 		{
 			m_label->setText( m_lineEdit->text() );
 			m_stackedWidget->setCurrentIndex( 0 );
+
+			m_layerRow->setSelected( true );
+			QString name = m_label->text();
+			m_layerRow->m_layerGroup->m_layerWidget->setLayerName( m_layerRow->m_index, name );
+			m_layerRow->m_layerGroup->m_layerWidget->modifiedCurrentScene();
 		}
 	}
 
 	return QWidget::eventFilter( obj, event );
 }
 
-LayerRow::LayerRow( LayerGroup* view )
+LayerRow::LayerRow( LayerGroup* view, int insertIndex )
 	:QListWidgetItem(),
 	m_layerGroup(view)
 {
-	QString name = QString( "Layer 1" );
-	int nameCount = 1;
-	int count = view->count();
-	for ( int i = 0; i < count; ++i )
-	{
-		LayerRow* row = static_cast<LayerRow*>(view->item(i));
-		if ( name == row->m_layerRowWidget->getName() )
-		{
-			name = QString( "Layer %1" ).arg( ++nameCount );
-			i = -1;
-		}
-	}
+	LayerInfo info;
 
-	m_layerRowWidget = new LayerRowWidget( name, this );
-	m_index = 0;
-	view->insertItem( 0, this );
+	m_layerRowWidget = new LayerRowWidget( info.getNmae(), this );
+	m_index = insertIndex;
+	view->insertItem( insertIndex, this );
 	view->setItemWidget( this, m_layerRowWidget );
 	setSizeHint( QSize( 0, 40 ) );
 }
@@ -434,4 +453,12 @@ LayerRow::LayerRow( LayerGroup* view, LayerInfo layerInfo )
 	view->addItem( this );
 	view->setItemWidget( this, m_layerRowWidget );
 	setSizeHint( QSize( 0, 40 ) );
+}
+
+void LayerRow::setLayerInfo( const LayerInfo& layerInfo )
+{
+	m_layerRowWidget->m_label->setText(layerInfo.getNmae());
+	m_layerRowWidget->m_lineEdit->setText(layerInfo.getNmae());
+	m_layerRowWidget->m_lockBtn->setChecked(layerInfo.isLock());
+	m_layerRowWidget->m_visibleBtn->setChecked(layerInfo.isVisible());
 }

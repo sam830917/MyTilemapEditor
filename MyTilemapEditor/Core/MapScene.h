@@ -27,6 +27,8 @@ class MapScene : public QGraphicsScene
 	friend class DrawCommand;
 	friend class LayerMoveCommand;
 	friend class LayerAddCommand;
+	friend class LayerDeleteCommand;
+	friend class LayerRenameCommand;
 	friend class Layer;
 
 public:
@@ -44,6 +46,9 @@ public:
 	void eraseMap( QSize coord );
 
 	Layer* addNewLayer( int zValue );
+
+private:
+	void paintMap( const QMap<int, TileInfo>& tileInfoMap, int layerIndex );
 
 protected:
 	virtual void mousePressEvent( QGraphicsSceneMouseEvent* event ) override;

@@ -32,7 +32,9 @@ private:
 public slots:
 	void updateToolbarStatus();
 	void addNewLayer();
-	void implementAddNewLayer( int index );
+	void implementAddNewLayer( int index, const QString& name );
+	void implementAddNewLayerWithInfo( int index, LayerInfo layerInfo );
+	void implementRenameLayer( int index, const QString& name );
 	void removeLayerFromIndex( int index );
 	void removeLayer();
 	void raiseCurrentLayer();
@@ -47,11 +49,12 @@ public slots:
 
 signals:
 	void getTabCount( int& tabCount );
-	void addedNewLayerGroup( int index );
+	void addedNewLayerFromIndex( int index, const QString& name );
 	void movedLayerGroup( int fromItemIndex, int toItemIndex );
 	void deletedLayer( int index );
 	void setLayerIsLock( int index, bool isLock );
 	void setLayerIsVisible( int index, bool isVisible );
+	void setLayerName( int index, const QString& name );
 	void modifiedCurrentScene();
 
 private:
@@ -76,8 +79,10 @@ class LayerRow : public QListWidgetItem
 	friend class LayerRowWidget;
 
 public:
-	LayerRow( LayerGroup* view );
+	LayerRow( LayerGroup* view, int insertIndex );
 	LayerRow( LayerGroup* view, LayerInfo layerInfo );
+
+	void setLayerInfo( const LayerInfo& layerInfo );
 
 private:
 	LayerRowWidget* m_layerRowWidget;

@@ -11,6 +11,7 @@ class Layer
 {
 	friend class WorkspaceWidget;
 	friend class MapScene;
+	friend class LayerDeleteCommand;
 	friend class Tile;
 
 public:
@@ -19,6 +20,7 @@ public:
 
 	void setOrder( int value );
 
+	void setLayerInfo( const LayerInfo& layerInfo ) { m_layerInfo = layerInfo; }
 	void setName( const QString& name ) { m_layerInfo.setName( name ); }
 	void setIsLock( bool islock ) { m_layerInfo.setIsLock( islock ); }
 	void setIsVisible( bool isVisible ) { m_layerInfo.setIsVisible( isVisible ); }
@@ -35,6 +37,7 @@ class Tile : public QGraphicsRectItem
 {
 	friend class MapScene;
 	friend class DrawCommand;
+	friend class LayerDeleteCommand;
 
 public:
 	Tile( MapScene* scene, Layer* layer, QGraphicsItem* parent = Q_NULLPTR );

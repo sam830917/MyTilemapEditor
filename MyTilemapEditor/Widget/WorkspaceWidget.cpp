@@ -138,10 +138,10 @@ void WorkspaceWidget::insertMap( MapInfo mapInfo, QList<LayerInfo> layerInfoList
 		Layer* newLayer = mapScene->addNewLayer( layerIndex );
 		if ( layerInfoList.size() > layerIndex )
 		{
-			newLayer->setIsLock( layerInfoList[layerIndex].isLock() );
-			newLayer->setIsVisible( layerInfoList[layerIndex].isVisible() );
+			newLayer->m_layerInfo = layerInfoList[layerIndex];
 		}
 
+		QMap<int, TileInfo> tileInfoMap;
 		for( XmlElement* tileEle = tilesEle->FirstChildElement( "Tile" ); tileEle; tileEle = tileEle->NextSiblingElement( "Tile" ) )
 		{
 			int index = parseXmlAttribute( *tileEle, "index", -1 );
@@ -152,17 +152,16 @@ void WorkspaceWidget::insertMap( MapInfo mapInfo, QList<LayerInfo> layerInfoList
 
 			if( tilesetsMap.contains( tilesetNumber ) )
 			{
-				mapScene->paintMap( index, TileInfo( tilesetsMap.value( tilesetNumber ), tilesetIndex ), layerIndex );
+				tileInfoMap[index] = TileInfo( tilesetsMap.value( tilesetNumber ), tilesetIndex );
 			}
 		}
+		mapScene->paintMap( tileInfoMap, layerIndex );
 		layerIndex++;
 		tilesEle = tilesEle->NextSiblingElement( "Tiles" );
 	} while ( tilesEle );
 
 	mapScene->update();
 	int currentIndex = 0;
-	m_mapSceneList[currentIndex]->m_isSaved = true;
-	m_mapTabWidget->setTabText( currentIndex, m_mapSceneList[currentIndex]->m_mapInfo.getName() );
 }
 
 void WorkspaceWidget::closeTab( int index )
@@ -381,9 +380,9 @@ void WorkspaceWidget::getTabCount( int& tabCount )
 	tabCount = m_mapTabWidget->count();
 }
 
-void WorkspaceWidget::addNewLayerIntoMap( int index )
+void WorkspaceWidget::addNewLayerIntoMap( int index, const QString& name )
 {
-	LayerAddCommand* command = new LayerAddCommand( m_mapSceneList[m_mapTabWidget->currentIndex()], index );
+	LayerAddCommand* command = new LayerAddCommand( m_mapSceneList[m_mapTabWidget->currentIndex()], index, name );
 	m_mapSceneList[m_mapTabWidget->currentIndex()]->m_undoStack->push( command );
 }
 
@@ -399,17 +398,11 @@ void WorkspaceWidget::deleteLayerFromIndex( int index )
 {
 	MapScene* mapScene = m_mapSceneList[m_mapTabWidget->currentIndex()];
 
-	Layer* layer = mapScene->m_layers[index];
-	mapScene->m_layers.removeAt(index);
-	delete layer;
-	for ( int i = index; i < mapScene->m_layers.size(); ++i )
-	{
-		mapScene->m_layers[i]->setOrder( i );
-	}
-	mapScene->update();
+	LayerDeleteCommand* command = new LayerDeleteCommand( mapScene, index );
+	mapScene->m_undoStack->push( command );
 }
 
-void WorkspaceWidget::lockLayer( int index, bool isLock )
+void WorkspaceWidget::setLayerLock( int index, bool isLock )
 {
 	MapScene* mapScene = m_mapSceneList[m_mapTabWidget->currentIndex()];
 
@@ -422,4 +415,16 @@ void WorkspaceWidget::setLayerVisible( int index, bool isVisible )
 
 	mapScene->m_layers[index]->setIsVisible( isVisible );
 	m_mapSceneList[m_mapTabWidget->currentIndex()]->update();
+}
+
+void WorkspaceWidget::setLayerName( int index, const QString& name )
+{
+	MapScene* mapScene = m_mapSceneList[m_mapTabWidget->currentIndex()];
+	if ( mapScene->m_layers[index]->getLayerInfo().getNmae() == name )
+	{
+		return;
+	}
+
+	LayerRenameCommand* command = new LayerRenameCommand( mapScene, index, name );
+	mapScene->m_undoStack->push( command );
 }
