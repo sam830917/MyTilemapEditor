@@ -25,12 +25,12 @@ public:
 	explicit WorkspaceWidget( QWidget* parent = Q_NULLPTR );
 
 	void disableTabWidget( bool disable ) const;
-	void markCurrentSceneForModified();
 	bool isReadyToClose();
 
 	eDrawTool getCurrentDrawTool() { return m_drawTool; }
 
 public slots:
+	void markCurrentSceneForModified();
 	void addMap();
 	void insertMap( MapInfo mapInfo, QList<LayerInfo> layerInfoList );
 	void closeTab( int index );
@@ -47,7 +47,7 @@ public slots:
 
 	void addNewLayerIntoMap( int index );
 	void changeLayerOrder( int indexA, int indexB );
-	void deleteLayer( int index );
+	void deleteLayerFromIndex( int index );
 	void lockLayer( int index, bool isLock );
 	void setLayerVisible( int index, bool isVisible );
 
@@ -59,6 +59,9 @@ signals:
 	void closeTabSuccessfully( int index );
 	void getLayerIndex( int& index );
 	void getLayerGroupInfoList( int index, QList<LayerInfo>& layerInfoList );
+	void movedLayerOrder( int fromItemIndex, int toItemIndex );
+	void addedNewLayer( int index );
+	void deletedLayer( int index );
 
 public:
 	QPushButton* m_newProjectButton;

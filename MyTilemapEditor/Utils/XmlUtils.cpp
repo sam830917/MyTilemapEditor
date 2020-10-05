@@ -174,8 +174,8 @@ void convertToMapInfo( const QString& mapFilePath, MapInfo& mapInfo, QList<Layer
 			for( XmlElement* layerEle = layersEle->FirstChildElement( "Layer" ); layerEle; layerEle = layerEle->NextSiblingElement( "Layer" ) )
 			{
 				QString name = parseXmlAttribute( *layerEle, "name", emptyInfo.getNmae() );
-				bool isLock = parseXmlAttribute( *layerEle, "isLock", emptyInfo.IsLock() );
-				bool isVisible = parseXmlAttribute( *layerEle, "isVisible", emptyInfo.IsVisible() );
+				bool isLock = parseXmlAttribute( *layerEle, "isLock", emptyInfo.isLock() );
+				bool isVisible = parseXmlAttribute( *layerEle, "isVisible", emptyInfo.isVisible() );
 
 				layerInfo.push_back( LayerInfo( name, isLock, isVisible ) );
 			}

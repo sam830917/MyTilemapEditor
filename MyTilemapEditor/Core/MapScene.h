@@ -25,6 +25,8 @@ class MapScene : public QGraphicsScene
 {
 	friend class WorkspaceWidget;
 	friend class DrawCommand;
+	friend class LayerMoveCommand;
+	friend class LayerAddCommand;
 	friend class Layer;
 
 public:

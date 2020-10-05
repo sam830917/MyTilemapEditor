@@ -46,7 +46,7 @@ Tile::Tile( MapScene* scene, Layer* layer, QGraphicsItem* parent /*= Q_NULLPTR *
 
 void Tile::paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget )
 {
-	if( m_tileInfo.isValid() && m_layer->m_isVisible )
+	if( m_tileInfo.isValid() && m_layer->getLayerInfo().isVisible() )
 	{
 		QRectF rect = boundingRect();
 		QSize tileSize = m_tileInfo.getTileset()->getTileSize();

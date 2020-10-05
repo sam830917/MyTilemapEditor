@@ -1,6 +1,7 @@
 #include "WorkspaceWidget.h"
 #include "AddMapDialog.h"
 #include "Core/Tileset.h"
+#include "Core/UndoCommand.h"
 #include "Utils/ProjectCommon.h"
 #include <QPushButton>
 #include <QHBoxLayout>
@@ -137,8 +138,8 @@ void WorkspaceWidget::insertMap( MapInfo mapInfo, QList<LayerInfo> layerInfoList
 		Layer* newLayer = mapScene->addNewLayer( layerIndex );
 		if ( layerInfoList.size() > layerIndex )
 		{
-			newLayer->setIsLock( layerInfoList[layerIndex].IsLock() );
-			newLayer->setIsVisible( layerInfoList[layerIndex].IsVisible() );
+			newLayer->setIsLock( layerInfoList[layerIndex].isLock() );
+			newLayer->setIsVisible( layerInfoList[layerIndex].isVisible() );
 		}
 
 		for( XmlElement* tileEle = tilesEle->FirstChildElement( "Tile" ); tileEle; tileEle = tileEle->NextSiblingElement( "Tile" ) )
@@ -323,8 +324,8 @@ void WorkspaceWidget::saveMap( int tabIndex )
 	{
 		XmlElement* mapLayerEle = mapDoc->NewElement( "Layer" );
 		mapLayerEle->SetAttribute( "name", layerInfoList[i].getNmae().toStdString().c_str() );
-		mapLayerEle->SetAttribute( "isLock", layerInfoList[i].IsLock() );
-		mapLayerEle->SetAttribute( "isVisible", layerInfoList[i].IsVisible() );
+		mapLayerEle->SetAttribute( "isLock", layerInfoList[i].isLock() );
+		mapLayerEle->SetAttribute( "isVisible", layerInfoList[i].isVisible() );
 		mapLayersEle->LinkEndChild( mapLayerEle );
 	}
 
@@ -382,25 +383,19 @@ void WorkspaceWidget::getTabCount( int& tabCount )
 
 void WorkspaceWidget::addNewLayerIntoMap( int index )
 {
-	m_mapSceneList[m_mapTabWidget->currentIndex()]->addNewLayer( index );
+	LayerAddCommand* command = new LayerAddCommand( m_mapSceneList[m_mapTabWidget->currentIndex()], index );
+	m_mapSceneList[m_mapTabWidget->currentIndex()]->m_undoStack->push( command );
 }
 
 void WorkspaceWidget::changeLayerOrder( int indexA, int indexB )
 {
 	MapScene* mapScene = m_mapSceneList[m_mapTabWidget->currentIndex()];
 
-	Layer* layerA = mapScene->m_layers[indexA];
-	Layer* layerB = mapScene->m_layers[indexB];
-
-	mapScene->m_layers[indexA]->setOrder( indexB );
-	mapScene->m_layers[indexB]->setOrder( indexA );
-	mapScene->m_layers[indexA] = layerB;
-	mapScene->m_layers[indexB] = layerA;
-
-	mapScene->update();
+	LayerMoveCommand* command = new LayerMoveCommand( mapScene, indexA, indexB );
+	mapScene->m_undoStack->push( command );
 }
 
-void WorkspaceWidget::deleteLayer( int index )
+void WorkspaceWidget::deleteLayerFromIndex( int index )
 {
 	MapScene* mapScene = m_mapSceneList[m_mapTabWidget->currentIndex()];
 
@@ -410,7 +405,6 @@ void WorkspaceWidget::deleteLayer( int index )
 	for ( int i = index; i < mapScene->m_layers.size(); ++i )
 	{
 		mapScene->m_layers[i]->setOrder( i );
-		qDebug() << i;
 	}
 	mapScene->update();
 }

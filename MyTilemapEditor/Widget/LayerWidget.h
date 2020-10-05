@@ -28,28 +28,31 @@ private:
 	void initialToolbar();
 
 	void updateToolbar( bool enableNewLayer, bool enableRaise, bool enableLower, bool enableDelete );
-	void moveItem( int fromItemIndex, int toItemIndex );
 
 public slots:
 	void updateToolbarStatus();
 	void addNewLayer();
+	void implementAddNewLayer( int index );
+	void removeLayerFromIndex( int index );
 	void removeLayer();
 	void raiseCurrentLayer();
 	void lowerCurrentLayer();
 
 	void addNewLayerGroup( MapInfo mapInfo, QList<LayerInfo> layerInfoList );
 	void removeLayerGropu( int listWidgetIndex );
-	void changeLayerGroup( int listWidgetIndex );
+	void switchLayerGroup( int listWidgetIndex );
 	void getLayerIndex( int& index );
 	void getLayerGroupInfoList( int index, QList<LayerInfo>& layerInfoList );
+	void moveItem( int fromItemIndex, int toItemIndex );
 
 signals:
 	void getTabCount( int& tabCount );
 	void addedNewLayerGroup( int index );
 	void movedLayerGroup( int fromItemIndex, int toItemIndex );
-	void deletedLayerGroup( int index );
+	void deletedLayer( int index );
 	void setLayerIsLock( int index, bool isLock );
 	void setLayerIsVisible( int index, bool isVisible );
+	void modifiedCurrentScene();
 
 private:
 	void addNewLayer( LayerInfo layerInfo );

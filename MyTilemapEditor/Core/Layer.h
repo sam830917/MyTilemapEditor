@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/TileInfo.h"
+#include "Core/LayerInfo.h"
 #include <QGraphicsRectItem>
 #include <QList>
 class MapScene;
@@ -18,14 +19,16 @@ public:
 
 	void setOrder( int value );
 
-	void setIsLock( bool islock ) { m_isLock = islock; }
-	void setIsVisible( bool isVisible ) { m_isVisible = isVisible; }
+	void setName( const QString& name ) { m_layerInfo.setName( name ); }
+	void setIsLock( bool islock ) { m_layerInfo.setIsLock( islock ); }
+	void setIsVisible( bool isVisible ) { m_layerInfo.setIsVisible( isVisible ); }
+
+	LayerInfo getLayerInfo() const { return m_layerInfo; }
 
 private:
 	MapScene* m_mapScene;
 	QList<Tile*> m_tileList;
-	bool m_isLock = false;
-	bool m_isVisible = true;
+	LayerInfo m_layerInfo;
 };
 
 class Tile : public QGraphicsRectItem

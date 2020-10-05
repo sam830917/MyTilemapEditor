@@ -40,13 +40,6 @@ LayerWidget::LayerWidget( const QString& title, QWidget* parent /*= Q_NULLPTR */
 
 void LayerWidget::addNewLayer()
 {
-	LayerRow* newRow = new LayerRow( m_listWidgetList[m_currentIndex] );
-	if ( m_listWidgetList[m_currentIndex]->count() == 1 )
-	{
-		m_listWidgetList[m_currentIndex]->setCurrentRow( 0 );
-	}
-	updateToolbarStatus();
-	int count = m_listWidgetList[m_currentIndex]->count();
 	addedNewLayerGroup( 0 );
 }
 
@@ -60,6 +53,28 @@ void LayerWidget::addNewLayer( LayerInfo layerInfo )
 	updateToolbarStatus();
 }
 
+void LayerWidget::implementAddNewLayer( int index )
+{
+	LayerRow* newRow = new LayerRow( m_listWidgetList[m_currentIndex] );
+	if( m_listWidgetList[m_currentIndex]->count() == 1 )
+	{
+		m_listWidgetList[m_currentIndex]->setCurrentRow( 0 );
+	}
+	updateToolbarStatus();
+	int count = m_listWidgetList[m_currentIndex]->count();
+	modifiedCurrentScene();
+}
+
+void LayerWidget::removeLayerFromIndex( int index )
+{
+	if( m_listWidgetList[m_currentIndex]->count() == 1 )
+	{
+		return;
+	}
+	delete m_listWidgetList[m_currentIndex]->takeItem( index );
+	updateToolbarStatus();
+}
+
 void LayerWidget::removeLayer()
 {
 	if ( m_listWidgetList[m_currentIndex]->count() == 1 )
@@ -67,23 +82,24 @@ void LayerWidget::removeLayer()
 		return;
 	}
 	int currentIndex = m_listWidgetList[m_currentIndex]->currentRow();
-	m_listWidgetList[m_currentIndex]->takeItem( currentIndex );
+	delete m_listWidgetList[m_currentIndex]->takeItem( currentIndex );
 	updateToolbarStatus();
-	deletedLayerGroup( currentIndex );
+	deletedLayer( currentIndex );
+	modifiedCurrentScene();
 }
 
 void LayerWidget::raiseCurrentLayer()
 {
 	int currentRow = m_listWidgetList[m_currentIndex]->currentRow();
 	int targetIndex = currentRow - 1;
-	moveItem( currentRow, targetIndex );
+	movedLayerGroup( currentRow, targetIndex );
 }
 
 void LayerWidget::lowerCurrentLayer()
 {
 	int currentRow = m_listWidgetList[m_currentIndex]->currentRow();
 	int targetIndex = currentRow + 1;
-	moveItem( currentRow, targetIndex );
+	movedLayerGroup( currentRow, targetIndex );
 }
 
 void LayerWidget::addNewLayerGroup( MapInfo mapInfo, QList<LayerInfo> layerInfoList )
@@ -97,7 +113,7 @@ void LayerWidget::addNewLayerGroup( MapInfo mapInfo, QList<LayerInfo> layerInfoL
 	{
 		if ( m_listWidgetList[i]->m_mapInfo.getFilePath() == mapInfo.getFilePath() )
 		{
-			changeLayerGroup(i);
+			switchLayerGroup(i);
 			return;
 		}
 	}
@@ -141,16 +157,16 @@ void LayerWidget::removeLayerGropu( int listWidgetIndex )
 	{
 		if ( listWidgetIndex == m_listWidgetList.size() )
 		{
-			changeLayerGroup( listWidgetIndex - 1 );
+			switchLayerGroup( listWidgetIndex - 1 );
 		}
 		else
 		{
-			changeLayerGroup( listWidgetIndex );
+			switchLayerGroup( listWidgetIndex );
 		}
 	}
 }
 
-void LayerWidget::changeLayerGroup( int listWidgetIndex )
+void LayerWidget::switchLayerGroup( int listWidgetIndex )
 {
 	if ( m_listWidgetList.size() <= listWidgetIndex )
 	{
@@ -217,7 +233,7 @@ void LayerWidget::moveItem( int fromItemIndex, int toItemIndex )
 
 	m_listWidgetList[m_currentIndex]->setCurrentRow( toItemIndex );
 	updateToolbarStatus();
-	movedLayerGroup( fromItemIndex, toItemIndex );
+	modifiedCurrentScene();
 }
 
 void LayerWidget::initialToolbar()
@@ -235,7 +251,7 @@ void LayerWidget::initialToolbar()
 	m_deleteAction = new QAction( QIcon( ":/MainWindow/Icon/delete.png" ), tr( "&Delete Layer" ), this );
 	m_toolbar->addAction( m_deleteAction );
 
-	connect( m_newLayerAction, SIGNAL(triggered(bool)), this, SLOT(addNewLayer()) );
+	connect( m_newLayerAction, SIGNAL( triggered(bool) ), this, SLOT( addNewLayer() ) );
 	connect( m_deleteAction, &QAction::triggered, this, &LayerWidget::removeLayer );
 	connect( m_raiseAction, &QAction::triggered, this, &LayerWidget::raiseCurrentLayer );
 	connect( m_lowerAction, &QAction::triggered, this, &LayerWidget::lowerCurrentLayer );
@@ -338,6 +354,7 @@ void LayerRowWidget::setIsLock()
  	bool checked = m_lockBtn->isChecked();
 
 	m_layerRow->m_layerGroup->m_layerWidget->setLayerIsLock( m_layerRow->m_index, checked );
+	m_layerRow->m_layerGroup->m_layerWidget->modifiedCurrentScene();
 }
 
 void LayerRowWidget::setIsVisible()
@@ -347,6 +364,7 @@ void LayerRowWidget::setIsVisible()
 	bool checked = m_visibleBtn->isChecked();
 
 	m_layerRow->m_layerGroup->m_layerWidget->setLayerIsVisible( m_layerRow->m_index, checked );
+	m_layerRow->m_layerGroup->m_layerWidget->modifiedCurrentScene();
 }
 
 bool LayerRowWidget::eventFilter( QObject* obj, QEvent* event )
@@ -411,7 +429,7 @@ LayerRow::LayerRow( LayerGroup* view, LayerInfo layerInfo )
 	:QListWidgetItem(),
 	m_layerGroup( view )
 {
-	m_layerRowWidget = new LayerRowWidget( layerInfo.getNmae(), this, layerInfo.IsLock(), layerInfo.IsVisible() );
+	m_layerRowWidget = new LayerRowWidget( layerInfo.getNmae(), this, layerInfo.isLock(), layerInfo.isVisible() );
 	m_index = view->count();
 	view->addItem( this );
 	view->setItemWidget( this, m_layerRowWidget );
