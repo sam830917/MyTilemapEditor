@@ -1,6 +1,8 @@
 #pragma once
 
 #include <QDockWidget>
+#include <QTreeWidget>
+#include <QMap>
 
 class PropertiesWidget : public QDockWidget
 {
@@ -12,7 +14,8 @@ public:
 private:
 
 public slots:
+	void showProperties( const QMap<QString, QString>& informationMap );
 
 private:
-
+	QTreeWidget* m_treeWidget;
 };

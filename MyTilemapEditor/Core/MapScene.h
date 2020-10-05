@@ -49,6 +49,8 @@ public:
 
 private:
 	void paintMap( const QMap<int, TileInfo>& tileInfoMap, int layerIndex );
+	void showTileProperties( const QPointF& mousePos );
+	void showSelectedTileProperties();
 
 protected:
 	virtual void mousePressEvent( QGraphicsSceneMouseEvent* event ) override;
@@ -64,4 +66,5 @@ private:
 
 	QList<TileInfo> m_beforeDrawTileInfo;
 	QUndoStack* m_undoStack;
+	int m_currentSelectedIndex = -1;
 };

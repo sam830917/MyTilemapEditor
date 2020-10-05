@@ -106,6 +106,9 @@ void MainWindow::initialToolBar()
 	m_paintToolToolbar = new ToolBar( tr( "paint tool" ), this );
 	addToolBar( m_paintToolToolbar );
 
+	m_cursorToolAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/cursor.png" ), tr( "&Cursor (C)" ) );
+	m_cursorToolAction->setData( QVariant::fromValue( eDrawTool::CURSOR ) );
+	m_cursorToolAction->setShortcut( tr( "C" ) );
 	m_moveToolAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/move.png" ), tr( "&Move (V)" ) );
 	m_moveToolAction->setData( QVariant::fromValue( eDrawTool::MOVE ) );
 	m_moveToolAction->setShortcut( tr( "V" ) );
@@ -115,10 +118,12 @@ void MainWindow::initialToolBar()
 	alignmentGroup->addAction( m_brushAction );
 	alignmentGroup->addAction( m_eraserAction );
 	alignmentGroup->addAction( m_moveToolAction );
+	alignmentGroup->addAction( m_cursorToolAction );
 	m_brushAction->setCheckable(true);
 	m_eraserAction->setCheckable(true);
 	m_moveToolAction->setCheckable(true);
-	m_moveToolAction->setChecked(true);
+	m_cursorToolAction->setCheckable(true);
+	m_cursorToolAction->setChecked(true);
 
 	m_brushAction->setData( QVariant::fromValue( eDrawTool::BRUSH ) );
 	m_brushAction->setShortcut( tr( "B" ) );
@@ -189,8 +194,8 @@ void MainWindow::initialConnections()
 	connect( m_tilesetAction, &QAction::triggered, m_tilesetWidget, &TilesetWidget::addTileset );
 	connect( m_mapAction, &QAction::triggered, m_centralWidget, &WorkspaceWidget::addMap );
 
-	connect( m_centralWidget->m_newProjectButton, &QPushButton::clicked, m_projectWidget, &ProjectWidget::newProject );
 	connect( m_centralWidget->m_openProjectButton, &QPushButton::clicked, m_projectWidget, &ProjectWidget::openProject );
+	connect( m_centralWidget->m_newProjectButton, &QPushButton::clicked, m_projectWidget, &ProjectWidget::newProject );
 
 	connect( m_projectWidget, &ProjectWidget::loadProjectSuccessfully, this, &MainWindow::updateToolBar );
 	connect( m_projectWidget, &ProjectWidget::loadTilesetSuccessfully, m_tilesetWidget, &TilesetWidget::addTilesetIntoProject );
@@ -201,24 +206,26 @@ void MainWindow::initialConnections()
 	connect( m_centralWidget, &WorkspaceWidget::updateRedo, this, &MainWindow::replaceRedoAction );
 	connect( m_centralWidget, &WorkspaceWidget::updateUndo, this, &MainWindow::replaceUndoAction );
 	connect( m_centralWidget, &WorkspaceWidget::disableShortcut, this, &MainWindow::disableShortcut );
-	connect( m_centralWidget, &WorkspaceWidget::tabFocusChanged, m_layerWidget, &LayerWidget::switchLayerGroup );
-	connect( m_centralWidget, &WorkspaceWidget::closeTabSuccessfully, m_layerWidget, &LayerWidget::removeLayerGropu );
-	connect( m_centralWidget, &WorkspaceWidget::getLayerIndex, m_layerWidget, &LayerWidget::getLayerIndex );
-	connect( m_centralWidget, &WorkspaceWidget::getLayerGroupInfoList, m_layerWidget, &LayerWidget::getLayerGroupInfoList );
-	connect( m_centralWidget, &WorkspaceWidget::movedLayerOrder, m_layerWidget, &LayerWidget::moveItem );
-	connect( m_centralWidget, &WorkspaceWidget::addedNewLayer, m_layerWidget, &LayerWidget::implementAddNewLayer );
 	connect( m_centralWidget, &WorkspaceWidget::addedNewLayerWithInfo, m_layerWidget, &LayerWidget::implementAddNewLayerWithInfo );
+	connect( m_centralWidget, &WorkspaceWidget::getLayerGroupInfoList, m_layerWidget, &LayerWidget::getLayerGroupInfoList );
+	connect( m_centralWidget, &WorkspaceWidget::closeTabSuccessfully, m_layerWidget, &LayerWidget::removeLayerGropu );
+	connect( m_centralWidget, &WorkspaceWidget::tabFocusChanged, m_layerWidget, &LayerWidget::switchLayerGroup );
+	connect( m_centralWidget, &WorkspaceWidget::movedLayerOrder, m_layerWidget, &LayerWidget::moveItem );
+	connect( m_centralWidget, &WorkspaceWidget::getLayerIndex, m_layerWidget, &LayerWidget::getLayerIndex );
+	connect( m_centralWidget, &WorkspaceWidget::addedNewLayer, m_layerWidget, &LayerWidget::implementAddNewLayer );
 	connect( m_centralWidget, &WorkspaceWidget::deletedLayer, m_layerWidget, &LayerWidget::removeLayerFromIndex );
 	connect( m_centralWidget, &WorkspaceWidget::renamedLayer, m_layerWidget, &LayerWidget::implementRenameLayer );
+	connect( m_centralWidget, &WorkspaceWidget::showProperties, m_propertiesWidget, &PropertiesWidget::showProperties );
 
-	connect( m_layerWidget, &LayerWidget::getTabCount,  m_centralWidget, &WorkspaceWidget::getTabCount );
 	connect( m_layerWidget, &LayerWidget::addedNewLayerFromIndex,  m_centralWidget, &WorkspaceWidget::addNewLayerIntoMap );
-	connect( m_layerWidget, &LayerWidget::movedLayerGroup,  m_centralWidget, &WorkspaceWidget::changeLayerOrder );
-	connect( m_layerWidget, &LayerWidget::deletedLayer,  m_centralWidget, &WorkspaceWidget::deleteLayerFromIndex );
-	connect( m_layerWidget, &LayerWidget::setLayerIsLock,  m_centralWidget, &WorkspaceWidget::setLayerLock );
-	connect( m_layerWidget, &LayerWidget::setLayerIsVisible,  m_centralWidget, &WorkspaceWidget::setLayerVisible );
-	connect( m_layerWidget, &LayerWidget::setLayerName,  m_centralWidget, &WorkspaceWidget::setLayerName );
 	connect( m_layerWidget, &LayerWidget::modifiedCurrentScene, m_centralWidget, &WorkspaceWidget::markCurrentSceneForModified );
+	connect( m_layerWidget, &LayerWidget::setLayerIsVisible,  m_centralWidget, &WorkspaceWidget::setLayerVisible );
+	connect( m_layerWidget, &LayerWidget::movedLayerGroup,  m_centralWidget, &WorkspaceWidget::changeLayerOrder );
+	connect( m_layerWidget, &LayerWidget::setLayerIsLock,  m_centralWidget, &WorkspaceWidget::setLayerLock );
+	connect( m_layerWidget, &LayerWidget::deletedLayer,  m_centralWidget, &WorkspaceWidget::deleteLayerFromIndex );
+	connect( m_layerWidget, &LayerWidget::setLayerName,  m_centralWidget, &WorkspaceWidget::setLayerName );
+	connect( m_layerWidget, &LayerWidget::getTabCount,  m_centralWidget, &WorkspaceWidget::getTabCount );
+	connect( m_layerWidget, &LayerWidget::changeLayerFocus,  m_centralWidget, &WorkspaceWidget::changeLayerFocus );
 }
 
 void MainWindow::updateToolBar()
@@ -289,8 +296,4 @@ void MainWindow::disableShortcut( bool isDisable )
 	}
 	QList<QAction*> actions = findChildren<QAction*>();
 	for( QAction* a : actions ) a->setShortcutContext( sc );
-	//m_redoAction->setShortcutContext( sc );
-	//m_undoAction->setShortcutContext( sc );
-	//m_brushAction->setShortcutContext( sc );
-	//m_eraserAction->setShortcutContext( sc );
 }

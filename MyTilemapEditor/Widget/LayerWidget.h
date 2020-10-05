@@ -56,6 +56,7 @@ signals:
 	void setLayerIsVisible( int index, bool isVisible );
 	void setLayerName( int index, const QString& name );
 	void modifiedCurrentScene();
+	void changeLayerFocus();
 
 private:
 	void addNewLayer( LayerInfo layerInfo );

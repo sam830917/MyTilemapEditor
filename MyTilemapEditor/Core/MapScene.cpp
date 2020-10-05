@@ -173,6 +173,76 @@ void MapScene::paintMap( const QMap<int, TileInfo>& tileInfoMap, int layerIndex 
 	update();
 }
 
+void MapScene::showTileProperties( const QPointF& mousePos )
+{
+	// Check out of bound
+	QSizeF bound = QSizeF( m_mapInfo.getTileSize().width() * m_mapInfo.getMapSize().width(), m_mapInfo.getTileSize().height() * m_mapInfo.getMapSize().height() );
+	if( mousePos.x() >= bound.width() || mousePos.y() >= bound.height() || mousePos.x() <= 0 || mousePos.y() <= 0 )
+	{
+		return;
+	}
+	QSize coord = QSize( qFloor( mousePos.x() / m_mapInfo.getTileSize().width() ), qFloor( mousePos.y() / m_mapInfo.getTileSize().height() ) );
+	if( coord.width() < 0 || coord.height() < 0 )
+	{
+		return;
+	}
+	int currentIndex = -1;
+	m_parentWidget->getLayerIndex( currentIndex );
+	if( currentIndex == -1 )
+	{
+		return;
+	}
+	int index = coord.height() * m_mapInfo.getMapSize().width() + coord.width();
+	m_currentSelectedIndex = index;
+	Tile* tile = m_layers[currentIndex]->m_tileList[index];
+
+	QMap<QString, QString> informationMap;
+	informationMap["X"] = QString("%1").arg( coord.width() );
+	informationMap["Y"] = QString("%1").arg( coord.height() );
+	if ( tile->m_tileInfo.isValid() )
+	{
+		informationMap["Tileset"] = tile->m_tileInfo.getTileset()->getFilePath();
+		informationMap["Tileset Index"] = QString("%1").arg( tile->m_tileInfo.getIndex() );
+	}
+	else
+	{
+		informationMap["Tileset"] = "";
+		informationMap["Tileset Index"] = "";
+	}
+	m_parentWidget->showProperties( informationMap );
+}
+
+void MapScene::showSelectedTileProperties()
+{
+	if ( m_currentSelectedIndex <= -1 )
+	{
+		return;
+	}
+	int currentIndex = -1;
+	m_parentWidget->getLayerIndex( currentIndex );
+	if( currentIndex == -1 )
+	{
+		return;
+	}
+	QSize coord = QSize( m_currentSelectedIndex % m_mapInfo.getMapSize().width(), m_currentSelectedIndex / m_mapInfo.getMapSize().width() );
+	Tile* tile = m_layers[currentIndex]->m_tileList[m_currentSelectedIndex];
+
+	QMap<QString, QString> informationMap;
+	informationMap["X"] = QString( "%1" ).arg( coord.width() );
+	informationMap["Y"] = QString( "%1" ).arg( coord.height() );
+	if( tile->m_tileInfo.isValid() )
+	{
+		informationMap["Tileset"] = tile->m_tileInfo.getTileset()->getFilePath();
+		informationMap["Tileset Index"] = QString( "%1" ).arg( tile->m_tileInfo.getIndex() );
+	}
+	else
+	{
+		informationMap["Tileset"] = "";
+		informationMap["Tileset Index"] = "";
+	}
+	m_parentWidget->showProperties( informationMap );
+}
+
 void MapScene::eraseMap( int index )
 {
 	if( index < 0 )
@@ -221,6 +291,17 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 			m_parentWidget->setCursor( Qt::ClosedHandCursor );
 			return;
 		}
+		if ( eDrawTool::CURSOR == m_parentWidget->m_drawTool )
+		{
+			QPointF mousePos = event->scenePos();
+			if( mousePos == QPointF() )
+			{
+				return;
+			}
+			showTileProperties( mousePos );
+			return;
+		}
+
 		m_beforeDrawTileInfo.clear();
 		int currentIndex = -1;
 		m_parentWidget->getLayerIndex( currentIndex );
@@ -258,6 +339,11 @@ void MapScene::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
 			m_view->horizontalScrollBar()->setValue( m_view->horizontalScrollBar()->value() - (currentPosition.x() - lastPosition.x()) );
 			return;
 		}
+		if( eDrawTool::CURSOR == m_parentWidget->m_drawTool )
+		{
+			return;
+		}
+
 		int currentIndex = -1;
 		m_parentWidget->getLayerIndex( currentIndex );
 		if( currentIndex == -1 || m_layers[currentIndex]->getLayerInfo().isLock() )

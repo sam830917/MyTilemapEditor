@@ -8,6 +8,7 @@ Layer::Layer( MapScene* mapScene, int zValue )
 	QSize mapSize = m_mapScene->m_mapInfo.getMapSize();
 	QSize tileSize = m_mapScene->m_mapInfo.getTileSize();
 
+	m_tileList.reserve( mapSize.height() * mapSize.width() );
 	// Create Tiles
 	for( int y = 0; y < mapSize.height(); ++y )
 	{

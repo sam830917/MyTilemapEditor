@@ -6,11 +6,13 @@
 #include <QWidget>
 #include <QTabWidget>
 #include <QList>
+#include <QMap>
 
 QT_FORWARD_DECLARE_CLASS( QPushButton )
 
 enum class eDrawTool
 {
+	CURSOR,
 	MOVE,
 	BRUSH,
 	ERASER
@@ -51,6 +53,7 @@ public slots:
 	void setLayerLock( int index, bool isLock );
 	void setLayerVisible( int index, bool isVisible );
 	void setLayerName( int index, const QString& name );
+	void changeLayerFocus();
 
 signals:
 	void updateRedo( QAction* action );
@@ -66,10 +69,12 @@ signals:
 	void deletedLayer( int index );
 	void renamedLayer( int index, const QString& name );
 
+	void showProperties( const QMap<QString, QString>& informationMap );
+
 public:
 	QPushButton* m_newProjectButton;
 	QPushButton* m_openProjectButton;
 	QTabWidget* m_mapTabWidget;
 	QList<MapScene*> m_mapSceneList;
-	eDrawTool m_drawTool = eDrawTool::MOVE;
+	eDrawTool m_drawTool = eDrawTool::CURSOR;
 };

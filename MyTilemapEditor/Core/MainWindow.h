@@ -53,6 +53,7 @@ private:
 	QAction* m_redoAction;
 	QAction* m_undoAction;
 
+	QAction* m_cursorToolAction;
 	QAction* m_moveToolAction;
 	QAction* m_brushAction;
 	QAction* m_eraserAction;

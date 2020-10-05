@@ -145,6 +145,7 @@ void LayerWidget::addNewLayerGroup( MapInfo mapInfo, QList<LayerInfo> layerInfoL
 	m_listWidgetList.push_back( listWidget );
 	m_layout->addWidget( listWidget );
 	connect( listWidget, &QListWidget::itemSelectionChanged, this, &LayerWidget::updateToolbarStatus );
+	connect( listWidget, &QListWidget::itemSelectionChanged, this, &LayerWidget::changeLayerFocus );
 	m_currentIndex = m_listWidgetList.size() - 1;
 	for ( int i = 0; i < layerInfoList.size(); ++i )
 	{
@@ -371,18 +372,18 @@ QString LayerRowWidget::getName() const
 
 void LayerRowWidget::setIsLock()
 {
-	m_layerRow->setSelected( true );
  	bool checked = m_lockBtn->isChecked();
 
+	m_layerRow->m_layerGroup->setCurrentRow( m_layerRow->m_index );
 	m_layerRow->m_layerGroup->m_layerWidget->setLayerIsLock( m_layerRow->m_index, checked );
 	m_layerRow->m_layerGroup->m_layerWidget->modifiedCurrentScene();
 }
 
 void LayerRowWidget::setIsVisible()
 {
- 	m_layerRow->setSelected( true );
 	bool checked = m_visibleBtn->isChecked();
 
+	m_layerRow->m_layerGroup->setCurrentRow( m_layerRow->m_index );
 	m_layerRow->m_layerGroup->m_layerWidget->setLayerIsVisible( m_layerRow->m_index, checked );
 	m_layerRow->m_layerGroup->m_layerWidget->modifiedCurrentScene();
 }

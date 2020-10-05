@@ -17,5 +17,6 @@
         <file>Icon/unlock.png</file>
         <file>Icon/close-eye.png</file>
         <file>Icon/eye.png</file>
+        <file>Icon/cursor.png</file>
     </qresource>
 </RCC>

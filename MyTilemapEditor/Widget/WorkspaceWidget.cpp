@@ -428,3 +428,8 @@ void WorkspaceWidget::setLayerName( int index, const QString& name )
 	LayerRenameCommand* command = new LayerRenameCommand( mapScene, index, name );
 	mapScene->m_undoStack->push( command );
 }
+
+void WorkspaceWidget::changeLayerFocus()
+{
+	m_mapSceneList[m_mapTabWidget->currentIndex()]->showSelectedTileProperties();
+}
