@@ -68,7 +68,7 @@ void MainWindow::initialMenuBar()
 	m_fileMenu->addAction( m_saveAction );
 	m_fileMenu->addAction( m_saveAllAction );
 	m_fileMenu->addSeparator();
-	m_fileMenu->addAction( tr( "&Quit" ), this, &QWidget::close );
+	m_fileMenu->addAction( tr( "&Quit" ), this, &MainWindow::quit );
 
 	m_editMenu = m_mainMenuBar->addMenu( "Edit" );
 	m_undoAction = new QAction( QIcon( ":/MainWindow/Icon/undo.png" ), tr( "&Undo" ) );
@@ -182,7 +182,7 @@ void MainWindow::initialDockWidgets()
 void MainWindow::initialConnections()
 {
 	connect( m_eraseSelectedTilesShortcut, &QShortcut::activated, m_centralWidget, &WorkspaceWidget::eraseSelectedTilesInCurrentLayer );
-	connect( m_selecteAllTilesShortcut, &QShortcut::activated, m_centralWidget, &WorkspaceWidget::selecteAllTilesInCurrentLayer );
+	connect( m_selectAllTilesShortcut, &QShortcut::activated, m_centralWidget, &WorkspaceWidget::selecteAllTilesInCurrentLayer );
 	connect( m_workspaceSwitchTabShortcut, &QShortcut::activated, m_centralWidget, &WorkspaceWidget::nextTab );
 	connect( m_workspaceCloseTabShortcut, &QShortcut::activated, m_centralWidget, &WorkspaceWidget::closeCurrentTab );
 	connect( m_newLayerShortcut, SIGNAL( activated() ), m_layerWidget, SLOT( addNewLayer() ) );
@@ -217,6 +217,7 @@ void MainWindow::initialConnections()
 	connect( m_centralWidget, &WorkspaceWidget::addedNewLayer, m_layerWidget, &LayerWidget::implementAddNewLayer );
 	connect( m_centralWidget, &WorkspaceWidget::deletedLayer, m_layerWidget, &LayerWidget::removeLayerFromIndex );
 	connect( m_centralWidget, &WorkspaceWidget::renamedLayer, m_layerWidget, &LayerWidget::implementRenameLayer );
+	connect( m_centralWidget, &WorkspaceWidget::addNewLayerGroup, m_layerWidget, &LayerWidget::addNewLayerGroup );
 	connect( m_centralWidget, &WorkspaceWidget::showProperties, m_propertiesWidget, &PropertiesWidget::showProperties );
 
 	connect( m_layerWidget, &LayerWidget::addedNewLayerFromIndex,  m_centralWidget, &WorkspaceWidget::addNewLayerIntoMap );
@@ -242,7 +243,7 @@ void MainWindow::initialShortcut()
 	m_eraserAction->	setShortcut( tr( "E" ) );
 
 	m_eraseSelectedTilesShortcut =	new QShortcut( QKeySequence::Delete, this );
-	m_selecteAllTilesShortcut =		new QShortcut( QKeySequence::SelectAll, this );
+	m_selectAllTilesShortcut =		new QShortcut( QKeySequence::SelectAll, this );
 	m_workspaceSwitchTabShortcut =	new QShortcut( QKeySequence::NextChild, this );
 	m_workspaceCloseTabShortcut =	new QShortcut( tr( "Ctrl+W" ), this );
 	m_newLayerShortcut =			new QShortcut( tr( "Ctrl+Shift+N" ), this );

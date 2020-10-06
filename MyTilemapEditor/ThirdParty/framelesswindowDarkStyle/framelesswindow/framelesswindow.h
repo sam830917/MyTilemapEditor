@@ -39,7 +39,6 @@ class FramelessWindow : public QWidget {
   void setWindowTitle(const QString &text);
   void setWindowIcon(const QIcon &ico);
 
- private slots:
   void on_applicationStateChanged(Qt::ApplicationState state);
   void on_minimizeButton_clicked();
   void on_restoreButton_clicked();

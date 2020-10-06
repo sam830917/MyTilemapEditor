@@ -263,7 +263,7 @@ void MapScene::showTileProperties( const QPointF& mousePos )
 	informationMap["Y"] = QString("%1").arg( coord.height() );
 	if ( tile->m_tileInfo.isValid() )
 	{
-		informationMap["Tileset"] = tile->m_tileInfo.getTileset()->getFilePath();
+		informationMap["Tileset"] = tile->m_tileInfo.getTileset()->getName();
 		informationMap["Tileset Index"] = QString("%1").arg( tile->m_tileInfo.getIndex() );
 	}
 	else
@@ -304,7 +304,7 @@ void MapScene::showSelectedTileProperties()
 	informationMap["Y"] = QString( "%1" ).arg( coord.height() );
 	if( tile->m_tileInfo.isValid() )
 	{
-		informationMap["Tileset"] = tile->m_tileInfo.getTileset()->getFilePath();
+		informationMap["Tileset"] = tile->m_tileInfo.getTileset()->getName();
 		informationMap["Tileset Index"] = QString( "%1" ).arg( tile->m_tileInfo.getIndex() );
 	}
 	else
@@ -432,7 +432,7 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 			{
 				return;
 			}
-
+			m_isSelectedMoreThanOneTile = false;
 			m_startPos = mousePos;
 			QPoint coord = QPoint( qFloor( mousePos.x() / m_mapInfo.getTileSize().width() ), qFloor( mousePos.y() / m_mapInfo.getTileSize().height() ) );
 			m_selectedMinCoord = coord;

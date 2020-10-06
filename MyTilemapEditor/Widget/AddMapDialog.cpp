@@ -18,6 +18,7 @@ MapInfo* AddMapDialog::getResult() const
 		m_ui.m_tileWidthValueBox->value(), m_ui.m_tileHeightValueBox->value() );
 	mapInfo->setFilePath(m_filePath);
 	mapInfo->setName( m_ui.m_nameBox->text() );
+	mapInfo->setIsValid(true);
 
 	return mapInfo;
 }

@@ -51,6 +51,7 @@ private:
 	int m_index = 0;
 	MapScene* m_mapScene;
 	QString m_name;
+	Layer* m_layer;
 };
 
 class LayerDeleteCommand : public QUndoCommand
@@ -65,8 +66,7 @@ public:
 private:
 	int m_index = 0;
 	MapScene* m_mapScene;
-	LayerInfo m_layerInfo;
-	QList<TileInfo> m_tileInfoList;
+	Layer* m_layer;
 };
 
 class LayerRenameCommand : public QUndoCommand

@@ -11,6 +11,7 @@ class Layer
 {
 	friend class WorkspaceWidget;
 	friend class MapScene;
+	friend class LayerAddCommand;
 	friend class LayerDeleteCommand;
 	friend class Tile;
 

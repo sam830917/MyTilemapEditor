@@ -38,6 +38,9 @@ public slots:
 	void replaceUndoAction( QAction* action );
 	void disableShortcut( bool isDisable );
 
+signals:
+	void quit();
+
 private:
 	QMenuBar* m_mainMenuBar;
 	QMenu* m_windowsMenu;
@@ -60,7 +63,7 @@ private:
 	QAction* m_eraserAction;
 
 	QShortcut* m_eraseSelectedTilesShortcut;
-	QShortcut* m_selecteAllTilesShortcut;
+	QShortcut* m_selectAllTilesShortcut;
 	QShortcut* m_workspaceSwitchTabShortcut;
 	QShortcut* m_workspaceCloseTabShortcut;
 	QShortcut* m_newLayerShortcut;

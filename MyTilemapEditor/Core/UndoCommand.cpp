@@ -84,6 +84,9 @@ LayerAddCommand::LayerAddCommand( MapScene* mapScene, int index, const QString& 
 	m_index(index),
 	m_name(name)
 {
+	Layer* newLayer = new Layer( m_mapScene, m_index );
+	m_layer = newLayer;
+	newLayer->setName( m_name );
 }
 
 LayerAddCommand::~LayerAddCommand()
@@ -92,9 +95,12 @@ LayerAddCommand::~LayerAddCommand()
 
 void LayerAddCommand::undo()
 {
-	Layer* layer = m_mapScene->m_layers[m_index];
 	m_mapScene->m_layers.removeAt( m_index );
-	delete layer;
+	for ( Tile* tile : m_layer->m_tileList )
+	{
+		m_mapScene->removeItem( tile );
+	}
+
 	for( int i = m_index; i < m_mapScene->m_layers.size(); ++i )
 	{
 		m_mapScene->m_layers[i]->setOrder( i );
@@ -105,8 +111,11 @@ void LayerAddCommand::undo()
 
 void LayerAddCommand::redo()
 {
-	Layer* layer = m_mapScene->addNewLayer( m_index );
-	layer->setName(m_name);
+	m_mapScene->m_layers.insert( m_index, m_layer );
+	for( Tile* tile : m_layer->m_tileList )
+	{
+		m_mapScene->addItem( tile );
+	}
 	m_mapScene->m_parentWidget->addedNewLayer( m_index, m_name );
 }
 
@@ -115,6 +124,7 @@ LayerDeleteCommand::LayerDeleteCommand( MapScene* mapScene, int index, QUndoComm
 	m_mapScene( mapScene ),
 	m_index( index )
 {
+	m_layer = m_mapScene->m_layers[m_index];
 }
 
 LayerDeleteCommand::~LayerDeleteCommand()
@@ -123,12 +133,10 @@ LayerDeleteCommand::~LayerDeleteCommand()
 
 void LayerDeleteCommand::undo()
 {
-	Layer* newLayer = new Layer( m_mapScene, m_index );
-	newLayer->setLayerInfo( m_layerInfo );
-	m_mapScene->m_layers.insert( m_index, newLayer );
-	for( int i = 0; i < newLayer->m_tileList.size(); ++i )
+	m_mapScene->m_layers.insert( m_index, m_layer );
+	for( Tile* tile : m_layer->m_tileList )
 	{
-		newLayer->m_tileList[i]->m_tileInfo = m_tileInfoList[i];
+		m_mapScene->addItem( tile );
 	}
 
 	// reorder z value
@@ -136,19 +144,17 @@ void LayerDeleteCommand::undo()
 	{
 		m_mapScene->m_layers[i]->setOrder( i );
 	}
-	m_mapScene->m_parentWidget->addedNewLayerWithInfo( m_index, m_layerInfo );
+	m_mapScene->m_parentWidget->addedNewLayerWithInfo( m_index, m_layer->m_layerInfo );
 }
 
 void LayerDeleteCommand::redo()
 {
-	Layer* layer = m_mapScene->m_layers[m_index];
-	for( Tile* t : layer->m_tileList )
-	{
-		m_tileInfoList.push_back( t->getTileInfo() );
-	}
-	m_layerInfo = layer->getLayerInfo();
 	m_mapScene->m_layers.removeAt( m_index );
-	delete layer;
+	for( Tile* tile : m_layer->m_tileList )
+	{
+		m_mapScene->removeItem( tile );
+	}
+
 	for( int i = m_index; i < m_mapScene->m_layers.size(); ++i )
 	{
 		m_mapScene->m_layers[i]->setOrder( i );

@@ -76,6 +76,7 @@ signals:
 	void renamedLayer( int index, const QString& name );
 
 	void showProperties( const QMap<QString, QString>& informationMap );
+	void addNewLayerGroup( MapInfo mapInfo, QList<LayerInfo> layerInfoList );
 
 public:
 	QPushButton* m_newProjectButton;

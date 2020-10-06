@@ -76,6 +76,13 @@ void LayerWidget::implementAddNewLayer( int index, const QString& name )
 	newRow->m_layerRowWidget->m_label->setText(name);
 	newRow->m_layerRowWidget->m_lineEdit->setText(name);
 	m_listWidgetList[m_currentIndex]->setCurrentRow( index );
+
+	LayerGroup* layerGroup = m_listWidgetList[m_currentIndex];
+	for ( int i = 0; i < layerGroup->count(); ++i )
+	{
+		LayerRow* row = static_cast<LayerRow*>(m_listWidgetList[m_currentIndex]->item( i ));
+		row->m_index = i;
+	}
 	updateToolbarStatus();
 	modifiedCurrentScene();
 }
@@ -100,6 +107,12 @@ void LayerWidget::implementRenameLayer( int index, const QString& name )
 void LayerWidget::removeLayerFromIndex( int index )
 {
 	delete m_listWidgetList[m_currentIndex]->takeItem( index );
+	LayerGroup* layerGroup = m_listWidgetList[m_currentIndex];
+	for( int i = 0; i < layerGroup->count(); ++i )
+	{
+		LayerRow* row = static_cast<LayerRow*>(m_listWidgetList[m_currentIndex]->item( i ));
+		row->m_index = i;
+	}
 	updateToolbarStatus();
 	modifiedCurrentScene();
 }

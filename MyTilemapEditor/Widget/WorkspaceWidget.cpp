@@ -89,6 +89,7 @@ void WorkspaceWidget::addMap()
 		QList<LayerInfo> layerInfoList;
 		layerInfoList.push_back( LayerInfo() );
 		insertMap( *mapInfo, layerInfoList );
+		addNewLayerGroup( *mapInfo, layerInfoList );
 	}
 }
 
@@ -122,7 +123,14 @@ void WorkspaceWidget::insertMap( MapInfo mapInfo, QList<LayerInfo> layerInfoList
 	XmlElement* mapRoot = mapDoc->RootElement();
 	XmlElement* tilesetsEle = mapRoot->FirstChildElement( "Tilesets" );
 	if( !tilesetsEle )
+	{
+		Layer* newLayer = mapScene->addNewLayer( 0 );
+		if( layerInfoList.size() > 0 )
+		{
+			newLayer->m_layerInfo = layerInfoList[0];
+		}
 		return;
+	}
 
 	QMap<int , Tileset*> tilesetsMap;
 	for ( XmlElement* tilesetEle = tilesetsEle->FirstChildElement( "Tileset" ); tilesetEle; tilesetEle = tilesetEle->NextSiblingElement( "Tileset" ) )
