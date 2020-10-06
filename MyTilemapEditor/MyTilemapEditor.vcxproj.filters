@@ -197,9 +197,6 @@
     <ClInclude Include="Core\MapInfo.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Core\MapScene.h">
-      <Filter>Core</Filter>
-    </ClInclude>
     <ClInclude Include="Core\TileInfo.h">
       <Filter>Core</Filter>
     </ClInclude>
@@ -210,6 +207,9 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\Layer.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\MapScene.h">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>

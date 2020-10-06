@@ -130,6 +130,12 @@ void MainWindow::initialToolBar()
 	m_eraserAction->setData( QVariant::fromValue( eDrawTool::ERASER ) );
 	m_eraserAction->setShortcut( tr("E") );
 	connect( alignmentGroup, &QActionGroup::triggered, this, &MainWindow::changeDrawTool );
+
+	// workspace widget shortcut
+	m_eraseSelectedTilesShortcut = new QShortcut( QKeySequence::Delete, this );
+	m_selecteAllTilesShortcut = new QShortcut( QKeySequence::SelectAll, this );
+	m_workspaceSwitchTabShortcut = new QShortcut( QKeySequence::NextChild, this );
+	m_workspaceCloseTabShortcut = new QShortcut( tr("Ctrl+W"), this );
 }
 
 void MainWindow::initialStatusBar()
@@ -187,12 +193,17 @@ void MainWindow::initialDockWidgets()
 
 void MainWindow::initialConnections()
 {
+	connect( m_eraseSelectedTilesShortcut, &QShortcut::activated, m_centralWidget, &WorkspaceWidget::eraseSelectedTilesInCurrentLayer );
+	connect( m_selecteAllTilesShortcut, &QShortcut::activated, m_centralWidget, &WorkspaceWidget::selecteAllTilesInCurrentLayer );
+	connect( m_workspaceSwitchTabShortcut, &QShortcut::activated, m_centralWidget, &WorkspaceWidget::nextTab );
+	connect( m_workspaceCloseTabShortcut, &QShortcut::activated, m_centralWidget, &WorkspaceWidget::closeCurrentTab );
+
 	connect( m_saveAction, &QAction::triggered, m_centralWidget, &WorkspaceWidget::saveCurrentMap );
 	connect( m_saveAllAction, &QAction::triggered, m_centralWidget, &WorkspaceWidget::saveAllMaps );
+	connect( m_mapAction, &QAction::triggered, m_centralWidget, &WorkspaceWidget::addMap );
 	connect( m_projectNewAction, &QAction::triggered, m_projectWidget, &ProjectWidget::newProject );
 	connect( m_projectOpenAction, &QAction::triggered, m_projectWidget, &ProjectWidget::openProject );
 	connect( m_tilesetAction, &QAction::triggered, m_tilesetWidget, &TilesetWidget::addTileset );
-	connect( m_mapAction, &QAction::triggered, m_centralWidget, &WorkspaceWidget::addMap );
 
 	connect( m_centralWidget->m_openProjectButton, &QPushButton::clicked, m_projectWidget, &ProjectWidget::openProject );
 	connect( m_centralWidget->m_newProjectButton, &QPushButton::clicked, m_projectWidget, &ProjectWidget::newProject );
@@ -296,4 +307,11 @@ void MainWindow::disableShortcut( bool isDisable )
 	}
 	QList<QAction*> actions = findChildren<QAction*>();
 	for( QAction* a : actions ) a->setShortcutContext( sc );
+
+	QList<QShortcut*> shortcuts = findChildren<QShortcut*>();
+	for( QShortcut* s : shortcuts )
+	{
+		s->setEnabled(!isDisable);
+		s->setContext( sc );
+	}
 }

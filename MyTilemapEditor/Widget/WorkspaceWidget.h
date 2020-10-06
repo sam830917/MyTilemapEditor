@@ -31,6 +31,9 @@ public:
 
 	eDrawTool getCurrentDrawTool() { return m_drawTool; }
 
+protected:
+	virtual bool eventFilter( QObject* obj, QEvent* event );
+
 public slots:
 	void markCurrentSceneForModified();
 	void addMap();
@@ -54,6 +57,9 @@ public slots:
 	void setLayerVisible( int index, bool isVisible );
 	void setLayerName( int index, const QString& name );
 	void changeLayerFocus();
+
+	void eraseSelectedTilesInCurrentLayer();
+	void selecteAllTilesInCurrentLayer();
 
 signals:
 	void updateRedo( QAction* action );

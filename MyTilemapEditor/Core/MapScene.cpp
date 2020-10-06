@@ -9,6 +9,56 @@
 #include <QtMath>
 #include <QGraphicsView>
 #include <QScrollBar>
+#include <qDebug>
+
+class SelectMask : public QGraphicsRectItem
+{
+	friend class MapScene;
+
+public:
+	SelectMask( MapScene* scene, QPoint coord );
+	~SelectMask();
+
+private:
+	virtual void paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = Q_NULLPTR ) override;
+
+private:
+	MapScene* m_scene;
+	QPoint m_coord;
+	bool isSelected = false;
+};
+
+SelectMask::SelectMask( MapScene* scene, QPoint coord )
+	:QGraphicsRectItem(NULL),
+	m_scene(scene),
+	m_coord(coord)
+{
+	setZValue(1);
+}
+
+SelectMask::~SelectMask()
+{
+
+}
+
+void SelectMask::paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget /*= Q_NULLPTR */ )
+{
+	QPoint& minCoord = m_scene->m_selectedMinCoord;
+	QPoint& maxCoord = m_scene->m_selectedMaxCoord;
+	isSelected = false;
+	if ( m_coord.x() >= minCoord.x() && m_coord.x() < maxCoord.x() && m_coord.y() < maxCoord.y() && m_coord.y() >= minCoord.y() )
+	{
+		if( m_scene->m_showSelection )
+		{
+			QRectF rect = boundingRect();
+			QSize& tileSize = m_scene->getMapInfo().getTileSize();
+			painter->setBrush( QBrush( QColor( 0, 0, 100, 100 ) ) );
+			painter->setPen( QPen() );
+			painter->drawRect( (rect.x() + 0.5f), (rect.y() + 0.5f), tileSize.width(), tileSize.height() );
+			isSelected = true;
+		}
+	}
+}
 
 MapView::MapView( WorkspaceWidget* parent /*= Q_NULLPTR */ )
 	:QGraphicsView( parent )
@@ -50,7 +100,6 @@ MapScene::MapScene( MapInfo mapInfo, WorkspaceWidget* parent /*= Q_NULLPTR*/ )
 	m_parentWidget( parent )
 {
 	m_view = new MapView( this );
-	//setBackgroundBrush( QBrush( QColor( 170, 170, 170, 255 ) ) );
 	m_undoStack = new QUndoStack( this );
 
 	QSize mapSize = m_mapInfo.getMapSize();
@@ -82,6 +131,19 @@ MapScene::MapScene( MapInfo mapInfo, WorkspaceWidget* parent /*= Q_NULLPTR*/ )
 		line->setPen( linePen );
 		line->setZValue(1);
 		addItem( line );
+	}
+
+	m_selectedTileItemList.reserve( mapSize.height() * mapSize.width() );
+	// Create masks
+	for( int y = 0; y < mapSize.height(); ++y )
+	{
+		for( int x = 0; x < mapSize.width(); ++x )
+		{
+			SelectMask* mask = new SelectMask( this, QPoint( x, y ) );
+			mask->setRect( qreal( x * tileSize.width() ), qreal( y * tileSize.height() ), tileSize.width(), tileSize.height() );
+			addItem( mask );
+			m_selectedTileItemList.push_back( mask );
+		}
 	}
 }
 
@@ -214,6 +276,16 @@ void MapScene::showTileProperties( const QPointF& mousePos )
 
 void MapScene::showSelectedTileProperties()
 {
+	if ( m_isSelectedMoreThanOneTile )
+	{
+		QMap<QString, QString> informationMap;
+		informationMap["X"] = QString( "..." );
+		informationMap["Y"] = QString( "..." );
+		informationMap["Tileset"] = "...";
+		informationMap["Tileset Index"] = "...";
+		m_parentWidget->showProperties( informationMap );
+		return;
+	}
 	if ( m_currentSelectedIndex <= -1 )
 	{
 		return;
@@ -281,9 +353,71 @@ Layer* MapScene::addNewLayer( int zValue )
 	return newLayer;
 }
 
+void MapScene::setIsShowSelection( bool isShow )
+{
+	m_showSelection = isShow;
+	updateSelection();
+}
+
+void MapScene::updateSelection()
+{
+	for( SelectMask* mask : m_selectedTileItemList )
+	{
+		mask->update();
+	}
+}
+
+void MapScene::eraseSelectedTiles()
+{
+	if ( m_parentWidget->m_drawTool != eDrawTool::CURSOR )
+	{
+		return;
+	}
+	if( !m_showSelection )
+	{
+		return;
+	}
+	m_beforeDrawTileInfo.clear();
+	int currentIndex = -1;
+	m_parentWidget->getLayerIndex( currentIndex );
+	if( currentIndex == -1 || m_layers[currentIndex]->getLayerInfo().isLock() )
+	{
+		return;
+	}
+	m_beforeDrawTileInfo.reserve( m_layers[currentIndex]->m_tileList.size() );
+	for( Tile* tile : m_layers[currentIndex]->m_tileList )
+	{
+		TileInfo& info = tile->getTileInfo();
+		m_beforeDrawTileInfo.push_back( info );
+	}
+	for( int i = 0; i < m_selectedTileItemList.size(); ++i )
+	{
+		if( m_selectedTileItemList[i]->isSelected )
+		{
+			eraseMap( i );
+		}
+	}
+	QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, m_layers[currentIndex]->m_tileList );
+	m_undoStack->push( command );
+	setIsShowSelection( false );
+}
+
+void MapScene::selecteAllTiles()
+{
+	if( m_parentWidget->m_drawTool != eDrawTool::CURSOR )
+	{
+		return;
+	}
+	setIsShowSelection( true );
+	m_selectedMinCoord = QPoint( 0, 0 );
+	m_selectedMaxCoord = QPoint( m_mapInfo.getMapSize().width(), m_mapInfo.getMapSize().height() );
+	updateSelection();
+}
+
 void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 {
 	QGraphicsScene::mousePressEvent( event );
+	setIsShowSelection( false );
 	if( event->button() & Qt::LeftButton )
 	{
 		if ( eDrawTool::MOVE == m_parentWidget->m_drawTool )
@@ -298,31 +432,46 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 			{
 				return;
 			}
+
+			m_startPos = mousePos;
+			QPoint coord = QPoint( qFloor( mousePos.x() / m_mapInfo.getTileSize().width() ), qFloor( mousePos.y() / m_mapInfo.getTileSize().height() ) );
+			m_selectedMinCoord = coord;
+			m_selectedMaxCoord = coord + QPoint( 1, 1 );
+			for ( SelectMask* mask : m_selectedTileItemList )
+			{
+				mask->update();
+			}
+			setIsShowSelection( true );
 			showTileProperties( mousePos );
 			return;
 		}
 
-		m_beforeDrawTileInfo.clear();
-		int currentIndex = -1;
-		m_parentWidget->getLayerIndex( currentIndex );
-		if( currentIndex == -1 || m_layers[currentIndex]->getLayerInfo().isLock() )
+		// Draw or erase mode
 		{
-			return;
-		}
+			m_beforeDrawTileInfo.clear();
+			int currentIndex = -1;
+			m_parentWidget->getLayerIndex( currentIndex );
+			if( currentIndex == -1 || m_layers[currentIndex]->getLayerInfo().isLock() )
+			{
+				return;
+			}
 
-		for( Tile* tile : m_layers[currentIndex]->m_tileList )
-		{
-			TileInfo info = tile->getTileInfo();
-			m_beforeDrawTileInfo.push_back( info );
+			m_beforeDrawTileInfo.reserve( m_layers[currentIndex]->m_tileList.size() );
+			for( Tile* tile : m_layers[currentIndex]->m_tileList )
+			{
+				TileInfo& info = tile->getTileInfo();
+				m_beforeDrawTileInfo.push_back( info );
+			}
+			m_parentWidget->disableShortcut( true );
+			QPointF mousePos = event->scenePos();
+			if( mousePos == QPointF() )
+			{
+				return;
+			}
+			editMapOnPoint( mousePos );
 		}
-		m_parentWidget->disableShortcut( true );
-		QPointF mousePos = event->scenePos();
-		if( mousePos == QPointF() )
-		{
-			return;
-		}
-		editMapOnPoint( mousePos );
 	}
+	update();
 }
 
 void MapScene::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
@@ -341,44 +490,80 @@ void MapScene::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
 		}
 		if( eDrawTool::CURSOR == m_parentWidget->m_drawTool )
 		{
+			QPointF mousePos = event->scenePos();
+			if( mousePos == QPointF() || m_selectedTileItemList.isEmpty() )
+			{
+				return;
+			}
+			QSize& tileSize = m_mapInfo.getTileSize();
+			QPointF minPoint = QPointF( qMin( m_startPos.x(), mousePos.x() ), qMin( m_startPos.y(), mousePos.y() ) );
+			QPointF maxPoint = QPointF( qMax( m_startPos.x(), mousePos.x() ), qMax( m_startPos.y(), mousePos.y() ) );
+
+			m_selectedMinCoord = QPoint( qFloor( minPoint.x() / tileSize.width() ), qFloor( minPoint.y() / tileSize.height() ) );
+			m_selectedMaxCoord = QPoint( qCeil( maxPoint.x() / tileSize.width() ), qCeil( maxPoint.y() / tileSize.height() ) );
+
+			QPoint coordDiff = m_selectedMaxCoord - m_selectedMinCoord;
+			if( coordDiff.x() > 1 || coordDiff.y() > 1 )
+			{
+				m_isSelectedMoreThanOneTile = true;
+			}
+			else
+			{
+				m_isSelectedMoreThanOneTile = false;
+			}
+			setIsShowSelection( true );
+			showSelectedTileProperties();
+			
 			return;
 		}
 
-		int currentIndex = -1;
-		m_parentWidget->getLayerIndex( currentIndex );
-		if( currentIndex == -1 || m_layers[currentIndex]->getLayerInfo().isLock() )
+		// Draw or erase mode
 		{
-			return;
+			int currentIndex = -1;
+			m_parentWidget->getLayerIndex( currentIndex );
+			if( currentIndex == -1 || m_layers[currentIndex]->getLayerInfo().isLock() )
+			{
+				return;
+			}
+			QPointF mousePos = event->scenePos();
+			if( mousePos == QPointF() )
+			{
+				return;
+			}
+			editMapOnPoint( mousePos );
 		}
-		QPointF mousePos = event->scenePos();
-		if( mousePos == QPointF() )
-		{
-			return;
-		}
-		editMapOnPoint( mousePos );
 	}
 }
 
 void MapScene::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 {
 	QGraphicsScene::mouseReleaseEvent( event );
-	if ( eDrawTool::MOVE == m_parentWidget->m_drawTool )
-	{
-		m_parentWidget->setCursor( Qt::ArrowCursor );
-		return;
-	}
+
 	if( event->button() & Qt::LeftButton )
 	{
-		int currentIndex = -1;
-		m_parentWidget->getLayerIndex( currentIndex );
-		if( currentIndex == -1 || m_layers[currentIndex]->getLayerInfo().isLock() )
+		if( eDrawTool::MOVE == m_parentWidget->m_drawTool )
+		{
+			m_parentWidget->setCursor( Qt::ArrowCursor );
+			return;
+		}
+		if( eDrawTool::CURSOR == m_parentWidget->m_drawTool )
 		{
 			return;
 		}
 
-		QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, m_layers[currentIndex]->m_tileList );
-		m_undoStack->push( command );
-		m_parentWidget->disableShortcut( false );
+		// Draw or erase mode
+		{
+			int currentIndex = -1;
+			m_parentWidget->getLayerIndex( currentIndex );
+			if( currentIndex == -1 || m_layers[currentIndex]->getLayerInfo().isLock() )
+			{
+				return;
+			}
+
+			QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, m_layers[currentIndex]->m_tileList );
+			m_undoStack->push( command );
+			m_parentWidget->disableShortcut( false );
+		}
 	}
 	update();
 }

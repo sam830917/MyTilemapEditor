@@ -9,9 +9,9 @@
 #include <QGraphicsView>
 #include <QMessageBox>
 #include <QFileInfo>
-#include <QShortcut>
 #include <QSignalMapper>
 #include <QDebug>
+#include <QShortcut>
 
 WorkspaceWidget::WorkspaceWidget( QWidget* parent /*= Q_NULLPTR */ )
 	:QWidget(parent)
@@ -33,13 +33,10 @@ WorkspaceWidget::WorkspaceWidget( QWidget* parent /*= Q_NULLPTR */ )
 	m_mapTabWidget = new QTabWidget( this );
 	layoutv->addWidget( m_mapTabWidget );
 	m_mapTabWidget->setTabsClosable(true);
+	m_mapTabWidget->installEventFilter( this );
 	disableTabWidget( true );
 	connect(m_mapTabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
-	connect(m_mapTabWidget, SIGNAL(currentChanged(int)), this, SLOT(changeTab(int)));
-	QShortcut* switchShortcut = new QShortcut(QKeySequence::NextChild, this);
-	QShortcut* closeShortcut = new QShortcut(tr("Ctrl+W"), this);
-	connect(switchShortcut, SIGNAL(activated()), this, SLOT(nextTab()));
-	connect(closeShortcut, SIGNAL(activated()), this, SLOT(closeCurrentTab()));
+	connect( m_mapTabWidget, SIGNAL( currentChanged( int ) ), this, SLOT( changeTab( int ) ) );
 }
 
 void WorkspaceWidget::disableTabWidget( bool disable ) const
@@ -56,6 +53,22 @@ void WorkspaceWidget::disableTabWidget( bool disable ) const
 		m_newProjectButton->setVisible( false );
 		m_mapTabWidget->setVisible( true );
 	}
+}
+
+bool WorkspaceWidget::eventFilter( QObject* obj, QEvent* event )
+{
+	if ( m_mapTabWidget == obj )
+	{
+		if ( event->type() == QEvent::KeyPress )
+		{
+			QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+			if ( keyEvent->key() == Qt::Key::Key_Tab )
+			{
+				return true;
+			}
+		}
+	}
+	return QWidget::eventFilter( obj, event );
 }
 
 void WorkspaceWidget::markCurrentSceneForModified()
@@ -202,6 +215,10 @@ void WorkspaceWidget::closeTab( int index )
 void WorkspaceWidget::setDrawTool( eDrawTool drawTool )
 {
 	m_drawTool = drawTool;
+	for ( MapScene* scene : m_mapSceneList )
+	{
+		scene->setIsShowSelection( false );
+	}
 }
 
 void WorkspaceWidget::changeTab( int index )
@@ -235,7 +252,7 @@ void WorkspaceWidget::nextTab()
 	{
 		return;
 	}
-
+	m_mapSceneList[index]->setIsShowSelection( false );
 	m_mapTabWidget->setCurrentIndex( index+1 == m_mapTabWidget->count() ? 0 : index+1 );
 }
 
@@ -432,4 +449,14 @@ void WorkspaceWidget::setLayerName( int index, const QString& name )
 void WorkspaceWidget::changeLayerFocus()
 {
 	m_mapSceneList[m_mapTabWidget->currentIndex()]->showSelectedTileProperties();
+}
+
+void WorkspaceWidget::eraseSelectedTilesInCurrentLayer()
+{
+	m_mapSceneList[m_mapTabWidget->currentIndex()]->eraseSelectedTiles();
+}
+
+void WorkspaceWidget::selecteAllTilesInCurrentLayer()
+{
+	m_mapSceneList[m_mapTabWidget->currentIndex()]->selecteAllTiles();
 }

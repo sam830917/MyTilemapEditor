@@ -4,6 +4,7 @@
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
 #include <QCloseEvent>
+#include <QShortcut>
 #include "Toolbar.h"
 #include "Widget/ProjectWidget.h"
 #include "Widget/WorkspaceWidget.h"
@@ -14,7 +15,6 @@
 
 class MainWindow : public QMainWindow
 {
-	friend class ViewportEventFilter;
     Q_OBJECT
 
 public:
@@ -57,6 +57,11 @@ private:
 	QAction* m_moveToolAction;
 	QAction* m_brushAction;
 	QAction* m_eraserAction;
+
+	QShortcut* m_eraseSelectedTilesShortcut;
+	QShortcut* m_selecteAllTilesShortcut;
+	QShortcut* m_workspaceSwitchTabShortcut;
+	QShortcut* m_workspaceCloseTabShortcut;
 
     ToolBar* m_basicToolbar;
     ToolBar* m_paintToolToolbar;
