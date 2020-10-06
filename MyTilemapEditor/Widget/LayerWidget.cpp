@@ -40,6 +40,10 @@ LayerWidget::LayerWidget( const QString& title, QWidget* parent /*= Q_NULLPTR */
 
 void LayerWidget::addNewLayer()
 {
+	if ( !m_newLayerAction->isEnabled() )
+	{
+		return;
+	}
 	QString name = QString( "Layer 1" );
 	int nameCount = 1;
 	int count = m_listWidgetList[m_currentIndex]->count();
@@ -102,6 +106,10 @@ void LayerWidget::removeLayerFromIndex( int index )
 
 void LayerWidget::removeLayer()
 {
+	if ( !m_deleteAction->isEnabled() )
+	{
+		return;
+	}
 	if ( m_listWidgetList[m_currentIndex]->count() == 1 )
 	{
 		return;
@@ -112,6 +120,10 @@ void LayerWidget::removeLayer()
 
 void LayerWidget::raiseCurrentLayer()
 {
+	if( !m_raiseAction->isEnabled() )
+	{
+		return;
+	}
 	int currentRow = m_listWidgetList[m_currentIndex]->currentRow();
 	int targetIndex = currentRow - 1;
 	movedLayerGroup( currentRow, targetIndex );
@@ -119,6 +131,10 @@ void LayerWidget::raiseCurrentLayer()
 
 void LayerWidget::lowerCurrentLayer()
 {
+	if( !m_lowerAction->isEnabled() )
+	{
+		return;
+	}
 	int currentRow = m_listWidgetList[m_currentIndex]->currentRow();
 	int targetIndex = currentRow + 1;
 	movedLayerGroup( currentRow, targetIndex );
@@ -266,10 +282,13 @@ void LayerWidget::initialToolbar()
 	m_layout->addWidget( m_toolbar );
 
 	m_newLayerAction = new QAction( QIcon( ":/MainWindow/Icon/plus.png" ), tr( "&New Layer" ), this );
+	m_newLayerAction->setToolTip( tr( "New Layer (Ctrl+Shift+N)" ) );
 	m_toolbar->addAction( m_newLayerAction );
 	m_raiseAction = new QAction( QIcon( ":/MainWindow/Icon/up-arrow.png" ), tr( "&Raise Layer" ), this );
+	m_raiseAction->setToolTip( tr( "Raise Layer (Ctrl+[)" ) );
 	m_toolbar->addAction( m_raiseAction );
 	m_lowerAction = new QAction( QIcon( ":/MainWindow/Icon/down-arrow.png" ), tr( "&Lower Layer" ), this );
+	m_lowerAction->setToolTip( tr( "Lower Layer (Ctrl+])" ) );
 	m_toolbar->addAction( m_lowerAction );
 	m_deleteAction = new QAction( QIcon( ":/MainWindow/Icon/delete.png" ), tr( "&Delete Layer" ), this );
 	m_toolbar->addAction( m_deleteAction );

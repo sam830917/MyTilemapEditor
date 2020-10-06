@@ -29,6 +29,7 @@ private:
     void initialStatusBar();
 	void initialDockWidgets();
 	void initialConnections();
+	void initialShortcut();
 
 public slots:
 	void updateToolBar();
@@ -62,6 +63,9 @@ private:
 	QShortcut* m_selecteAllTilesShortcut;
 	QShortcut* m_workspaceSwitchTabShortcut;
 	QShortcut* m_workspaceCloseTabShortcut;
+	QShortcut* m_newLayerShortcut;
+	QShortcut* m_raiseLayerShortcut;
+	QShortcut* m_lowerLayerShortcut;
 
     ToolBar* m_basicToolbar;
     ToolBar* m_paintToolToolbar;

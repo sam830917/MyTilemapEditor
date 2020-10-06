@@ -53,7 +53,7 @@ void SelectMask::paint( QPainter* painter, const QStyleOptionGraphicsItem* optio
 			QRectF rect = boundingRect();
 			QSize& tileSize = m_scene->getMapInfo().getTileSize();
 			painter->setBrush( QBrush( QColor( 0, 0, 100, 100 ) ) );
-			painter->setPen( QPen() );
+			painter->setPen( QPen( QColor( 0, 0, 0, 0 ) ) );
 			painter->drawRect( (rect.x() + 0.5f), (rect.y() + 0.5f), tileSize.width(), tileSize.height() );
 			isSelected = true;
 		}

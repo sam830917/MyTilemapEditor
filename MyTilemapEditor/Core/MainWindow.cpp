@@ -14,6 +14,7 @@ MainWindow::MainWindow(QWidget *parent)
 	initialMenuBar();
 	initialToolBar();
 	initialDockWidgets();
+	initialShortcut();
 	initialConnections();
 	initialStatusBar();
 }
@@ -58,12 +59,10 @@ void MainWindow::initialMenuBar()
 
 	m_saveAction = new QAction( tr( "Save" ), this );
 	m_saveAction->setIcon( QIcon(":/MainWindow/Icon/save-file.png") );
-	m_saveAction->setShortcuts( QKeySequence::Save );
 	m_saveAction->setDisabled( true );
 	m_saveAction->setToolTip( tr( "Save (Ctrl+S)" ) );
 	m_saveAllAction = new QAction( tr( "Save All" ), this );
 	m_saveAllAction->setIcon( QIcon( ":/MainWindow/Icon/save-all-files.png" ) );
-	m_saveAllAction->setShortcut( tr( "Ctrl+Shift+S" ) );
 	m_saveAllAction->setDisabled( true );
 	m_saveAllAction->setToolTip( tr( "Save All (Ctrl+Shift+S)" ) );
 	m_fileMenu->addAction( m_saveAction );
@@ -73,12 +72,10 @@ void MainWindow::initialMenuBar()
 
 	m_editMenu = m_mainMenuBar->addMenu( "Edit" );
 	m_undoAction = new QAction( QIcon( ":/MainWindow/Icon/undo.png" ), tr( "&Undo" ) );
-	m_undoAction->setShortcuts( QKeySequence::Undo );
 	m_undoAction->setToolTip( tr( "Undo (Ctrl+Z)" ) );
 	m_undoAction->setDisabled(true);
 	m_editMenu->addAction( m_undoAction );
 	m_redoAction = new QAction( QIcon( ":/MainWindow/Icon/redo.png" ), tr( "&Redo" ) );
-	m_redoAction->setShortcuts( QKeySequence::Redo );
 	m_redoAction->setToolTip( tr( "Redo (Ctrl+Y)" ) );
 	m_redoAction->setDisabled(true);
 	m_editMenu->addAction( m_redoAction );
@@ -108,12 +105,11 @@ void MainWindow::initialToolBar()
 
 	m_cursorToolAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/cursor.png" ), tr( "&Cursor (C)" ) );
 	m_cursorToolAction->setData( QVariant::fromValue( eDrawTool::CURSOR ) );
-	m_cursorToolAction->setShortcut( tr( "C" ) );
 	m_moveToolAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/move.png" ), tr( "&Move (V)" ) );
 	m_moveToolAction->setData( QVariant::fromValue( eDrawTool::MOVE ) );
-	m_moveToolAction->setShortcut( tr( "V" ) );
 	m_brushAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/pencil.png" ), tr( "&Brush (B)" ) );
 	m_eraserAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/eraser.png" ), tr( "&Eraser (E)" ) );
+
 	QActionGroup* alignmentGroup = new QActionGroup( this );
 	alignmentGroup->addAction( m_brushAction );
 	alignmentGroup->addAction( m_eraserAction );
@@ -126,16 +122,8 @@ void MainWindow::initialToolBar()
 	m_cursorToolAction->setChecked(true);
 
 	m_brushAction->setData( QVariant::fromValue( eDrawTool::BRUSH ) );
-	m_brushAction->setShortcut( tr( "B" ) );
 	m_eraserAction->setData( QVariant::fromValue( eDrawTool::ERASER ) );
-	m_eraserAction->setShortcut( tr("E") );
 	connect( alignmentGroup, &QActionGroup::triggered, this, &MainWindow::changeDrawTool );
-
-	// workspace widget shortcut
-	m_eraseSelectedTilesShortcut = new QShortcut( QKeySequence::Delete, this );
-	m_selecteAllTilesShortcut = new QShortcut( QKeySequence::SelectAll, this );
-	m_workspaceSwitchTabShortcut = new QShortcut( QKeySequence::NextChild, this );
-	m_workspaceCloseTabShortcut = new QShortcut( tr("Ctrl+W"), this );
 }
 
 void MainWindow::initialStatusBar()
@@ -197,6 +185,9 @@ void MainWindow::initialConnections()
 	connect( m_selecteAllTilesShortcut, &QShortcut::activated, m_centralWidget, &WorkspaceWidget::selecteAllTilesInCurrentLayer );
 	connect( m_workspaceSwitchTabShortcut, &QShortcut::activated, m_centralWidget, &WorkspaceWidget::nextTab );
 	connect( m_workspaceCloseTabShortcut, &QShortcut::activated, m_centralWidget, &WorkspaceWidget::closeCurrentTab );
+	connect( m_newLayerShortcut, SIGNAL( activated() ), m_layerWidget, SLOT( addNewLayer() ) );
+	connect( m_raiseLayerShortcut, &QShortcut::activated, m_layerWidget, &LayerWidget::raiseCurrentLayer );
+	connect( m_lowerLayerShortcut, &QShortcut::activated, m_layerWidget, &LayerWidget::lowerCurrentLayer );
 
 	connect( m_saveAction, &QAction::triggered, m_centralWidget, &WorkspaceWidget::saveCurrentMap );
 	connect( m_saveAllAction, &QAction::triggered, m_centralWidget, &WorkspaceWidget::saveAllMaps );
@@ -231,12 +222,32 @@ void MainWindow::initialConnections()
 	connect( m_layerWidget, &LayerWidget::addedNewLayerFromIndex,  m_centralWidget, &WorkspaceWidget::addNewLayerIntoMap );
 	connect( m_layerWidget, &LayerWidget::modifiedCurrentScene, m_centralWidget, &WorkspaceWidget::markCurrentSceneForModified );
 	connect( m_layerWidget, &LayerWidget::setLayerIsVisible,  m_centralWidget, &WorkspaceWidget::setLayerVisible );
+	connect( m_layerWidget, &LayerWidget::changeLayerFocus,  m_centralWidget, &WorkspaceWidget::changeLayerFocus );
 	connect( m_layerWidget, &LayerWidget::movedLayerGroup,  m_centralWidget, &WorkspaceWidget::changeLayerOrder );
 	connect( m_layerWidget, &LayerWidget::setLayerIsLock,  m_centralWidget, &WorkspaceWidget::setLayerLock );
-	connect( m_layerWidget, &LayerWidget::deletedLayer,  m_centralWidget, &WorkspaceWidget::deleteLayerFromIndex );
 	connect( m_layerWidget, &LayerWidget::setLayerName,  m_centralWidget, &WorkspaceWidget::setLayerName );
+	connect( m_layerWidget, &LayerWidget::deletedLayer,  m_centralWidget, &WorkspaceWidget::deleteLayerFromIndex );
 	connect( m_layerWidget, &LayerWidget::getTabCount,  m_centralWidget, &WorkspaceWidget::getTabCount );
-	connect( m_layerWidget, &LayerWidget::changeLayerFocus,  m_centralWidget, &WorkspaceWidget::changeLayerFocus );
+}
+
+void MainWindow::initialShortcut()
+{
+	m_saveAction->		setShortcuts( QKeySequence::Save );
+	m_undoAction->		setShortcuts( QKeySequence::Undo );
+	m_redoAction->		setShortcuts( QKeySequence::Redo );
+	m_saveAllAction->	setShortcut( tr( "Ctrl+Shift+S" ) );
+	m_cursorToolAction->setShortcut( tr( "C" ) );
+	m_moveToolAction->	setShortcut( tr( "V" ) );
+	m_brushAction->		setShortcut( tr( "B" ) );
+	m_eraserAction->	setShortcut( tr( "E" ) );
+
+	m_eraseSelectedTilesShortcut =	new QShortcut( QKeySequence::Delete, this );
+	m_selecteAllTilesShortcut =		new QShortcut( QKeySequence::SelectAll, this );
+	m_workspaceSwitchTabShortcut =	new QShortcut( QKeySequence::NextChild, this );
+	m_workspaceCloseTabShortcut =	new QShortcut( tr( "Ctrl+W" ), this );
+	m_newLayerShortcut =			new QShortcut( tr( "Ctrl+Shift+N" ), this );
+	m_raiseLayerShortcut =			new QShortcut( tr( "Ctrl+[" ), this );
+	m_lowerLayerShortcut =			new QShortcut( tr( "Ctrl+]" ), this );
 }
 
 void MainWindow::updateToolBar()
