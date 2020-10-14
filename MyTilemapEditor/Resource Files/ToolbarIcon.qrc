@@ -18,5 +18,6 @@
         <file>Icon/close-eye.png</file>
         <file>Icon/eye.png</file>
         <file>Icon/cursor.png</file>
+        <file>app-icon.ico</file>
     </qresource>
 </RCC>

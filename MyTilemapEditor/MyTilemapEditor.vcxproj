@@ -179,6 +179,9 @@
   <ItemGroup>
     <None Include="ThirdParty\framelesswindowDarkStyle\frameless_window_dark.pro" />
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resource Files\resources.rc" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
     <Import Project="$(QtMsBuild)\qt.targets" />
