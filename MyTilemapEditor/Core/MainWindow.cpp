@@ -24,10 +24,7 @@ MainWindow::MainWindow(QWidget *parent)
 void MainWindow::closeEvent( QCloseEvent* event )
 {
 	bool isAllReadyToClose = true;
-	if ( !m_centralWidget->isReadyToClose() )
-	{
-		isAllReadyToClose = false;
-	}
+	closeCurrentProject( isAllReadyToClose );
 
 	if ( isAllReadyToClose )
 	{
@@ -190,9 +187,9 @@ void MainWindow::initialDockWidgets()
 void MainWindow::initialConnections()
 {
 	connect( m_eraseSelectedTilesShortcut, &QShortcut::activated, m_centralWidget, &WorkspaceWidget::eraseSelectedTilesInCurrentLayer );
-	connect( m_selectAllTilesShortcut, &QShortcut::activated, m_centralWidget, &WorkspaceWidget::selecteAllTilesInCurrentLayer );
 	connect( m_workspaceSwitchTabShortcut, &QShortcut::activated, m_centralWidget, &WorkspaceWidget::nextTab );
 	connect( m_workspaceCloseTabShortcut, &QShortcut::activated, m_centralWidget, &WorkspaceWidget::closeCurrentTab );
+	connect( m_selectAllTilesShortcut, &QShortcut::activated, m_centralWidget, &WorkspaceWidget::selecteAllTilesInCurrentLayer );
 	connect( m_newLayerShortcut, SIGNAL( activated() ), m_layerWidget, SLOT( addNewLayer() ) );
 	connect( m_raiseLayerShortcut, &QShortcut::activated, m_layerWidget, &LayerWidget::raiseCurrentLayer );
 	connect( m_lowerLayerShortcut, &QShortcut::activated, m_layerWidget, &LayerWidget::lowerCurrentLayer );
@@ -209,9 +206,12 @@ void MainWindow::initialConnections()
 
 	connect( m_projectWidget, &ProjectWidget::loadProjectSuccessfully, this, &MainWindow::updateToolBar );
 	connect( m_projectWidget, &ProjectWidget::loadTilesetSuccessfully, m_tilesetWidget, &TilesetWidget::addTilesetIntoProject );
-	connect( m_projectWidget, &ProjectWidget::tilesetRenamed, m_tilesetWidget, &TilesetWidget::tilesetRenamed );
 	connect( m_projectWidget, &ProjectWidget::loadMapSuccessfully, m_centralWidget, &WorkspaceWidget::insertMap );
 	connect( m_projectWidget, &ProjectWidget::loadMapSuccessfully, m_layerWidget, &LayerWidget::addNewLayerGroup );
+	connect( m_projectWidget, &ProjectWidget::tilesetRenamed, m_tilesetWidget, &TilesetWidget::tilesetRenamed );
+	connect( m_projectWidget, &ProjectWidget::isReadyCloseProject, this, &MainWindow::closeCurrentProject );
+	connect( m_projectWidget, &ProjectWidget::closeProject, m_centralWidget, &WorkspaceWidget::closeAllTab );
+	connect( m_projectWidget, &ProjectWidget::closeProject, m_tilesetWidget, &TilesetWidget::closeAllTab );
 
 	connect( m_centralWidget, &WorkspaceWidget::updateRedo, this, &MainWindow::replaceRedoAction );
 	connect( m_centralWidget, &WorkspaceWidget::updateUndo, this, &MainWindow::replaceUndoAction );
@@ -346,5 +346,15 @@ void MainWindow::disableShortcut( bool isDisable )
 	{
 		s->setEnabled(!isDisable);
 		s->setContext( sc );
+	}
+}
+
+void MainWindow::closeCurrentProject( bool& isSuccess )
+{
+	isSuccess = true;
+
+	if( !m_centralWidget->isReadyToClose() )
+	{
+		isSuccess = false;
 	}
 }

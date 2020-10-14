@@ -44,6 +44,8 @@ private slots:
 	void rename();
 
 signals:
+	void isReadyCloseProject( bool& isSuccess );
+	void closeProject();
 	void loadProjectSuccessfully();
 	void loadTilesetSuccessfully( Tileset* tileset );
 	void loadMapSuccessfully( MapInfo mapInfo, QList<LayerInfo> layerInfoList );

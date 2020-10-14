@@ -111,6 +111,10 @@ void TilesetWidget::addTilesetIntoProject( Tileset* tileset )
 
 void TilesetWidget::tabCurrentChanged( int index )
 {
+	if ( index < 0 )
+	{
+		return;
+	}
 	TilePalette* p = m_tilePaletteList[index];
 	updateTile( p->m_tileset, p->m_currentIndex );
 }
@@ -143,4 +147,21 @@ void TilesetWidget::tilesetRenamed( const QString& path, const QString& oldName,
 			m_tilesetTabWidget->setTabText( i, baseName );
 		}
 	}
+}
+
+void TilesetWidget::closeAllTab()
+{
+	int count = m_tilesetTabWidget->count();
+	for( int i = 0; i < count; ++i )
+	{
+		m_tilesetTabWidget->removeTab( i );
+	}
+	m_tilesetTabWidget->clear();
+
+	for( int i = 0; i < m_tilePaletteList.size(); ++i )
+	{
+		delete m_tilePaletteList[i];
+	}
+	m_tilePaletteList.clear();
+	updateTile( nullptr, 0 );
 }

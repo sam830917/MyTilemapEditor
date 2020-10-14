@@ -163,7 +163,19 @@ void ProjectWidget::newProject()
 			root->LinkEndChild( tilesetEle );
 
 			saveXmlFile( *xmlDocument, filePath );
-	
+
+			if( getProject() )
+			{
+				// Close previous project
+				bool isSuccess = false;
+				isReadyCloseProject( isSuccess );
+				if( !isSuccess )
+				{
+					return;
+				}
+				closeProject();
+				updateProject( nullptr );
+			}
 			updateProject( new Project( xmlDocument, filePath ) );
 
 			m_fileModel->setRootPath( fileInfo.path() );
@@ -222,6 +234,18 @@ void ProjectWidget::openProject( const QString& filePath )
 		return;
 	}
 
+	if ( getProject() )
+	{
+		// Close previous project
+		bool isSuccess = false;
+		isReadyCloseProject( isSuccess );
+		if ( !isSuccess )
+		{
+			return;
+		}
+		closeProject();
+		updateProject( nullptr );
+	}
 	updateProject( new Project( xmlDocument, filePath ) );
 
 	m_fileModel->setRootPath( fileInfo.path() );

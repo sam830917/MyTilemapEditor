@@ -39,6 +39,7 @@ public slots:
 	void replaceRedoAction( QAction* action );
 	void replaceUndoAction( QAction* action );
 	void disableShortcut( bool isDisable );
+	void closeCurrentProject( bool& isSuccess );
 
 signals:
 	void quit();

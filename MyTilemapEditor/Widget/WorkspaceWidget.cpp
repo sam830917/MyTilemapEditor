@@ -478,3 +478,20 @@ void WorkspaceWidget::selecteAllTilesInCurrentLayer()
 {
 	m_mapSceneList[m_mapTabWidget->currentIndex()]->selecteAllTiles();
 }
+
+void WorkspaceWidget::closeAllTab()
+{
+	int count = m_mapTabWidget->count();
+	for( int i = 0; i < count; ++i ) 
+	{
+		closeTab( m_mapTabWidget->currentIndex() );
+	}
+	m_mapTabWidget->clear();
+	disableTabWidget( true );
+
+	for ( int i = 0; i < m_mapSceneList.size(); ++i )
+	{
+		delete m_mapSceneList[i];
+	}
+	m_mapSceneList.clear();
+}

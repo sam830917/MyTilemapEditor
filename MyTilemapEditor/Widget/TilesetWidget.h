@@ -36,6 +36,7 @@ private:
 public slots:
 	void addTileset();
 	void tilesetRenamed( const QString& path, const QString& oldName, const QString& newName );
+	void closeAllTab();
 
 private:
 	QList<TilePalette*> m_tilePaletteList;

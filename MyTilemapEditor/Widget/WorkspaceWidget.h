@@ -61,6 +61,7 @@ public slots:
 
 	void eraseSelectedTilesInCurrentLayer();
 	void selecteAllTilesInCurrentLayer();
+	void closeAllTab();
 
 signals:
 	void updateRedo( QAction* action );
