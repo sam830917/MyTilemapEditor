@@ -25,7 +25,6 @@ void ProjectWidget::refresh()
 	if ( getProject() == Q_NULLPTR )
 		return;
 
-
 }
 
 void ProjectWidget::addFolder()
@@ -186,59 +185,68 @@ void ProjectWidget::openProject()
 			return;
 
 		QString filePath = filePathList[0];
-		if ( QFileInfo(filePath).suffix() != "mytilemap-project" )
+		openProject( filePath );
+	}
+}
+
+void ProjectWidget::openProject( const QString& filePath )
+{
+	if ( filePath.isEmpty() )
+	{
+		return;
+	}
+	if( QFileInfo( filePath ).suffix() != "mytilemap-project" )
+	{
+		QMessageBox::critical( this, tr( "Error" ), tr( "Failed to Load Project File." ) );
+		return;
+	}
+	QFileInfo fileInfo( filePath );
+
+	if( !fileInfo.exists() )
+		return;
+
+	XmlDocument* xmlDocument = new XmlDocument;
+	xmlDocument->LoadFile( filePath.toStdString().c_str() );
+	if( xmlDocument->Error() )
+	{
+		QMessageBox::critical( this, tr( "Error" ), tr( "Failed to Load Project File." ) );
+		return;
+	}
+
+	updateProject( new Project( xmlDocument, filePath ) );
+
+	m_fileModel->setRootPath( fileInfo.path() );
+
+	m_treeView->setModel( m_fileModel );
+	for( int i = 1; i < m_fileModel->columnCount(); ++i )
+	{
+		m_treeView->hideColumn( i );
+	}
+	m_treeView->setHeaderHidden( true );
+	m_treeView->setRootIndex( m_fileModel->index( fileInfo.path() ) );
+
+	// add Tileset
+	XmlElement* root = xmlDocument->RootElement();
+	if( !root )
+	{
+		QMessageBox::critical( this, tr( "Error" ), tr( "Failed to Load Project File." ) );
+		return;
+	}
+	loadProjectSuccessfully();
+
+	XmlElement* tilesetsEle = root->FirstChildElement( "Tilesets" );
+	if( !tilesetsEle )
+		return;
+
+	for( XmlElement* tilesetEle = tilesetsEle->FirstChildElement( "Tileset" ); tilesetEle; tilesetEle = tilesetEle->NextSiblingElement( "Tileset" ) )
+	{
+		QString path = parseXmlAttribute( *tilesetEle, "path", QString() );
+		QString tilesetPath = getProjectRootPath() + "/" + path;
+
+		Tileset* t = convertToTileset( tilesetPath );
+		if( t )
 		{
-			QMessageBox::critical( this, tr( "Error" ), tr( "Failed to Load Project File." ) );
-			return;
-		}
-		QFileInfo fileInfo( filePath );
-
-		if ( !fileInfo.exists() )
-			return;
-
-		XmlDocument* xmlDocument = new XmlDocument;
-		xmlDocument->LoadFile( filePath.toStdString().c_str() );
-		if( xmlDocument->Error() )
-		{
-			QMessageBox::critical( this, tr( "Error" ), tr( "Failed to Load Project File." ) );
-			return;
-		}
-
-		updateProject( new Project( xmlDocument, filePath ) );
-
-		m_fileModel->setRootPath( fileInfo.path() );
-
-		m_treeView->setModel( m_fileModel );
-		for( int i = 1; i < m_fileModel->columnCount(); ++i )
-		{
-			m_treeView->hideColumn( i );
-		}
-		m_treeView->setHeaderHidden( true );
-		m_treeView->setRootIndex( m_fileModel->index( fileInfo.path() ) );
-
-		// add Tileset
-		XmlElement* root = xmlDocument->RootElement();
-		if ( !root )
-		{
-			QMessageBox::critical( this, tr( "Error" ), tr( "Failed to Load Project File." ) );
-			return;
-		}
-		loadProjectSuccessfully();
-
-		XmlElement* tilesetsEle = root->FirstChildElement( "Tilesets" );
-		if ( !tilesetsEle )
-			return;
-
-		for ( XmlElement* tilesetEle = tilesetsEle->FirstChildElement( "Tileset" ); tilesetEle; tilesetEle = tilesetEle->NextSiblingElement( "Tileset" ) )
-		{
-			QString path = parseXmlAttribute( *tilesetEle, "path", QString() );
-			QString tilesetPath = getProjectRootPath() + "/" + path;
-
-			Tileset* t = convertToTileset( tilesetPath );
-			if ( t )
-			{
-				loadTilesetSuccessfully( t );
-			}
+			loadTilesetSuccessfully( t );
 		}
 	}
 }

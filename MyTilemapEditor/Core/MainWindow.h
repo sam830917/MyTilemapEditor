@@ -3,6 +3,7 @@
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
+#include "Core/Config.h"
 #include <QCloseEvent>
 #include <QShortcut>
 #include "Toolbar.h"
@@ -30,6 +31,7 @@ private:
 	void initialDockWidgets();
 	void initialConnections();
 	void initialShortcut();
+	void restoreStates();
 
 public slots:
 	void updateToolBar();
@@ -42,6 +44,7 @@ signals:
 	void quit();
 
 private:
+	Config* m_config;
 	QMenuBar* m_mainMenuBar;
 	QMenu* m_windowsMenu;
 	QMenu* m_fileMenu;

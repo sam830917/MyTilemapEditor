@@ -11,12 +11,14 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
+	m_config = new Config();
 	initialMenuBar();
 	initialToolBar();
 	initialDockWidgets();
 	initialShortcut();
 	initialConnections();
 	initialStatusBar();
+	restoreStates();
 }
 
 void MainWindow::closeEvent( QCloseEvent* event )
@@ -29,6 +31,10 @@ void MainWindow::closeEvent( QCloseEvent* event )
 
 	if ( isAllReadyToClose )
 	{
+		QString projectFilePath = getProjectFilePath();
+		m_config->set( "projectFilePath", projectFilePath );
+		m_config->set( "windowState", saveState() );
+		m_config->set( "geometry", saveGeometry() );
 		event->accept();
 	}
 	else
@@ -193,10 +199,10 @@ void MainWindow::initialConnections()
 	connect( m_saveAllAction, &QAction::triggered, m_centralWidget, &WorkspaceWidget::saveAllMaps );
 	connect( m_mapAction, &QAction::triggered, m_centralWidget, &WorkspaceWidget::addMap );
 	connect( m_projectNewAction, &QAction::triggered, m_projectWidget, &ProjectWidget::newProject );
-	connect( m_projectOpenAction, &QAction::triggered, m_projectWidget, &ProjectWidget::openProject );
+	connect( m_projectOpenAction, SIGNAL( triggered(bool) ), m_projectWidget, SLOT( openProject() ) );
 	connect( m_tilesetAction, &QAction::triggered, m_tilesetWidget, &TilesetWidget::addTileset );
 
-	connect( m_centralWidget->m_openProjectButton, &QPushButton::clicked, m_projectWidget, &ProjectWidget::openProject );
+	connect( m_centralWidget->m_openProjectButton, SIGNAL( clicked(bool) ), m_projectWidget, SLOT( openProject() ) );
 	connect( m_centralWidget->m_newProjectButton, &QPushButton::clicked, m_projectWidget, &ProjectWidget::newProject );
 
 	connect( m_projectWidget, &ProjectWidget::loadProjectSuccessfully, this, &MainWindow::updateToolBar );
@@ -249,6 +255,14 @@ void MainWindow::initialShortcut()
 	m_newLayerShortcut =			new QShortcut( tr( "Ctrl+Shift+N" ), this );
 	m_raiseLayerShortcut =			new QShortcut( tr( "Ctrl+[" ), this );
 	m_lowerLayerShortcut =			new QShortcut( tr( "Ctrl+]" ), this );
+}
+
+void MainWindow::restoreStates()
+{
+	restoreState( m_config->get( "windowState" ).toByteArray() );
+	restoreGeometry( m_config->get( "geometry" ).toByteArray() );
+	QString projectFilePath = m_config->get( "projectFilePath" ).toString();
+ 	m_projectWidget->openProject( projectFilePath );
 }
 
 void MainWindow::updateToolBar()

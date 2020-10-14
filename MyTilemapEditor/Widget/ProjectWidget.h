@@ -32,6 +32,7 @@ private:
 public slots:
 	void newProject();
 	void openProject();
+	void openProject( const QString& filePath );
 	void refresh();
 	void addFolder();
 	void fileRenamed(const QString &path, const QString &oldName, const QString &newName);

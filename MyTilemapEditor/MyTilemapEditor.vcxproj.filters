@@ -111,6 +111,9 @@
     <ClCompile Include="Widget\LayerWidget.cpp">
       <Filter>Widget</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Config.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Core\MainWindow.h">
@@ -210,6 +213,9 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\MapScene.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Config.h">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
