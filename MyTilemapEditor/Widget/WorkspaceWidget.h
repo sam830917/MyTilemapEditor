@@ -28,6 +28,7 @@ public:
 
 	void disableTabWidget( bool disable ) const;
 	bool isReadyToClose();
+	QStringList getOpeningMapFilePath() const;
 
 	eDrawTool getCurrentDrawTool() { return m_drawTool; }
 

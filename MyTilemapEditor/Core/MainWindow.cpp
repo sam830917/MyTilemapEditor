@@ -35,6 +35,8 @@ void MainWindow::closeEvent( QCloseEvent* event )
 		m_config->set( "projectFilePath", projectFilePath );
 		m_config->set( "windowState", saveState() );
 		m_config->set( "geometry", saveGeometry() );
+		QStringList openingMapPathList = m_centralWidget->getOpeningMapFilePath();
+		m_config->set( "openingMaps", openingMapPathList );
 		event->accept();
 	}
 	else
@@ -263,6 +265,11 @@ void MainWindow::restoreStates()
 	restoreGeometry( m_config->get( "geometry" ).toByteArray() );
 	QString projectFilePath = m_config->get( "projectFilePath" ).toString();
  	m_projectWidget->openProject( projectFilePath );
+	QStringList openingMaps = m_config->get( "openingMaps" ).toStringList();
+	for ( QString path : openingMaps )
+	{
+		m_projectWidget->openFile( path );
+	}
 }
 
 void MainWindow::updateToolBar()

@@ -37,6 +37,7 @@ public slots:
 	void addFolder();
 	void fileRenamed(const QString &path, const QString &oldName, const QString &newName);
 	void openFile( QModelIndex index );
+	void openFile( const QString& filePath );
 
 private slots:
 	void popupMenu( const QPoint& pos );

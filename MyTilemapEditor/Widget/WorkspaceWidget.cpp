@@ -306,6 +306,16 @@ bool WorkspaceWidget::isReadyToClose()
 	return true;
 }
 
+QStringList WorkspaceWidget::getOpeningMapFilePath() const
+{
+	QStringList filePathList;
+	for ( MapScene* scene : m_mapSceneList )
+	{
+		filePathList << scene->m_mapInfo.getFilePath();
+	}
+	return filePathList;
+}
+
 void WorkspaceWidget::saveCurrentMap()
 {
 	int mapIndex = m_mapTabWidget->currentIndex();

@@ -82,12 +82,21 @@ void ProjectWidget::openFile( QModelIndex index )
 	bool isFile = fileInfo.isFile();
 	if ( !isFile )
 		return;
-	
+
+	openFile( path );
+}
+
+void ProjectWidget::openFile( const QString& filePath )
+{
+	if ( !getProject() )
+		return;
+
+	QFileInfo fileInfo( filePath );
 	if ( "map" == fileInfo.suffix() )
 	{
 		MapInfo mapInfo;
 		QList<LayerInfo> layerInfoList;
-		convertToMapInfo( path, mapInfo, layerInfoList );
+		convertToMapInfo( filePath, mapInfo, layerInfoList );
 		if( !mapInfo.IsValid() )
 		{
 			QMessageBox::critical( this, tr( "Error" ), tr( "Failed to Load Map File." ) );
@@ -97,7 +106,7 @@ void ProjectWidget::openFile( QModelIndex index )
 	}
 	else if ( "tileset" == fileInfo.suffix() )
 	{
-		Tileset* tileset  = convertToTileset( path );
+		Tileset* tileset  = convertToTileset( filePath );
 		if ( tileset == nullptr )
 		{
 			QMessageBox::critical( this, tr( "Error" ), tr( "Failed to Load Tileset File." ) );
@@ -121,7 +130,7 @@ void ProjectWidget::initialTreeView()
 	setWidget( m_treeView );
 	m_treeView->setContextMenuPolicy( Qt::CustomContextMenu );
 	connect( m_treeView, &QTreeView::customContextMenuRequested, this, &ProjectWidget::popupMenu );
-	connect( m_treeView, &QAbstractItemView::doubleClicked, this, &ProjectWidget::openFile );
+	connect( m_treeView, SIGNAL( doubleClicked(QModelIndex) ), this, SLOT( openFile(QModelIndex) ) );
 }
 
 void ProjectWidget::newProject()
