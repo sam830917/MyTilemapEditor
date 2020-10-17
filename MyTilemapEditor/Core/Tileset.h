@@ -22,6 +22,10 @@ public:
 	QSize		getSizeFromIndex( int index ) const;
 	QSize		getCoordTileSize() const;
 	QPoint		getPoint( int index ) const;
+
+	bool        operator==( const Tileset& compare ) const;
+	bool        operator!=( const Tileset& compare ) const;
+
 private:
 	QString m_imagePath;
 	QString m_filePath;

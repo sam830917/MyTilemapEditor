@@ -38,6 +38,7 @@ public:
 	MapInfo getMapInfo() { return m_mapInfo; }
 
 	void editMapOnPoint( const QPointF& point );
+	void editMapFloodFill( int layerIndex, const QPoint& coord );
 
 	void paintMap( int index, TileInfo tileInfo, int layerIndex );
 	void paintMap( int index, TileInfo tileInfo );
@@ -57,6 +58,7 @@ private:
 	void paintMap( const QMap<int, TileInfo>& tileInfoMap, int layerIndex );
 	void showTileProperties( const QPointF& mousePos );
 	void showSelectedTileProperties();
+	void floodFillMap( int layerIndex, const QPoint& coord, const TileInfo& currentTileInfo, const TileInfo& newTileInfo );
 
 protected:
 	virtual void mousePressEvent( QGraphicsSceneMouseEvent* event ) override;

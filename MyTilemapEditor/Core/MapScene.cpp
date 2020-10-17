@@ -178,6 +178,12 @@ void MapScene::editMapOnPoint( const QPointF& point )
 	}
 }
 
+void MapScene::editMapFloodFill( int layerIndex, const QPoint& coord )
+{
+	TileInfo currentTileInfo = m_layers[layerIndex]->m_tileList[m_mapInfo.getIndex( coord )]->m_tileInfo;
+	floodFillMap( layerIndex, coord, currentTileInfo, getCurrentTile() );
+}
+
 void MapScene::paintMap( int index )
 {
 	paintMap( index, getCurrentTile() );
@@ -315,6 +321,25 @@ void MapScene::showSelectedTileProperties()
 	m_parentWidget->showProperties( informationMap );
 }
 
+void MapScene::floodFillMap( int layerIndex, const QPoint& coord, const TileInfo& currentTileInfo, const TileInfo& newTileInfo )
+{
+	if( coord.x() < 0 || coord.x() >= m_mapInfo.getMapSize().width() || coord.y() < 0 || coord.y() >= m_mapInfo.getMapSize().height() )
+		return;
+
+	if ( m_layers[layerIndex]->m_tileList[m_mapInfo.getIndex( coord )]->m_tileInfo != currentTileInfo )
+		return;
+
+	if( m_layers[layerIndex]->m_tileList[m_mapInfo.getIndex( coord )]->m_tileInfo == newTileInfo )
+		return;
+
+	paintMap( m_mapInfo.getIndex(coord), newTileInfo, layerIndex );
+
+	floodFillMap( layerIndex, QPoint( coord.x() + 1, coord.y() ), currentTileInfo, newTileInfo );
+	floodFillMap( layerIndex, QPoint( coord.x() - 1, coord.y() ), currentTileInfo, newTileInfo );
+	floodFillMap( layerIndex, QPoint( coord.x(), coord.y() + 1 ), currentTileInfo, newTileInfo );
+	floodFillMap( layerIndex, QPoint( coord.x(), coord.y() - 1 ), currentTileInfo, newTileInfo );
+}
+
 void MapScene::eraseMap( int index )
 {
 	if( index < 0 )
@@ -425,7 +450,7 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 			m_parentWidget->setCursor( Qt::ClosedHandCursor );
 			return;
 		}
-		if ( eDrawTool::CURSOR == m_parentWidget->m_drawTool )
+		else if ( eDrawTool::CURSOR == m_parentWidget->m_drawTool )
 		{
 			QPointF mousePos = event->scenePos();
 			if( mousePos == QPointF() )
@@ -445,8 +470,41 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 			showTileProperties( mousePos );
 			return;
 		}
+		else if ( eDrawTool::BUCKET == m_parentWidget->m_drawTool )
+		{
+			QPointF mousePos = event->scenePos();
+			if( mousePos == QPointF() )
+			{
+				return;
+			}
+			QSizeF bound = QSizeF( m_mapInfo.getTileSize().width() * m_mapInfo.getMapSize().width(), m_mapInfo.getTileSize().height() * m_mapInfo.getMapSize().height() );
+			if( mousePos.x() >= bound.width() || mousePos.y() >= bound.height() || mousePos.x() <= 0 || mousePos.y() <= 0 )
+			{
+				return;
+			}
+			QPoint coord = QPoint( qFloor( mousePos.x() / m_mapInfo.getTileSize().width() ), qFloor( mousePos.y() / m_mapInfo.getTileSize().height() ) );
 
+			// Flood fill Algorithm
+			int currentIndex = -1;
+			m_parentWidget->getLayerIndex( currentIndex );
+			if( currentIndex == -1 )
+			{
+				return;
+			}
+			m_beforeDrawTileInfo.clear();
+			m_beforeDrawTileInfo.reserve( m_layers[currentIndex]->m_tileList.size() );
+			for( Tile* tile : m_layers[currentIndex]->m_tileList )
+			{
+				TileInfo& info = tile->getTileInfo();
+				m_beforeDrawTileInfo.push_back( info );
+			}
+			editMapFloodFill( currentIndex, coord );
+			QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, m_layers[currentIndex]->m_tileList );
+			m_undoStack->push( command );
+		}
 		// Draw or erase mode
+		else if ( eDrawTool::BRUSH == m_parentWidget->m_drawTool ||
+				eDrawTool::ERASER == m_parentWidget->m_drawTool )
 		{
 			m_beforeDrawTileInfo.clear();
 			int currentIndex = -1;
@@ -488,7 +546,7 @@ void MapScene::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
 			m_view->horizontalScrollBar()->setValue( m_view->horizontalScrollBar()->value() - (currentPosition.x() - lastPosition.x()) );
 			return;
 		}
-		if( eDrawTool::CURSOR == m_parentWidget->m_drawTool )
+		else if( eDrawTool::CURSOR == m_parentWidget->m_drawTool )
 		{
 			QPointF mousePos = event->scenePos();
 			if( mousePos == QPointF() || m_selectedTileItemList.isEmpty() )
@@ -516,8 +574,9 @@ void MapScene::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
 			
 			return;
 		}
-
 		// Draw or erase mode
+		else if( eDrawTool::BRUSH == m_parentWidget->m_drawTool ||
+			eDrawTool::ERASER == m_parentWidget->m_drawTool )
 		{
 			int currentIndex = -1;
 			m_parentWidget->getLayerIndex( currentIndex );
@@ -546,12 +605,13 @@ void MapScene::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 			m_parentWidget->setCursor( Qt::ArrowCursor );
 			return;
 		}
-		if( eDrawTool::CURSOR == m_parentWidget->m_drawTool )
+		else if( eDrawTool::CURSOR == m_parentWidget->m_drawTool )
 		{
 			return;
 		}
-
 		// Draw or erase mode
+		else if( eDrawTool::BRUSH == m_parentWidget->m_drawTool ||
+			eDrawTool::ERASER == m_parentWidget->m_drawTool )
 		{
 			int currentIndex = -1;
 			m_parentWidget->getLayerIndex( currentIndex );

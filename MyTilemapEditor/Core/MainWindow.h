@@ -65,6 +65,8 @@ private:
 	QAction* m_moveToolAction;
 	QAction* m_brushAction;
 	QAction* m_eraserAction;
+	QAction* m_bucketAction;
+	QAction* m_magicWandAction;
 
 	QShortcut* m_eraseSelectedTilesShortcut;
 	QShortcut* m_selectAllTilesShortcut;

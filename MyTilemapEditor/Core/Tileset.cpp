@@ -76,3 +76,13 @@ QPoint Tileset::getPoint( int index ) const
 	QSize tileSize = getSizeFromIndex( index );
 	return QPoint( tileSize.width() * m_tileSize.width(), tileSize.height() * m_tileSize.height() );
 }
+
+bool Tileset::operator!=( const Tileset& compare ) const
+{
+	return m_filePath != compare.m_filePath;
+}
+
+bool Tileset::operator==( const Tileset& compare ) const
+{
+	return m_filePath == compare.m_filePath;
+}

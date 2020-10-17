@@ -2,6 +2,7 @@
 
 #include <QSize>
 #include <QString>
+#include <QPoint>
 
 class MapInfo
 {
@@ -14,6 +15,7 @@ public:
 	void setFilePath( const QString& filePath ) { m_filePath = filePath; }
 	void setName( const QString& name ) { m_name = name; }
 	void setIsValid( bool isValid ) { m_isValid = isValid; }
+	int  getIndex( const QPoint& coord ) const { return coord.y() * getMapSize().width() + coord.x(); }
 
 	QString		getFilePath() const { return m_filePath; }
 	QString		getName() const { return m_name; }

@@ -116,20 +116,29 @@ void MainWindow::initialToolBar()
 	m_moveToolAction->setData( QVariant::fromValue( eDrawTool::MOVE ) );
 	m_brushAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/pencil.png" ), tr( "&Brush (B)" ) );
 	m_eraserAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/eraser.png" ), tr( "&Eraser (E)" ) );
+	m_bucketAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/bucket.png" ), tr( "&Bucket (G)" ) );
+	m_magicWandAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/magic-wand.png" ), tr( "&Magic Wand (W)" ) );
 
 	QActionGroup* alignmentGroup = new QActionGroup( this );
 	alignmentGroup->addAction( m_brushAction );
 	alignmentGroup->addAction( m_eraserAction );
+	alignmentGroup->addAction( m_bucketAction );
+	alignmentGroup->addAction( m_magicWandAction );
 	alignmentGroup->addAction( m_moveToolAction );
 	alignmentGroup->addAction( m_cursorToolAction );
 	m_brushAction->setCheckable(true);
 	m_eraserAction->setCheckable(true);
 	m_moveToolAction->setCheckable(true);
 	m_cursorToolAction->setCheckable(true);
+	m_bucketAction->setCheckable(true);
+	m_magicWandAction->setCheckable(true);
+
 	m_cursorToolAction->setChecked(true);
 
 	m_brushAction->setData( QVariant::fromValue( eDrawTool::BRUSH ) );
 	m_eraserAction->setData( QVariant::fromValue( eDrawTool::ERASER ) );
+	m_bucketAction->setData( QVariant::fromValue( eDrawTool::BUCKET ) );
+	m_magicWandAction->setData( QVariant::fromValue( eDrawTool::MAGIC_WAND ) );
 	connect( alignmentGroup, &QActionGroup::triggered, this, &MainWindow::changeDrawTool );
 }
 
@@ -251,6 +260,8 @@ void MainWindow::initialShortcut()
 	m_moveToolAction->	setShortcut( tr( "V" ) );
 	m_brushAction->		setShortcut( tr( "B" ) );
 	m_eraserAction->	setShortcut( tr( "E" ) );
+	m_bucketAction->	setShortcut( tr( "G" ) );
+	m_magicWandAction->	setShortcut( tr( "W" ) );
 
 	m_eraseSelectedTilesShortcut =	new QShortcut( QKeySequence::Delete, this );
 	m_selectAllTilesShortcut =		new QShortcut( QKeySequence::SelectAll, this );

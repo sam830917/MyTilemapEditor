@@ -15,7 +15,9 @@ enum class eDrawTool
 	CURSOR,
 	MOVE,
 	BRUSH,
-	ERASER
+	ERASER,
+	BUCKET,
+	MAGIC_WAND,
 };
 Q_DECLARE_METATYPE( eDrawTool );
 

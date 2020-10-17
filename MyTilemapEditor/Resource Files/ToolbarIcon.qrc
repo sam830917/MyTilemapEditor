@@ -19,5 +19,7 @@
         <file>Icon/eye.png</file>
         <file>Icon/cursor.png</file>
         <file>app-icon.ico</file>
+        <file>Icon/bucket.png</file>
+        <file>Icon/magic-wand.png</file>
     </qresource>
 </RCC>
