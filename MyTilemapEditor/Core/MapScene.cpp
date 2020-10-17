@@ -19,13 +19,14 @@ public:
 	SelectMask( MapScene* scene, QPoint coord );
 	~SelectMask();
 
+	void setSelected( bool isSelected );
 private:
 	virtual void paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = Q_NULLPTR ) override;
 
 private:
 	MapScene* m_scene;
 	QPoint m_coord;
-	bool isSelected = false;
+	bool m_isSelected = false;
 };
 
 SelectMask::SelectMask( MapScene* scene, QPoint coord )
@@ -38,25 +39,25 @@ SelectMask::SelectMask( MapScene* scene, QPoint coord )
 
 SelectMask::~SelectMask()
 {
+}
 
+void SelectMask::setSelected( bool isSelected )
+{
+	m_isSelected = isSelected;
 }
 
 void SelectMask::paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget /*= Q_NULLPTR */ )
 {
-	QPoint& minCoord = m_scene->m_selectedMinCoord;
-	QPoint& maxCoord = m_scene->m_selectedMaxCoord;
-	isSelected = false;
-	if ( m_coord.x() >= minCoord.x() && m_coord.x() < maxCoord.x() && m_coord.y() < maxCoord.y() && m_coord.y() >= minCoord.y() )
+	if( !m_scene->m_showSelection )
+		return;
+
+	if ( m_isSelected )
 	{
-		if( m_scene->m_showSelection )
-		{
-			QRectF rect = boundingRect();
-			QSize& tileSize = m_scene->getMapInfo().getTileSize();
-			painter->setBrush( QBrush( QColor( 0, 0, 100, 100 ) ) );
-			painter->setPen( QPen( QColor( 0, 0, 0, 0 ) ) );
-			painter->drawRect( (rect.x() + 0.5f), (rect.y() + 0.5f), tileSize.width(), tileSize.height() );
-			isSelected = true;
-		}
+		QRectF rect = boundingRect();
+		QSize& tileSize = m_scene->getMapInfo().getTileSize();
+		painter->setBrush( QBrush( QColor( 0, 0, 100, 100 ) ) );
+		painter->setPen( QPen( QColor( 0, 0, 0, 0 ) ) );
+		painter->drawRect( (rect.x() + 0.5f), (rect.y() + 0.5f), tileSize.width(), tileSize.height() );
 	}
 }
 
@@ -178,10 +179,27 @@ void MapScene::editMapOnPoint( const QPointF& point )
 	}
 }
 
-void MapScene::editMapFloodFill( int layerIndex, const QPoint& coord )
+void MapScene::editMapByFloodFill( int layerIndex, const QPoint& coord )
 {
 	TileInfo currentTileInfo = m_layers[layerIndex]->m_tileList[m_mapInfo.getIndex( coord )]->m_tileInfo;
-	floodFillMap( layerIndex, coord, currentTileInfo, getCurrentTile() );
+	paintTileByFloodFill( layerIndex, coord, currentTileInfo, getCurrentTile() );
+}
+
+void MapScene::selectTilesByFloodFill( int layerIndex, const QPoint& coord )
+{
+	for( SelectMask* mask : m_selectedTileItemList )
+	{
+		mask->setSelected( false );
+	}
+	TileInfo currentTileInfo = m_layers[layerIndex]->m_tileList[m_mapInfo.getIndex( coord )]->m_tileInfo;
+	selectTilesByFloodFill( layerIndex, coord, currentTileInfo, getCurrentTile() );
+}
+
+int MapScene::getCurrentLayerIndex()
+{
+	int currentIndex = -1;
+	m_parentWidget->getLayerIndex( currentIndex );
+	return currentIndex;
 }
 
 void MapScene::paintMap( int index )
@@ -321,7 +339,7 @@ void MapScene::showSelectedTileProperties()
 	m_parentWidget->showProperties( informationMap );
 }
 
-void MapScene::floodFillMap( int layerIndex, const QPoint& coord, const TileInfo& currentTileInfo, const TileInfo& newTileInfo )
+void MapScene::paintTileByFloodFill( int layerIndex, const QPoint& coord, const TileInfo& currentTileInfo, const TileInfo& newTileInfo )
 {
 	if( coord.x() < 0 || coord.x() >= m_mapInfo.getMapSize().width() || coord.y() < 0 || coord.y() >= m_mapInfo.getMapSize().height() )
 		return;
@@ -334,10 +352,32 @@ void MapScene::floodFillMap( int layerIndex, const QPoint& coord, const TileInfo
 
 	paintMap( m_mapInfo.getIndex(coord), newTileInfo, layerIndex );
 
-	floodFillMap( layerIndex, QPoint( coord.x() + 1, coord.y() ), currentTileInfo, newTileInfo );
-	floodFillMap( layerIndex, QPoint( coord.x() - 1, coord.y() ), currentTileInfo, newTileInfo );
-	floodFillMap( layerIndex, QPoint( coord.x(), coord.y() + 1 ), currentTileInfo, newTileInfo );
-	floodFillMap( layerIndex, QPoint( coord.x(), coord.y() - 1 ), currentTileInfo, newTileInfo );
+	paintTileByFloodFill( layerIndex, QPoint( coord.x() + 1, coord.y() ), currentTileInfo, newTileInfo );
+	paintTileByFloodFill( layerIndex, QPoint( coord.x() - 1, coord.y() ), currentTileInfo, newTileInfo );
+	paintTileByFloodFill( layerIndex, QPoint( coord.x(), coord.y() + 1 ), currentTileInfo, newTileInfo );
+	paintTileByFloodFill( layerIndex, QPoint( coord.x(), coord.y() - 1 ), currentTileInfo, newTileInfo );
+}
+
+void MapScene::selectTilesByFloodFill( int layerIndex, const QPoint& coord, const TileInfo& currentTileInfo, const TileInfo& newTileInfo )
+{
+	if( coord.x() < 0 || coord.x() >= m_mapInfo.getMapSize().width() || coord.y() < 0 || coord.y() >= m_mapInfo.getMapSize().height() )
+		return;
+
+	if( m_layers[layerIndex]->m_tileList[m_mapInfo.getIndex( coord )]->m_tileInfo != currentTileInfo )
+		return;
+
+	if( m_layers[layerIndex]->m_tileList[m_mapInfo.getIndex( coord )]->m_tileInfo == newTileInfo )
+		return;
+
+	if ( m_selectedTileItemList[m_mapInfo.getIndex( coord )]->m_isSelected )
+		return;
+
+	m_selectedTileItemList[m_mapInfo.getIndex( coord )]->setSelected( true );
+
+	selectTilesByFloodFill( layerIndex, QPoint( coord.x() + 1, coord.y() ), currentTileInfo, newTileInfo );
+	selectTilesByFloodFill( layerIndex, QPoint( coord.x() - 1, coord.y() ), currentTileInfo, newTileInfo );
+	selectTilesByFloodFill( layerIndex, QPoint( coord.x(), coord.y() + 1 ), currentTileInfo, newTileInfo );
+	selectTilesByFloodFill( layerIndex, QPoint( coord.x(), coord.y() - 1 ), currentTileInfo, newTileInfo );
 }
 
 void MapScene::eraseMap( int index )
@@ -386,18 +426,29 @@ void MapScene::setIsShowSelection( bool isShow )
 
 void MapScene::updateSelection()
 {
+	m_isSelectedMoreThanOneTile = false;
+	bool hasSelected = false;
 	for( SelectMask* mask : m_selectedTileItemList )
 	{
+		if ( mask->m_isSelected )
+		{
+			if ( hasSelected )
+			{
+				m_isSelectedMoreThanOneTile = true;
+			}
+			hasSelected = true;
+		}
 		mask->update();
 	}
 }
 
 void MapScene::eraseSelectedTiles()
 {
-	if ( m_parentWidget->m_drawTool != eDrawTool::CURSOR )
+	if ( !(m_parentWidget->m_drawTool == eDrawTool::CURSOR || m_parentWidget->m_drawTool == eDrawTool::MAGIC_WAND) )
 	{
 		return;
 	}
+
 	if( !m_showSelection )
 	{
 		return;
@@ -417,7 +468,7 @@ void MapScene::eraseSelectedTiles()
 	}
 	for( int i = 0; i < m_selectedTileItemList.size(); ++i )
 	{
-		if( m_selectedTileItemList[i]->isSelected )
+		if( m_selectedTileItemList[i]->m_isSelected )
 		{
 			eraseMap( i );
 		}
@@ -464,7 +515,12 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 			m_selectedMaxCoord = coord + QPoint( 1, 1 );
 			for ( SelectMask* mask : m_selectedTileItemList )
 			{
-				mask->update();
+				mask->setSelected( false );
+				if( mask->m_coord.x() >= m_selectedMinCoord.x() && mask->m_coord.x() < m_selectedMaxCoord.x() && 
+					mask->m_coord.y() < m_selectedMaxCoord.y() && mask->m_coord.y() >= m_selectedMinCoord.y() )
+				{
+					mask->setSelected( true );
+				}
 			}
 			setIsShowSelection( true );
 			showTileProperties( mousePos );
@@ -485,8 +541,7 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 			QPoint coord = QPoint( qFloor( mousePos.x() / m_mapInfo.getTileSize().width() ), qFloor( mousePos.y() / m_mapInfo.getTileSize().height() ) );
 
 			// Flood fill Algorithm
-			int currentIndex = -1;
-			m_parentWidget->getLayerIndex( currentIndex );
+			int currentIndex = getCurrentLayerIndex();
 			if( currentIndex == -1 )
 			{
 				return;
@@ -498,9 +553,32 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 				TileInfo& info = tile->getTileInfo();
 				m_beforeDrawTileInfo.push_back( info );
 			}
-			editMapFloodFill( currentIndex, coord );
+			editMapByFloodFill( currentIndex, coord );
 			QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, m_layers[currentIndex]->m_tileList );
 			m_undoStack->push( command );
+		}
+		else if ( eDrawTool::MAGIC_WAND == m_parentWidget->m_drawTool )
+		{
+			QPointF mousePos = event->scenePos();
+			if( mousePos == QPointF() )
+			{
+				return;
+			}
+			QSizeF bound = QSizeF( m_mapInfo.getTileSize().width() * m_mapInfo.getMapSize().width(), m_mapInfo.getTileSize().height() * m_mapInfo.getMapSize().height() );
+			if( mousePos.x() >= bound.width() || mousePos.y() >= bound.height() || mousePos.x() <= 0 || mousePos.y() <= 0 )
+			{
+				return;
+			}
+			QPoint coord = QPoint( qFloor( mousePos.x() / m_mapInfo.getTileSize().width() ), qFloor( mousePos.y() / m_mapInfo.getTileSize().height() ) );
+
+			int currentIndex = getCurrentLayerIndex();
+			if( currentIndex == -1 )
+			{
+				return;
+			}
+			selectTilesByFloodFill( currentIndex, coord );
+			setIsShowSelection( true );
+			showSelectedTileProperties();
 		}
 		// Draw or erase mode
 		else if ( eDrawTool::BRUSH == m_parentWidget->m_drawTool ||
@@ -568,6 +646,15 @@ void MapScene::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
 			else
 			{
 				m_isSelectedMoreThanOneTile = false;
+			}
+			for( SelectMask* mask : m_selectedTileItemList )
+			{
+				mask->setSelected( false );
+				if( mask->m_coord.x() >= m_selectedMinCoord.x() && mask->m_coord.x() < m_selectedMaxCoord.x() &&
+					mask->m_coord.y() < m_selectedMaxCoord.y() && mask->m_coord.y() >= m_selectedMinCoord.y() )
+				{
+					mask->setSelected( true );
+				}
 			}
 			setIsShowSelection( true );
 			showSelectedTileProperties();
