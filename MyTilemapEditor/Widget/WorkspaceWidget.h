@@ -3,6 +3,7 @@
 #include "Core/MapScene.h"
 #include "Core/MapInfo.h"
 #include "Core/LayerInfo.h"
+#include "Brush/Brush.h"
 #include <QWidget>
 #include <QTabWidget>
 #include <QList>
@@ -82,6 +83,7 @@ signals:
 
 	void showProperties( const QMap<QString, QString>& informationMap );
 	void addNewLayerGroup( MapInfo mapInfo, QList<LayerInfo> layerInfoList );
+	void getCurrentBrush( Brush*& brush ) const;
 
 public:
 	QPushButton* m_newProjectButton;

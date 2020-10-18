@@ -3,6 +3,7 @@
 #include "Tileset.h"
 #include "Widget/WorkspaceWidget.h"
 #include "Utils/ProjectCommon.h"
+#include "Brush/Brush.h"
 #include <QPainter>
 #include <QGraphicsSceneMouseEvent>
 #include <QDebug>
@@ -162,16 +163,42 @@ void MapScene::editMapOnPoint( const QPointF& point )
 	{
 		return;
 	}
+	Brush* brush = nullptr;
+	m_parentWidget->getCurrentBrush( brush );
 	switch( m_parentWidget->getCurrentDrawTool() )
 	{
 	case eDrawTool::BRUSH:
 	{
-		paintMap( coord );
+		if ( brush )
+		{
+			brush->paint( QPoint( coord.width(), coord.height() ) );
+			QList<TileModified> modifiedList = brush->popReadyToPaintCoordList();
+			for ( TileModified m : modifiedList )
+			{
+				paintMap( coord );
+			}
+		}
+		else
+		{
+			paintMap( coord );
+		}
 		break;
 	}
 	case eDrawTool::ERASER:
 	{
-		eraseMap( coord );
+		if ( brush )
+		{
+			brush->erase( QPoint( coord.width(), coord.height() ) );
+			QList<TileModified> modifiedList = brush->popReadyToPaintCoordList();
+			for( TileModified m : modifiedList )
+			{
+				paintMap( coord );
+			}
+		}
+		else
+		{
+			eraseMap( coord );
+		}
 		break;
 	}
 	default:
@@ -257,6 +284,12 @@ void MapScene::paintMap( const QMap<int, TileInfo>& tileInfoMap, int layerIndex 
 		++mapIterator;
 	}
 	update();
+}
+
+void MapScene::paintMap( QPoint coord, TileInfo tileInfo )
+{
+	int index = m_mapInfo.getIndex( coord );
+	paintMap( index, tileInfo );
 }
 
 void MapScene::showTileProperties( const QPointF& mousePos )

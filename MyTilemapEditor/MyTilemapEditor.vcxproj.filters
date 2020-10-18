@@ -34,6 +34,9 @@
     <Filter Include="ThirdParty\Style\framelesswindow">
       <UniqueIdentifier>{97fe0918-120e-47e1-b8b5-b08168d07a12}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Brush">
+      <UniqueIdentifier>{c3c81aee-41d1-467f-8731-a0790b01f6ed}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\main.cpp">
@@ -114,6 +117,12 @@
     <ClCompile Include="Core\Config.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Brush\Brush.cpp">
+      <Filter>Brush</Filter>
+    </ClCompile>
+    <ClCompile Include="Widget\BrushWidget.cpp">
+      <Filter>Widget</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Core\MainWindow.h">
@@ -154,6 +163,9 @@
     </QtMoc>
     <QtMoc Include="ThirdParty\framelesswindowDarkStyle\framelesswindow\windowdragger.h">
       <Filter>ThirdParty\Style\framelesswindow</Filter>
+    </QtMoc>
+    <QtMoc Include="Widget\BrushWidget.h">
+      <Filter>Widget</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
@@ -217,6 +229,9 @@
     </ClInclude>
     <ClInclude Include="Core\Config.h">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Brush\Brush.h">
+      <Filter>Brush</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

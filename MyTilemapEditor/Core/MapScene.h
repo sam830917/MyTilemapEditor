@@ -45,6 +45,7 @@ public:
 	void paintMap( int index, TileInfo tileInfo );
 	void paintMap( int index );
 	void paintMap( QSize coord );
+	void paintMap( QPoint coord, TileInfo tileInfo );
 	void eraseMap( int index );
 	void eraseMap( QSize coord );
 

@@ -186,17 +186,23 @@ void MainWindow::initialDockWidgets()
 	m_layerWidget->setObjectName( tr( "Layer" ) );
 	addDockWidget( Qt::RightDockWidgetArea, m_layerWidget );
 
+	m_brushWidget = new BrushWidget( tr( "Brush" ), this );
+	m_brushWidget->setObjectName( tr( "Layer" ) );
+	addDockWidget( Qt::RightDockWidgetArea, m_brushWidget );
+
 	resizeDocks( { m_projectWidget }, { 250 }, Qt::Horizontal);
 	resizeDocks( { m_tilesetWidget }, { 250 }, Qt::Vertical );
 	resizeDocks( { m_minimapWidget }, { 250 }, Qt::Horizontal );
 	resizeDocks( { m_propertiesWidget }, { 250 }, Qt::Vertical );
 	resizeDocks( { m_layerWidget }, { 250 }, Qt::Vertical );
+	resizeDocks( { m_brushWidget }, { 250 }, Qt::Vertical );
 
 	m_windowsMenu->addAction( m_projectWidget->toggleViewAction() );
 	m_windowsMenu->addAction( m_tilesetWidget->toggleViewAction() );
 	m_windowsMenu->addAction( m_layerWidget->toggleViewAction() );
 	m_windowsMenu->addAction( m_propertiesWidget->toggleViewAction() );
 	m_windowsMenu->addAction( m_minimapWidget->toggleViewAction() );
+	m_windowsMenu->addAction( m_brushWidget->toggleViewAction() );
 }
 
 void MainWindow::initialConnections()
@@ -242,6 +248,7 @@ void MainWindow::initialConnections()
 	connect( m_centralWidget, &WorkspaceWidget::renamedLayer, m_layerWidget, &LayerWidget::implementRenameLayer );
 	connect( m_centralWidget, &WorkspaceWidget::addNewLayerGroup, m_layerWidget, &LayerWidget::addNewLayerGroup );
 	connect( m_centralWidget, &WorkspaceWidget::showProperties, m_propertiesWidget, &PropertiesWidget::showProperties );
+	connect( m_centralWidget, &WorkspaceWidget::getCurrentBrush, m_brushWidget, &BrushWidget::getCurrentBrush );
 
 	connect( m_layerWidget, &LayerWidget::addedNewLayerFromIndex,  m_centralWidget, &WorkspaceWidget::addNewLayerIntoMap );
 	connect( m_layerWidget, &LayerWidget::modifiedCurrentScene, m_centralWidget, &WorkspaceWidget::markCurrentSceneForModified );

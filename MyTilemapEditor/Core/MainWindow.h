@@ -13,6 +13,7 @@
 #include "Widget/LayerWidget.h"
 #include "Widget/PropertiesWidget.h"
 #include "Widget/MinimapWidget.h"
+#include "Widget/BrushWidget.h"
 
 class MainWindow : public QMainWindow
 {
@@ -88,4 +89,5 @@ private:
 	LayerWidget*		m_layerWidget;
 	PropertiesWidget*	m_propertiesWidget;
 	MinimapWidget*		m_minimapWidget;
+	BrushWidget*		m_brushWidget;
 };
