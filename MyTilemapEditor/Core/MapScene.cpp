@@ -444,11 +444,6 @@ void MapScene::updateSelection()
 
 void MapScene::eraseSelectedTiles()
 {
-	if ( !(m_parentWidget->m_drawTool == eDrawTool::CURSOR || m_parentWidget->m_drawTool == eDrawTool::MAGIC_WAND) )
-	{
-		return;
-	}
-
 	if( !m_showSelection )
 	{
 		return;
@@ -577,6 +572,41 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 				return;
 			}
 			selectTilesByFloodFill( currentIndex, coord );
+			setIsShowSelection( true );
+			showSelectedTileProperties();
+		}
+		else if ( eDrawTool::SELECT_SAME_TILE == m_parentWidget->m_drawTool )
+		{
+			QPointF mousePos = event->scenePos();
+			if( mousePos == QPointF() )
+			{
+				return;
+			}
+			QSizeF bound = QSizeF( m_mapInfo.getTileSize().width() * m_mapInfo.getMapSize().width(), m_mapInfo.getTileSize().height() * m_mapInfo.getMapSize().height() );
+			if( mousePos.x() >= bound.width() || mousePos.y() >= bound.height() || mousePos.x() <= 0 || mousePos.y() <= 0 )
+			{
+				return;
+			}
+			QPoint coord = QPoint( qFloor( mousePos.x() / m_mapInfo.getTileSize().width() ), qFloor( mousePos.y() / m_mapInfo.getTileSize().height() ) );
+
+			int currentIndex = getCurrentLayerIndex();
+			if( currentIndex == -1 )
+			{
+				return;
+			}
+			TileInfo currentTileInfo = m_layers[currentIndex]->m_tileList[m_mapInfo.getIndex( coord )]->m_tileInfo;
+			for( int i = 0; i < m_selectedTileItemList.size(); ++i )
+			{
+				if ( m_layers[currentIndex]->m_tileList[i]->m_tileInfo == currentTileInfo )
+				{
+					m_selectedTileItemList[i]->setSelected( true );
+				}
+				else
+				{
+					m_selectedTileItemList[i]->setSelected( false );
+				}
+			}
+
 			setIsShowSelection( true );
 			showSelectedTileProperties();
 		}

@@ -118,12 +118,14 @@ void MainWindow::initialToolBar()
 	m_eraserAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/eraser.png" ), tr( "&Eraser (E)" ) );
 	m_bucketAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/bucket.png" ), tr( "&Bucket (G)" ) );
 	m_magicWandAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/magic-wand.png" ), tr( "&Magic Wand (W)" ) );
+	m_selectSameTileAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/same-tile.png" ), tr( "&Select Same Tile (S)" ) );
 
 	QActionGroup* alignmentGroup = new QActionGroup( this );
 	alignmentGroup->addAction( m_brushAction );
 	alignmentGroup->addAction( m_eraserAction );
 	alignmentGroup->addAction( m_bucketAction );
 	alignmentGroup->addAction( m_magicWandAction );
+	alignmentGroup->addAction( m_selectSameTileAction );
 	alignmentGroup->addAction( m_moveToolAction );
 	alignmentGroup->addAction( m_cursorToolAction );
 	m_brushAction->setCheckable(true);
@@ -132,6 +134,7 @@ void MainWindow::initialToolBar()
 	m_cursorToolAction->setCheckable(true);
 	m_bucketAction->setCheckable(true);
 	m_magicWandAction->setCheckable(true);
+	m_selectSameTileAction->setCheckable(true);
 
 	m_cursorToolAction->setChecked(true);
 
@@ -139,6 +142,7 @@ void MainWindow::initialToolBar()
 	m_eraserAction->setData( QVariant::fromValue( eDrawTool::ERASER ) );
 	m_bucketAction->setData( QVariant::fromValue( eDrawTool::BUCKET ) );
 	m_magicWandAction->setData( QVariant::fromValue( eDrawTool::MAGIC_WAND ) );
+	m_selectSameTileAction->setData( QVariant::fromValue( eDrawTool::SELECT_SAME_TILE ) );
 	connect( alignmentGroup, &QActionGroup::triggered, this, &MainWindow::changeDrawTool );
 }
 
@@ -252,16 +256,17 @@ void MainWindow::initialConnections()
 
 void MainWindow::initialShortcut()
 {
-	m_saveAction->		setShortcuts( QKeySequence::Save );
-	m_undoAction->		setShortcuts( QKeySequence::Undo );
-	m_redoAction->		setShortcuts( QKeySequence::Redo );
-	m_saveAllAction->	setShortcut( tr( "Ctrl+Shift+S" ) );
-	m_cursorToolAction->setShortcut( tr( "C" ) );
-	m_moveToolAction->	setShortcut( tr( "V" ) );
-	m_brushAction->		setShortcut( tr( "B" ) );
-	m_eraserAction->	setShortcut( tr( "E" ) );
-	m_bucketAction->	setShortcut( tr( "G" ) );
-	m_magicWandAction->	setShortcut( tr( "W" ) );
+	m_saveAction->				setShortcuts( QKeySequence::Save );
+	m_undoAction->				setShortcuts( QKeySequence::Undo );
+	m_redoAction->				setShortcuts( QKeySequence::Redo );
+	m_saveAllAction->			setShortcut( tr( "Ctrl+Shift+S" ) );
+	m_cursorToolAction->		setShortcut( tr( "C" ) );
+	m_moveToolAction->			setShortcut( tr( "V" ) );
+	m_brushAction->				setShortcut( tr( "B" ) );
+	m_eraserAction->			setShortcut( tr( "E" ) );
+	m_bucketAction->			setShortcut( tr( "G" ) );
+	m_magicWandAction->			setShortcut( tr( "W" ) );
+	m_selectSameTileAction->	setShortcut( tr( "S" ) );
 
 	m_eraseSelectedTilesShortcut =	new QShortcut( QKeySequence::Delete, this );
 	m_selectAllTilesShortcut =		new QShortcut( QKeySequence::SelectAll, this );

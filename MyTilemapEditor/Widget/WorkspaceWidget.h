@@ -18,6 +18,7 @@ enum class eDrawTool
 	ERASER,
 	BUCKET,
 	MAGIC_WAND,
+	SELECT_SAME_TILE,
 };
 Q_DECLARE_METATYPE( eDrawTool );
 

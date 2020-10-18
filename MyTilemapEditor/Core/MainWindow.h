@@ -61,12 +61,14 @@ private:
 	QAction* m_redoAction;
 	QAction* m_undoAction;
 
+	// Tool Actions
 	QAction* m_cursorToolAction;
 	QAction* m_moveToolAction;
 	QAction* m_brushAction;
 	QAction* m_eraserAction;
 	QAction* m_bucketAction;
 	QAction* m_magicWandAction;
+	QAction* m_selectSameTileAction;
 
 	QShortcut* m_eraseSelectedTilesShortcut;
 	QShortcut* m_selectAllTilesShortcut;

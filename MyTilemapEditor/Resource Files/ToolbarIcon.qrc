@@ -21,5 +21,6 @@
         <file>app-icon.ico</file>
         <file>Icon/bucket.png</file>
         <file>Icon/magic-wand.png</file>
+        <file>Icon/same-tile.png</file>
     </qresource>
 </RCC>
