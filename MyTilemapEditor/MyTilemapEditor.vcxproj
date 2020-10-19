@@ -96,6 +96,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Brush\Brush.cpp" />
+    <ClCompile Include="Brush\BrushCommon.cpp" />
     <ClCompile Include="Brush\LargeItemBrush.cpp" />
     <ClCompile Include="Core\Config.cpp" />
     <ClCompile Include="Core\Layer.cpp" />

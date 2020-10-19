@@ -29,13 +29,7 @@ void LargeItemBrush::erase( const QPoint& currentCoord, const MapInfo& mapInfo )
 QList<AddBrushItem*> LargeItemBrush::createAddDialogItem()
 {
 	QList<AddBrushItem*> items = CREATE_BASIC_ITEM;
+	CREATE_ITEM( "Tile", m_tile, items );
 
-	AddBrushItem* tileItem = new AddBrushItem();
-	TileSelector* tileSelector = new TileSelector( QSize( 50, 50 ) );
-	QObject::connect( tileSelector, &TileSelector::tileChanged, [=]( TileInfo tileInfo ) { this->m_tile = tileInfo; } );
-
-	tileItem->m_name = "Tile";
-	tileItem->m_widgetItem = tileSelector;
-	items.push_back( tileItem );
 	return items;
 }

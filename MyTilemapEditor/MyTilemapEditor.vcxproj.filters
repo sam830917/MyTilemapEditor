@@ -135,6 +135,9 @@
     <ClCompile Include="Widget\SelectTileDialog.cpp">
       <Filter>Widget</Filter>
     </ClCompile>
+    <ClCompile Include="Brush\BrushCommon.cpp">
+      <Filter>Brush</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Core\MainWindow.h">

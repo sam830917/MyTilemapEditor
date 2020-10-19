@@ -3,13 +3,13 @@
 #include <QLineEdit>
 #include <QLabel>
 
-static int constexpr MAX_BRUSHES( 128 );
-static BrushType* g_registrarList[MAX_BRUSHES];
-static int g_registrarBrushCount = 0;
+int constexpr MAX_BRUSHES( 128 );
+BrushType* g_registrarList[MAX_BRUSHES];
+int g_registrarBrushCount = 0;
 
 BrushType::BrushType( const QString& displayName, BrushConstructorFunction constructorFunction )
-	:m_displayName(displayName),
-	m_constructorFunction(constructorFunction)
+	:m_displayName( displayName ),
+	m_constructorFunction( constructorFunction )
 {
 	g_registrarList[g_registrarBrushCount] = this;
 	g_registrarBrushCount++;
