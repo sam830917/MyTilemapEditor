@@ -11,7 +11,7 @@ class TilePalette : public QGraphicsScene
 	Q_OBJECT
 
 public:
-	TilePalette(QObject *parent = Q_NULLPTR);
+	TilePalette(Tileset* tileset, QObject *parent = Q_NULLPTR);
 
 private:
 	virtual void mousePressEvent( QGraphicsSceneMouseEvent* event ) override;

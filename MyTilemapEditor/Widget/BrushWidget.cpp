@@ -1,19 +1,27 @@
 #include "Widget/BrushWidget.h"
+#include "Widget/AddBrushDialog.h"
 #include "Brush/Brush.h"
-
-static Brush* g_currentBrush;
+#include <QBoxLayout>
+#include <QToolBar>
+#include <QComboBox>
+#include <QVariant>
 
 BrushWidget::BrushWidget( const QString& title, QWidget* parent /*= Q_NULLPTR */ )
 	:QDockWidget( title, parent )
 {
 	m_listWidget = new QListWidget( this );
-	setWidget(m_listWidget);
 	m_listWidget->setSelectionMode( QAbstractItemView::SelectionMode::SingleSelection );
+
+	QWidget* placeholder = new QWidget( this );
+	m_layout = new QBoxLayout( QBoxLayout::BottomToTop, placeholder );
+	m_layout->setContentsMargins( 0, 0, 0, 0 );
+	initialToolbar();
+	m_layout->addWidget( m_listWidget );
+	setWidget( placeholder );
 
 	Brush* defaultBrush = new Brush();
 	defaultBrush->setName( "Default" );
 	addBrush( defaultBrush );
-	g_currentBrush = defaultBrush;
 	m_listWidget->setCurrentRow(0);
 }
 
@@ -35,6 +43,26 @@ void BrushWidget::addBrush( Brush* brush )
 	m_listWidget->addItem( brush->getName() );
 }
 
+void BrushWidget::initialToolbar()
+{
+	m_toolbar = new QToolBar;
+	m_toolbar->setIconSize( QSize( 20, 20 ) );
+	m_layout->addWidget( m_toolbar );
+
+	m_newBrushAction = new QAction( QIcon( ":/MainWindow/Icon/plus.png" ), tr( "&New Brush" ), this );
+	m_newBrushAction->setToolTip( tr( "New Brush" ) );
+	m_brushListBox = new QComboBox( this );
+	m_toolbar->addWidget( m_brushListBox );
+	m_toolbar->addAction( m_newBrushAction );
+
+	QList<BrushType*> brushTypeList = Brush::getAllBrushType();
+	for ( BrushType* type : brushTypeList )
+	{
+		m_brushListBox->addItem( type->m_displayName );
+	}
+	connect( m_newBrushAction, &QAction::triggered, this, &BrushWidget::createNewBrush );
+}
+
 void BrushWidget::getCurrentBrush( Brush*& brush ) const
 {
 	int index = m_listWidget->currentRow();
@@ -45,5 +73,20 @@ void BrushWidget::getCurrentBrush( Brush*& brush ) const
 	else
 	{
 		brush = m_brushList[index];
+	}
+}
+
+void BrushWidget::createNewBrush()
+{
+	AddBrushDialog dialog( this );
+	QList<BrushType*> brushTypeList = Brush::getAllBrushType();
+	int index = m_brushListBox->currentIndex();
+ 	BrushType* type = brushTypeList[index];
+	Brush* newBrush = type->m_constructorFunction();
+ 	dialog.setAddLayout( newBrush->createAddDialogUI() );
+
+	if( dialog.exec() == QDialog::Accepted )
+	{
+		addBrush( newBrush );
 	}
 }

@@ -96,6 +96,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Brush\Brush.cpp" />
+    <ClCompile Include="Brush\LargeItemBrush.cpp" />
     <ClCompile Include="Core\Config.cpp" />
     <ClCompile Include="Core\Layer.cpp" />
     <ClCompile Include="Core\LayerInfo.cpp" />
@@ -105,6 +106,7 @@
     <ClCompile Include="Core\MapScene.cpp" />
     <ClCompile Include="Core\Project.cpp" />
     <ClCompile Include="Core\TileInfo.cpp" />
+    <ClCompile Include="Core\TileSelector.cpp" />
     <ClCompile Include="Core\Tileset.cpp" />
     <ClCompile Include="Core\Toolbar.cpp" />
     <ClCompile Include="Core\UndoCommand.cpp" />
@@ -114,6 +116,12 @@
     <ClCompile Include="ThirdParty\tinyxml2.cpp" />
     <ClCompile Include="Utils\ProjectCommon.cpp" />
     <ClCompile Include="Utils\XmlUtils.cpp" />
+    <ClCompile Include="Widget\AddBrushDialog.cpp">
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
+    </ClCompile>
     <ClCompile Include="Widget\AddMapDialog.cpp" />
     <ClCompile Include="Widget\AddTilesetDialog.cpp" />
     <ClCompile Include="Widget\BrushWidget.cpp" />
@@ -126,6 +134,7 @@
     <ClCompile Include="Widget\MinimapWidget.cpp" />
     <ClCompile Include="Widget\ProjectWidget.cpp" />
     <ClCompile Include="Widget\PropertiesWidget.cpp" />
+    <ClCompile Include="Widget\SelectTileDialog.cpp" />
     <ClCompile Include="Widget\TilesetWidget.cpp" />
     <ClCompile Include="Widget\WorkspaceWidget.cpp" />
   </ItemGroup>
@@ -133,9 +142,11 @@
     <QtMoc Include="Core\MainWindow.h" />
   </ItemGroup>
   <ItemGroup>
+    <QtUic Include="Resource Files\UI\AddBrushUI.ui" />
     <QtUic Include="Resource Files\UI\AddMapUI.ui" />
     <QtUic Include="Resource Files\UI\AddTilesetUI.ui" />
     <QtUic Include="Resource Files\UI\MainWindow.ui" />
+    <QtUic Include="Resource Files\UI\TileSelectorUI.ui" />
     <QtUic Include="ThirdParty\framelesswindowDarkStyle\framelesswindow\framelesswindow.ui" />
   </ItemGroup>
   <ItemGroup>
@@ -153,8 +164,12 @@
     <QtMoc Include="Widget\WorkspaceWidget.h" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="Widget\SelectTileDialog.h" />
+    <QtMoc Include="Widget\AddBrushDialog.h" />
     <QtMoc Include="Widget\BrushWidget.h" />
     <ClInclude Include="Brush\Brush.h" />
+    <ClInclude Include="Brush\BrushCommon.h" />
+    <ClInclude Include="Brush\LargeItemBrush.h" />
     <ClInclude Include="Core\Config.h" />
     <ClInclude Include="Core\Layer.h" />
     <ClInclude Include="Core\LayerInfo.h" />
@@ -162,6 +177,7 @@
     <ClInclude Include="Core\MapScene.h" />
     <ClInclude Include="Core\Project.h" />
     <ClInclude Include="Core\TileInfo.h" />
+    <QtMoc Include="Core\TileSelector.h" />
     <ClInclude Include="Core\Tileset.h" />
     <ClInclude Include="Core\UndoCommand.h" />
     <QtMoc Include="ThirdParty\framelesswindowDarkStyle\DarkStyle.h" />

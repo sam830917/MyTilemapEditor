@@ -9,10 +9,48 @@
 #include <QtMath>
 #include <QFileInfo>
 #include <QMessageBox>
+#include <QScrollBar>
 
-TilePalette::TilePalette( QObject* parent /*= Q_NULLPTR*/ )
+QList<Tileset*> g_tilesetList;
+
+TilePalette::TilePalette( Tileset* tileset, QObject* parent /*= Q_NULLPTR*/ )
 	:QGraphicsScene( parent )
 {
+	QGraphicsRectItem* bg = new QGraphicsRectItem();
+	QColor bgColor( 0, 0, 0, 50 );
+
+	bg->setBrush( QBrush( bgColor ) );
+	bg->setPen( QPen( bgColor ) );
+	bg->setRect( 0, 0, tileset->getImage()->size().width(), tileset->getImage()->size().height() );
+	QGraphicsPixmapItem* imgItem = new QGraphicsPixmapItem( *tileset->getImage() );
+	addItem( bg );
+	addItem( imgItem );
+
+	// draw grid
+	QSize tileSize = tileset->getTileSize();
+	QSize size = tileset->getImage()->size();
+	int vLineCount = size.width() / tileSize.width();
+	int hLineCount = size.height() / tileSize.height();
+
+	QPen linePen( bgColor );
+	linePen.setWidth( 2 );
+	for( int v = 1; v < vLineCount; ++v )
+	{
+		addLine( v * tileSize.width(), 0, v * tileSize.width(), size.height(), linePen );
+	}
+	for( int h = 1; h < hLineCount; ++h )
+	{
+		addLine( 0, h * tileSize.height(), size.width(), h * tileSize.height(), linePen );
+	}
+
+	m_selectFrame = new QGraphicsRectItem();
+	QBrush brush( QColor( 0, 0, 255, 70 ) );
+	QPen redPen( Qt::red );
+	redPen.setWidth( 2 );
+	m_selectFrame->setRect( 0, 0, tileset->getTileSize().width(), tileset->getTileSize().height() );
+	m_selectFrame->setBrush( brush );
+	m_selectFrame->setPen( redPen );
+	addItem( m_selectFrame );
 }
 
 void TilePalette::mousePressEvent( QGraphicsSceneMouseEvent* event )
@@ -62,51 +100,18 @@ void TilesetWidget::addTilesetIntoProject( Tileset* tileset )
 		}
 	}
 
-	TilePalette* tilePalette = new TilePalette(this);
+	TilePalette* tilePalette = new TilePalette( tileset, this);
 	tilePalette->m_tileset = tileset;
 
 	m_tilePaletteList.append( tilePalette );
+	g_tilesetList.append( tileset );
 
 	QGraphicsView* tilesetView = new QGraphicsView();
 	tilesetView->setScene( tilePalette );
 
-	QGraphicsRectItem* bg = new QGraphicsRectItem();
-	QColor bgColor( 0, 0, 0, 50 );
-
-	bg->setBrush( QBrush( bgColor ) );
-	bg->setPen( QPen( bgColor ) );
-	bg->setRect( 0, 0, tileset->getImage()->size().width(), tileset->getImage()->size().height() );
-	QGraphicsPixmapItem* imgItem = new QGraphicsPixmapItem( *tileset->getImage() );
-	tilePalette->addItem( bg );
-	tilePalette->addItem( imgItem );
-
-	m_tilesetTabWidget->addTab( tilesetView, tileset->getName() );
-
-	// draw grid
-	QSize tileSize = tileset->getTileSize();
-	QSize size = tileset->getImage()->size();
-	int vLineCount = size.width() / tileSize.width();
-	int hLineCount = size.height() / tileSize.height();
-
-	QPen linePen( bgColor );
-	linePen.setWidth( 2 );
-	for( int v = 1; v < vLineCount; ++v )
-	{
-		tilePalette->addLine( v * tileSize.width(), 0, v * tileSize.width(), size.height(), linePen );
-	}
-	for( int h = 1; h < hLineCount; ++h )
-	{
-		tilePalette->addLine( 0, h * tileSize.height(), size.width(), h * tileSize.height(), linePen );
-	}
-
-	tilePalette->m_selectFrame = new QGraphicsRectItem();
-	QBrush brush( QColor( 0, 0, 255, 70 ) );
-	QPen redPen( Qt::red );
-	redPen.setWidth( 2 );
-	tilePalette->m_selectFrame->setRect( 0, 0, tileset->getTileSize().width(), tileset->getTileSize().height() );
-	tilePalette->m_selectFrame->setBrush( brush );
-	tilePalette->m_selectFrame->setPen( redPen );
-	tilePalette->addItem( tilePalette->m_selectFrame );
+	m_tilesetTabWidget->addTab( tilesetView, tileset->getName() ); 
+	tilesetView->horizontalScrollBar()->setSliderPosition( tilesetView->horizontalScrollBar()->minimum() );
+	tilesetView->verticalScrollBar()->setSliderPosition( tilesetView->verticalScrollBar()->minimum() );
 }
 
 void TilesetWidget::tabCurrentChanged( int index )
@@ -161,7 +166,9 @@ void TilesetWidget::closeAllTab()
 	for( int i = 0; i < m_tilePaletteList.size(); ++i )
 	{
 		delete m_tilePaletteList[i];
+		delete g_tilesetList[i];
 	}
 	m_tilePaletteList.clear();
+	g_tilesetList.clear();
 	updateTile( nullptr, 0 );
 }

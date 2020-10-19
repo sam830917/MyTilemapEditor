@@ -4,6 +4,10 @@
 #include "Core/TileInfo.h"
 #include <QString>
 
+#define UNUSED(x) (void)(x);
+#define STATIC  ;
+#define VIRTUAL  ;
+
 class Tileset;
 
 QString			getProjectFilePath();

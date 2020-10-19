@@ -123,6 +123,18 @@
     <ClCompile Include="Widget\BrushWidget.cpp">
       <Filter>Widget</Filter>
     </ClCompile>
+    <ClCompile Include="Brush\LargeItemBrush.cpp">
+      <Filter>Brush</Filter>
+    </ClCompile>
+    <ClCompile Include="Widget\AddBrushDialog.cpp">
+      <Filter>Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\TileSelector.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Widget\SelectTileDialog.cpp">
+      <Filter>Widget</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Core\MainWindow.h">
@@ -167,6 +179,15 @@
     <QtMoc Include="Widget\BrushWidget.h">
       <Filter>Widget</Filter>
     </QtMoc>
+    <QtMoc Include="Widget\AddBrushDialog.h">
+      <Filter>Widget</Filter>
+    </QtMoc>
+    <QtMoc Include="Widget\SelectTileDialog.h">
+      <Filter>Widget</Filter>
+    </QtMoc>
+    <QtMoc Include="Core\TileSelector.h">
+      <Filter>Core</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="Resource Files\UI\MainWindow.ui">
@@ -180,6 +201,12 @@
     </QtUic>
     <QtUic Include="ThirdParty\framelesswindowDarkStyle\framelesswindow\framelesswindow.ui">
       <Filter>ThirdParty\Style\framelesswindow</Filter>
+    </QtUic>
+    <QtUic Include="Resource Files\UI\AddBrushUI.ui">
+      <Filter>Resource Files\UI</Filter>
+    </QtUic>
+    <QtUic Include="Resource Files\UI\TileSelectorUI.ui">
+      <Filter>Resource Files\UI</Filter>
     </QtUic>
   </ItemGroup>
   <ItemGroup>
@@ -231,6 +258,12 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Brush\Brush.h">
+      <Filter>Brush</Filter>
+    </ClInclude>
+    <ClInclude Include="Brush\LargeItemBrush.h">
+      <Filter>Brush</Filter>
+    </ClInclude>
+    <ClInclude Include="Brush\BrushCommon.h">
       <Filter>Brush</Filter>
     </ClInclude>
   </ItemGroup>

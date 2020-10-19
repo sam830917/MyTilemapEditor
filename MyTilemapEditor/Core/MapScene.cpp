@@ -171,11 +171,11 @@ void MapScene::editMapOnPoint( const QPointF& point )
 	{
 		if ( brush )
 		{
-			brush->paint( QPoint( coord.width(), coord.height() ) );
+			brush->paint( QPoint( coord.width(), coord.height() ), m_mapInfo );
 			QList<TileModified> modifiedList = brush->popReadyToPaintCoordList();
 			for ( TileModified m : modifiedList )
 			{
-				paintMap( coord );
+				paintMap( QPoint( coord.width(), coord.height() ), m.m_tileInfo );
 			}
 		}
 		else
@@ -188,11 +188,11 @@ void MapScene::editMapOnPoint( const QPointF& point )
 	{
 		if ( brush )
 		{
-			brush->erase( QPoint( coord.width(), coord.height() ) );
+			brush->erase( QPoint( coord.width(), coord.height() ), m_mapInfo );
 			QList<TileModified> modifiedList = brush->popReadyToPaintCoordList();
 			for( TileModified m : modifiedList )
 			{
-				paintMap( coord );
+				paintMap( QPoint( coord.width(), coord.height() ), m.m_tileInfo );
 			}
 		}
 		else
