@@ -10,7 +10,7 @@ public:
 
 	virtual void paint( const QPoint& currentCoord, const MapInfo& mapInfo ) override;
 	virtual void erase( const QPoint& currentCoord, const MapInfo& mapInfo ) override;
-	virtual QBoxLayout* createAddDialogUI() override;
+	virtual QList<AddBrushItem*> createAddDialogItem() override;
 
 private:
 	TileInfo m_tile;

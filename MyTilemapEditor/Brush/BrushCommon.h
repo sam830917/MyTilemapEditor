@@ -2,6 +2,7 @@
 
 #include <QString>
 #include <QBoxLayout>
+#include <QTreeWidgetItem>
 
 class Brush;
 
@@ -11,7 +12,7 @@ typedef Brush* (*BrushConstructorFunction)();
 	static Brush* className##_constructor() { return new className(); }\
 	static BrushType className##_impl( displayName, className##_constructor );
 
-#define CREATE_BASIC_LAYOUT Brush::createAddDialogUI();
+#define CREATE_BASIC_ITEM Brush::createAddDialogItem();
 
 struct BrushType
 {
@@ -20,4 +21,10 @@ struct BrushType
 
 	const QString m_displayName;
 	BrushConstructorFunction m_constructorFunction;
+};
+
+struct AddBrushItem
+{
+	QString m_name;
+	QWidget* m_widgetItem;
 };

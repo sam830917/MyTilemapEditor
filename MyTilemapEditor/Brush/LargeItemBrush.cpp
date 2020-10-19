@@ -26,18 +26,16 @@ void LargeItemBrush::erase( const QPoint& currentCoord, const MapInfo& mapInfo )
 	Brush::erase( currentCoord, mapInfo );
 }
 
-QBoxLayout* LargeItemBrush::createAddDialogUI()
+QList<AddBrushItem*> LargeItemBrush::createAddDialogItem()
 {
-	QBoxLayout* layout = CREATE_BASIC_LAYOUT;
+	QList<AddBrushItem*> items = CREATE_BASIC_ITEM;
 
-	QBoxLayout* tileLayout = new QBoxLayout( QBoxLayout::LeftToRight );
+	AddBrushItem* tileItem = new AddBrushItem();
 	TileSelector* tileSelector = new TileSelector( QSize( 50, 50 ) );
-	QLabel* nameLabel = new QLabel;
-	nameLabel->setText( "Tile" );
-	tileLayout->addWidget( nameLabel, 0, Qt::AlignTop );
-	tileLayout->addWidget( tileSelector, 0, Qt::AlignTop );
 	QObject::connect( tileSelector, &TileSelector::tileChanged, [=]( TileInfo tileInfo ) { this->m_tile = tileInfo; } );
-	layout->addLayout( tileLayout );
 
-	return layout;
+	tileItem->m_name = "Tile";
+	tileItem->m_widgetItem = tileSelector;
+	items.push_back( tileItem );
+	return items;
 }

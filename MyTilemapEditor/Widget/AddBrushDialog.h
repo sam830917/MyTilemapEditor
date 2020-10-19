@@ -3,6 +3,7 @@
 #include <QDialog>
 #include <QBoxLayout>
 #include "ui_AddBrushUI.h"
+#include "Brush/BrushCommon.h"
 
 class AddBrushDialog : public QDialog
 {
@@ -11,7 +12,7 @@ class AddBrushDialog : public QDialog
 public:
 	AddBrushDialog( QWidget* parent = Q_NULLPTR );
 
-	void setAddLayout( QBoxLayout* widget );
+	void addItem( QList<AddBrushItem*> items );
 
 public:
 	Ui::AddBrushUI m_ui;

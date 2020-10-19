@@ -24,7 +24,7 @@ public:
 
 	virtual void paint( const QPoint& currentCoord, const MapInfo& mapInfo );
 	virtual void erase( const QPoint& currentCoord, const MapInfo& mapInfo );
-	virtual QBoxLayout* createAddDialogUI();
+	virtual QList<AddBrushItem*> createAddDialogItem();
 
 	QString getName() const { return m_name; }
 	void setName( const QString& name ) { m_name = name; }

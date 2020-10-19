@@ -22,6 +22,7 @@ TileSelectorScene::TileSelectorScene( const QSize& size )
 {
 	QGraphicsRectItem* image = new QGraphicsRectItem();
 	image->setRect( 0, 0, size.width(), size.height() );
+	image->setBrush( QBrush( QColor( 255, 0, 255, 255 ) ) );
 	addItem( image );
 	m_image = image;
 }

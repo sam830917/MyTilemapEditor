@@ -83,7 +83,7 @@ void BrushWidget::createNewBrush()
 	int index = m_brushListBox->currentIndex();
  	BrushType* type = brushTypeList[index];
 	Brush* newBrush = type->m_constructorFunction();
- 	dialog.setAddLayout( newBrush->createAddDialogUI() );
+	dialog.addItem( newBrush->createAddDialogItem() );
 
 	if( dialog.exec() == QDialog::Accepted )
 	{

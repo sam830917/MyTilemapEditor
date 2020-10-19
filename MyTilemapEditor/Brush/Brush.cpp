@@ -33,23 +33,18 @@ void Brush::erase( const QPoint& currentCoord, const MapInfo& mapInfo )
 	eraseTile( currentCoord );
 }
 
-QBoxLayout* Brush::createAddDialogUI()
+QList<AddBrushItem*> Brush::createAddDialogItem()
 {
-	QBoxLayout* layout = new QBoxLayout( QBoxLayout::TopToBottom );
-	layout->setContentsMargins( 0, 0, 0, 0 );
-
+	QList<AddBrushItem*> itemList;
+	AddBrushItem* nameItem = new AddBrushItem();
 	QLineEdit* nameInput = new QLineEdit();
 	nameInput->setText( m_name );
-	QLabel* nameLabel = new QLabel;
-	nameLabel->setText( "Name" );
-	QBoxLayout* nameLayout = new QBoxLayout( QBoxLayout::LeftToRight );
-	nameLayout->addWidget( nameLabel, 0, Qt::AlignTop );
-	nameLayout->addWidget( nameInput, 0, Qt::AlignTop );
+	QObject::connect( nameInput, &QLineEdit::textChanged, [=]( const QString& newValue ) { this->m_name = newValue; } );
 
-	layout->addLayout( nameLayout );
-	QObject::connect( nameInput, &QLineEdit::textChanged, [=]( const QString &newValue ) { this->m_name = newValue; } );
-
-	return layout;
+	nameItem->m_name = "Name";
+	nameItem->m_widgetItem = nameInput;
+	itemList.push_back( nameItem );
+	return itemList;
 }
 
 void Brush::setTile( QPoint coordinate, TileInfo tileInfo )
