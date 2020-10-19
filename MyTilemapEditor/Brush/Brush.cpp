@@ -1,5 +1,6 @@
 #include "Brush/Brush.h"
 #include "Utils/ProjectCommon.h"
+#include "Core/TileSelector.h"
 #include <QLineEdit>
 #include <QLabel>
 
@@ -36,14 +37,8 @@ void Brush::erase( const QPoint& currentCoord, const MapInfo& mapInfo )
 QList<AddBrushItem*> Brush::createAddDialogItem()
 {
 	QList<AddBrushItem*> itemList;
-	AddBrushItem* nameItem = new AddBrushItem();
-	QLineEdit* nameInput = new QLineEdit();
-	nameInput->setText( m_name );
-	QObject::connect( nameInput, &QLineEdit::textChanged, [=]( const QString& newValue ) { this->m_name = newValue; } );
+	CREATE_ITEM( "Name", m_name, itemList );
 
-	nameItem->m_name = "Name";
-	nameItem->m_widgetItem = nameInput;
-	itemList.push_back( nameItem );
 	return itemList;
 }
 

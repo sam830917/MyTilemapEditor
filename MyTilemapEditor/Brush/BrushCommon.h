@@ -3,15 +3,10 @@
 #include <QString>
 #include <QBoxLayout>
 #include <QTreeWidgetItem>
+#include <QList>
+#include "Core/TileInfo.h"
 
 class Brush;
-
-enum class eVariableType
-{
-	STRING,
-	TILE,
-	UNKNOWN,
-};
 
 typedef Brush* (*BrushConstructorFunction)();
 
@@ -21,31 +16,11 @@ typedef Brush* (*BrushConstructorFunction)();
 
 #define CREATE_BASIC_ITEM Brush::createAddDialogItem();
 
-#define CREATE_ITEM( lableName, variable, AddBrushItemList ) \
-	switch ( getVariableType( variable ) ) \
-	{ \
-		case eVariableType::STRING: \
-		{ \
-			break; \
-		} \
-		case eVariableType::TILE: \
-		{ \
-			CREATE_TILE_ITEM( lableName, variable, AddBrushItemList ) \
-			break; \
-		} \
-		default: \
-		{ \
-			break;\
-		} \
-	}
+#define CREATE_ITEM( lableName, variable, addBrushItemList ) createBrushUIItem( lableName, &variable, addBrushItemList );
 
-#define CREATE_TILE_ITEM( lableName, variable, AddBrushItemList ) \
-	AddBrushItem* variable##_tileItem = new AddBrushItem();\
-	TileSelector* variable##_tileSelector = new TileSelector( QSize( 50, 50 ) );\
-	QObject::connect( variable##_tileSelector, &TileSelector::tileChanged, [=]( TileInfo tileInfo ) { this->variable = tileInfo; } );\
-	variable##_tileItem->m_name = lableName;\
-	variable##_tileItem->m_widgetItem = variable##_tileSelector;\
-	AddBrushItemList.push_back( variable##_tileItem );
+#define CREATE_STRING_ITEM( lableName, variable, AddBrushItemList );
+
+#define CREATE_TILE_ITEM( lableName, variable, AddBrushItemList );
 
 struct BrushType
 {
@@ -62,5 +37,5 @@ struct AddBrushItem
 	QWidget* m_widgetItem;
 };
 
-template<typename T>
-eVariableType getVariableType( const T& );
+void createBrushUIItem( const QString& name, QString* val, QList<AddBrushItem*>& itemList );
+void createBrushUIItem( const QString& name, TileInfo* val, QList<AddBrushItem*>& itemList );

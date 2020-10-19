@@ -14,7 +14,7 @@ SelectTileDialog::SelectTileDialog( QWidget* parent /*= Q_NULLPTR */ )
 
 	for ( Tileset* tileset : g_tilesetList )
 	{
-		TilePalette* tilePalette = new TilePalette( tileset, this );
+		TilePalette* tilePalette = new TilePalette( tileset, false, this );
 		tilePalette->m_tileset = tileset;
 		QGraphicsView* tilesetView = new QGraphicsView();
 		tilesetView->setScene( tilePalette );

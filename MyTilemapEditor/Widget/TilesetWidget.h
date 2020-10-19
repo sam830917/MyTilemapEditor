@@ -11,7 +11,7 @@ class TilePalette : public QGraphicsScene
 	Q_OBJECT
 
 public:
-	TilePalette(Tileset* tileset, QObject *parent = Q_NULLPTR);
+	TilePalette(Tileset* tileset, bool isMainPalette = false, QObject *parent = Q_NULLPTR);
 
 private:
 	virtual void mousePressEvent( QGraphicsSceneMouseEvent* event ) override;
@@ -20,6 +20,7 @@ public:
 	Tileset* m_tileset;
 	int m_currentIndex = 0;
 	QGraphicsRectItem* m_selectFrame;
+	bool m_isMainPalette = false;
 };
 
 class TilesetWidget : public QDockWidget

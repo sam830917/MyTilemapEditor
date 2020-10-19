@@ -13,8 +13,9 @@
 
 QList<Tileset*> g_tilesetList;
 
-TilePalette::TilePalette( Tileset* tileset, QObject* parent /*= Q_NULLPTR*/ )
-	:QGraphicsScene( parent )
+TilePalette::TilePalette( Tileset* tileset, bool isMainPalette, QObject* parent /*= Q_NULLPTR*/ )
+	:QGraphicsScene( parent ),
+	m_isMainPalette(isMainPalette)
 {
 	QGraphicsRectItem* bg = new QGraphicsRectItem();
 	QColor bgColor( 0, 0, 0, 50 );
@@ -70,7 +71,10 @@ void TilePalette::mousePressEvent( QGraphicsSceneMouseEvent* event )
 		QPoint startPos = QPoint( coord.x() * size.width(), coord.y() * size.height() );
 		m_selectFrame->setRect( startPos.x(), startPos.y(), size.width(), size.height() );
 		m_currentIndex = m_tileset->getCoordTileSize().width() * coord.y() + coord.x();
-		updateTile( m_tileset, m_currentIndex );
+		if ( m_isMainPalette )
+		{
+			updateTile( m_tileset, m_currentIndex );
+		}
 	}
 	update();
 }
@@ -100,7 +104,7 @@ void TilesetWidget::addTilesetIntoProject( Tileset* tileset )
 		}
 	}
 
-	TilePalette* tilePalette = new TilePalette( tileset, this);
+	TilePalette* tilePalette = new TilePalette( tileset, true, this);
 	tilePalette->m_tileset = tileset;
 
 	m_tilePaletteList.append( tilePalette );

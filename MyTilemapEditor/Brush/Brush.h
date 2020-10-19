@@ -37,8 +37,10 @@ protected:
 	void setTile( QPoint coordinate, TileInfo tileInfo );
 	void eraseTile( QPoint coordinate );
 
-protected:
+public:
 	QString m_name = "Unnamed";
+
+protected:
 	QList<TileModified> m_readyToPaintCoordList;
 
 };
