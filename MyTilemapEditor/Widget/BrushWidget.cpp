@@ -4,7 +4,6 @@
 #include <QBoxLayout>
 #include <QToolBar>
 #include <QComboBox>
-#include <QVariant>
 
 BrushWidget::BrushWidget( const QString& title, QWidget* parent /*= Q_NULLPTR */ )
 	:QDockWidget( title, parent )
@@ -23,6 +22,8 @@ BrushWidget::BrushWidget( const QString& title, QWidget* parent /*= Q_NULLPTR */
 	defaultBrush->setName( "Default" );
 	addBrush( defaultBrush );
 	m_listWidget->setCurrentRow(0);
+
+	connect( m_listWidget, &QListWidget::itemDoubleClicked, this, &BrushWidget::editBrush );
 }
 
 BrushWidget::~BrushWidget()
@@ -88,5 +89,29 @@ void BrushWidget::createNewBrush()
 	if( dialog.exec() == QDialog::Accepted )
 	{
 		addBrush( newBrush );
+	}
+}
+
+void BrushWidget::editBrush( QListWidgetItem* item )
+{
+	int index = m_listWidget->row( item );
+	if ( index <= 0 || index >= m_brushList.size() )
+		return;
+
+	AddBrushDialog dialog( this );
+	QList<BrushType*> brushTypeList = Brush::getAllBrushType();
+	BrushType* type = brushTypeList[m_brushListBox->currentIndex()];
+	Brush* newBrush = copyBrush( m_brushList[index], type );
+	dialog.addItem( newBrush->createAddDialogItem() );
+
+	if( dialog.exec() == QDialog::Accepted )
+	{
+		delete m_brushList[index];
+		m_brushList[index] = newBrush;
+		m_listWidget->item( index )->setText( newBrush->m_name );
+	}
+	else
+	{
+		delete newBrush;
 	}
 }

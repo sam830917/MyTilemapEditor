@@ -24,6 +24,7 @@ private:
 public slots:
 	void getCurrentBrush( Brush*& brush ) const;
 	void createNewBrush();
+	void editBrush(QListWidgetItem *item);
 
 private:
 	QToolBar* m_toolbar;

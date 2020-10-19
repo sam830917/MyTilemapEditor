@@ -13,14 +13,16 @@ typedef Brush* (*BrushConstructorFunction)();
 #define BRUSH_TYPE( displayName, className ) \
 	static Brush* className##_constructor() { return new className(); }\
 	static BrushType className##_impl( displayName, className##_constructor );
-
 #define CREATE_BASIC_ITEM Brush::createAddDialogItem();
-
 #define CREATE_ITEM( lableName, variable, addBrushItemList ) createBrushUIItem( lableName, &variable, addBrushItemList );
 
-#define CREATE_STRING_ITEM( lableName, variable, AddBrushItemList );
+enum class eItemType
+{
+	STRING,
+	TILE_INFO,
 
-#define CREATE_TILE_ITEM( lableName, variable, AddBrushItemList );
+	UNKNOWN,
+};
 
 struct BrushType
 {
@@ -33,9 +35,12 @@ struct BrushType
 
 struct AddBrushItem
 {
+	eItemType m_type = eItemType::UNKNOWN;
 	QString m_name;
 	QWidget* m_widgetItem;
 };
 
 void createBrushUIItem( const QString& name, QString* val, QList<AddBrushItem*>& itemList );
 void createBrushUIItem( const QString& name, TileInfo* val, QList<AddBrushItem*>& itemList );
+
+Brush* copyBrush( Brush* referBrush, BrushType* type );

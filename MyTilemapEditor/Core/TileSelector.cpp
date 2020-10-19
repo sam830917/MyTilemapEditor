@@ -9,6 +9,8 @@ class TileSelectorScene : public QGraphicsScene
 public:
 	TileSelectorScene( const QSize& size );
 
+	void setTileInfo( TileInfo tileinfo );
+
 protected:
 	virtual void mousePressEvent( QGraphicsSceneMouseEvent* event ) override;
 
@@ -27,6 +29,25 @@ TileSelectorScene::TileSelectorScene( const QSize& size )
 	m_image = image;
 }
 
+void TileSelectorScene::setTileInfo( TileInfo tileinfo )
+{
+	if ( tileinfo.isValid() )
+	{
+		QPixmap img = tileinfo.getTileImage();
+		m_image = addPixmap( img.scaled( m_parentView->getSize().width(), m_parentView->getSize().height(), Qt::KeepAspectRatio ) );
+		m_parentView->m_selectedTile = tileinfo;
+	}
+	else
+	{
+		QGraphicsRectItem* image = new QGraphicsRectItem();
+		image->setRect( 0, 0, m_parentView->getSize().width(), m_parentView->getSize().height() );
+		image->setBrush( QBrush( QColor( 255, 0, 255, 255 ) ) );
+		addItem( image );
+		m_image = image;
+	}
+	m_parentView->tileChanged( tileinfo );
+}
+
 void TileSelectorScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 {
 	SelectTileDialog dialog;
@@ -35,10 +56,7 @@ void TileSelectorScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 	{
 		TileInfo tileinfo = dialog.getSelectTile();
 		delete m_image;
-		QPixmap img = tileinfo.getTileImage();
-		m_image = addPixmap( img.scaled( m_parentView->getSize().width(), m_parentView->getSize().height(), Qt::KeepAspectRatio ) );
-		m_parentView->m_selectedTile = tileinfo;
-		m_parentView->tileChanged( tileinfo );
+		setTileInfo( tileinfo );
 	}
 }
 
@@ -58,4 +76,10 @@ TileSelector::TileSelector( const QSize& size )
 
 TileSelector::~TileSelector()
 {
+}
+
+void TileSelector::setTileInfo( TileInfo tileinfo )
+{
+	m_selectedTile = tileinfo;
+	m_scene->setTileInfo( tileinfo );
 }

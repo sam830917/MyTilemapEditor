@@ -15,6 +15,8 @@ public:
 	~TileSelector();
 
 	QSize getSize() const { return m_size; }
+	TileInfo getTileinfo() const { return m_selectedTile; }
+	void setTileInfo( TileInfo tileinfo );
 
 signals:
 	void tileChanged( TileInfo tileInfo );
