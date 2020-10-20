@@ -107,9 +107,12 @@ void BrushWidget::editBrush( QListWidgetItem* item )
 
 	if( dialog.exec() == QDialog::Accepted )
 	{
+		QString oldPath = m_brushFileList[index].m_filePath;
+		QString newPath = dialog.m_brushFile.m_filePath;
 		delete m_brushFileList[index].m_brush;
-		m_brushFileList[index].m_brush = newBrush;
+		m_brushFileList[index] = dialog.m_brushFile;
 		m_listWidget->item( index )->setText( newBrush->getName() );
+		updateBrushFileInProject( oldPath, newPath );
 	}
 	else
 	{
