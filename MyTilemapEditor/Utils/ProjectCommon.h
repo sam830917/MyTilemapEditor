@@ -19,3 +19,4 @@ void updateProject( Project* newProject );
 void updateTile( const Tileset* tileset, int index );
 
 void saveTilesetIntoProject( Tileset* tileset );
+void saveBrushIntoProject( const QString& filePath );

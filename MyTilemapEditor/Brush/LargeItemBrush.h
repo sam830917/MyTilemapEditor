@@ -12,6 +12,6 @@ public:
 	virtual void erase( const QPoint& currentCoord, const MapInfo& mapInfo ) override;
 	virtual QList<AddBrushItem*> createAddDialogItem() override;
 
-public:
+private:
 	TileInfo m_tile;
 };

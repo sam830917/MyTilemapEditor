@@ -1,6 +1,7 @@
 #include "Widget/BrushWidget.h"
 #include "Widget/AddBrushDialog.h"
 #include "Brush/Brush.h"
+#include "Utils/ProjectCommon.h"
 #include <QBoxLayout>
 #include <QToolBar>
 #include <QComboBox>
@@ -28,19 +29,14 @@ BrushWidget::BrushWidget( const QString& title, QWidget* parent /*= Q_NULLPTR */
 
 BrushWidget::~BrushWidget()
 {
-	for ( int i = 0; i < m_brushList.size(); ++i )
-	{
-		delete m_brushList[i];
-		m_brushList[i] = nullptr;
-	}
 }
 
-void BrushWidget::addBrush( Brush* brush )
+void BrushWidget::addBrush( Brush* brush, QString filePath )
 {
-	if ( !brush )
-		return;
-
-	m_brushList.push_back(brush);
+	BrushFile frushFile;
+	frushFile.m_brush = brush;
+	frushFile.m_filePath = filePath;
+	m_brushFileList.push_back(frushFile);
 	m_listWidget->addItem( brush->getName() );
 }
 
@@ -67,13 +63,13 @@ void BrushWidget::initialToolbar()
 void BrushWidget::getCurrentBrush( Brush*& brush ) const
 {
 	int index = m_listWidget->currentRow();
-	if ( index < 0 || m_brushList.size() <= index )
+	if ( index < 0 || m_brushFileList.size() <= index )
 	{
 		brush = nullptr;
 	}
 	else
 	{
-		brush = m_brushList[index];
+		brush = m_brushFileList[index].m_brush;
 	}
 }
 
@@ -84,31 +80,34 @@ void BrushWidget::createNewBrush()
 	int index = m_brushListBox->currentIndex();
  	BrushType* type = brushTypeList[index];
 	Brush* newBrush = type->m_constructorFunction();
+	newBrush->setBrushType( type );
 	dialog.addItem( newBrush->createAddDialogItem() );
+	dialog.setBrush( newBrush );
 
 	if( dialog.exec() == QDialog::Accepted )
 	{
-		addBrush( newBrush );
+		addBrush( newBrush, dialog.m_brushFile.m_filePath );
+		saveBrushIntoProject( dialog.m_brushFile.m_filePath );
 	}
 }
 
 void BrushWidget::editBrush( QListWidgetItem* item )
 {
 	int index = m_listWidget->row( item );
-	if ( index <= 0 || index >= m_brushList.size() )
+	if ( index <= 0 || index >= m_brushFileList.size() )
 		return;
 
 	AddBrushDialog dialog( this );
 	QList<BrushType*> brushTypeList = Brush::getAllBrushType();
 	BrushType* type = brushTypeList[m_brushListBox->currentIndex()];
-	Brush* newBrush = copyBrush( m_brushList[index], type );
+	Brush* newBrush = copyBrush( m_brushFileList[index].m_brush );
 	dialog.addItem( newBrush->createAddDialogItem() );
 
 	if( dialog.exec() == QDialog::Accepted )
 	{
-		delete m_brushList[index];
-		m_brushList[index] = newBrush;
-		m_listWidget->item( index )->setText( newBrush->m_name );
+		delete m_brushFileList[index].m_brush;
+		m_brushFileList[index].m_brush = newBrush;
+		m_listWidget->item( index )->setText( newBrush->getName() );
 	}
 	else
 	{

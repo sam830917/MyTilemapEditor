@@ -40,7 +40,16 @@ struct AddBrushItem
 	QWidget* m_widgetItem;
 };
 
+struct BrushFile
+{
+	Brush* m_brush;
+	QString m_filePath;
+};
+
 void createBrushUIItem( const QString& name, QString* val, QList<AddBrushItem*>& itemList );
 void createBrushUIItem( const QString& name, TileInfo* val, QList<AddBrushItem*>& itemList );
 
-Brush* copyBrush( Brush* referBrush, BrushType* type );
+Brush* copyBrush( Brush* referBrush );
+
+bool saveBrushAsFile( Brush* brush, QString filePath );
+Brush* loadBrush( const QString& brushFilePath );

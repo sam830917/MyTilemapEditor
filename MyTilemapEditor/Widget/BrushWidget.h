@@ -2,6 +2,7 @@
 
 #include <QDockWidget>
 #include <QListWidget>
+#include "Brush/BrushCommon.h"
 
 QT_FORWARD_DECLARE_CLASS( QToolBar )
 QT_FORWARD_DECLARE_CLASS( QBoxLayout )
@@ -16,7 +17,6 @@ public:
 	explicit BrushWidget( const QString& title, QWidget* parent = Q_NULLPTR );
 	~BrushWidget();
 
-	void addBrush( Brush* brush );
 
 private:
 	void initialToolbar();
@@ -24,7 +24,8 @@ private:
 public slots:
 	void getCurrentBrush( Brush*& brush ) const;
 	void createNewBrush();
-	void editBrush(QListWidgetItem *item);
+	void editBrush( QListWidgetItem* item );
+	void addBrush( Brush* brush, QString filePath = "" );
 
 private:
 	QToolBar* m_toolbar;
@@ -32,5 +33,5 @@ private:
 	QComboBox* m_brushListBox;
 	QBoxLayout* m_layout;
 	QListWidget* m_listWidget;
-	QList<Brush*> m_brushList;
+	QList<BrushFile> m_brushFileList;
 };

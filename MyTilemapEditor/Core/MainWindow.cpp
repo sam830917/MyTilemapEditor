@@ -233,6 +233,7 @@ void MainWindow::initialConnections()
 	connect( m_projectWidget, &ProjectWidget::isReadyCloseProject, this, &MainWindow::closeCurrentProject );
 	connect( m_projectWidget, &ProjectWidget::closeProject, m_centralWidget, &WorkspaceWidget::closeAllTab );
 	connect( m_projectWidget, &ProjectWidget::closeProject, m_tilesetWidget, &TilesetWidget::closeAllTab );
+	connect( m_projectWidget, &ProjectWidget::loadBrushSuccessfully, m_brushWidget, &BrushWidget::addBrush );
 
 	connect( m_centralWidget, &WorkspaceWidget::updateRedo, this, &MainWindow::replaceRedoAction );
 	connect( m_centralWidget, &WorkspaceWidget::updateUndo, this, &MainWindow::replaceUndoAction );

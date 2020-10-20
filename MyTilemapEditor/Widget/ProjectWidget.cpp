@@ -1,5 +1,6 @@
 #include "ProjectWidget.h"
 #include "Core/MapInfo.h"
+#include "Brush/Brush.h"
 #include "Utils/XmlUtils.h"
 #include "Utils/ProjectCommon.h"
 #include <QFileSystemModel>
@@ -258,7 +259,7 @@ void ProjectWidget::openProject( const QString& filePath )
 	m_treeView->setHeaderHidden( true );
 	m_treeView->setRootIndex( m_fileModel->index( fileInfo.path() ) );
 
-	// add Tileset
+	// Load Project
 	XmlElement* root = xmlDocument->RootElement();
 	if( !root )
 	{
@@ -267,19 +268,37 @@ void ProjectWidget::openProject( const QString& filePath )
 	}
 	loadProjectSuccessfully();
 
+	// Load Tileset
 	XmlElement* tilesetsEle = root->FirstChildElement( "Tilesets" );
-	if( !tilesetsEle )
-		return;
-
-	for( XmlElement* tilesetEle = tilesetsEle->FirstChildElement( "Tileset" ); tilesetEle; tilesetEle = tilesetEle->NextSiblingElement( "Tileset" ) )
+	if( tilesetsEle )
 	{
-		QString path = parseXmlAttribute( *tilesetEle, "path", QString() );
-		QString tilesetPath = getProjectRootPath() + "/" + path;
-
-		Tileset* t = convertToTileset( tilesetPath );
-		if( t )
+		for( XmlElement* tilesetEle = tilesetsEle->FirstChildElement( "Tileset" ); tilesetEle; tilesetEle = tilesetEle->NextSiblingElement( "Tileset" ) )
 		{
-			loadTilesetSuccessfully( t );
+			QString path = parseXmlAttribute( *tilesetEle, "path", QString() );
+			QString tilesetPath = getProjectRootPath() + "/" + path;
+
+			Tileset* t = convertToTileset( tilesetPath );
+			if( t )
+			{
+				loadTilesetSuccessfully( t );
+			}
+		}
+	}
+
+	// Load Brush
+	XmlElement* brushesEle = root->FirstChildElement( "Brushes" );
+	if( brushesEle )
+	{
+		for( XmlElement* brushEle = brushesEle->FirstChildElement( "Brush" ); brushEle; brushEle = brushEle->NextSiblingElement( "Brush" ) )
+		{
+			QString path = parseXmlAttribute( *brushEle, "path", QString() );
+			QString brushPath = getProjectRootPath() + "/" + path;
+
+			Brush* b = convertToBrush( brushPath );
+			if ( b )
+			{
+				loadBrushSuccessfully( b, brushPath );
+			}
 		}
 	}
 }

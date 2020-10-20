@@ -16,8 +16,6 @@ struct TileModified
 
 class Brush
 {
-	friend class BrushWidget;
-
 public:
 	Brush();
 	~Brush();
@@ -27,20 +25,22 @@ public:
 	virtual QList<AddBrushItem*> createAddDialogItem();
 
 	QString getName() const { return m_name; }
+	BrushType* getBrushType() const { return m_brushType; }
 	void setName( const QString& name ) { m_name = name; }
+	void setBrushType( BrushType* brushType ) { m_brushType = brushType; }
 	QList<TileModified> popReadyToPaintCoordList();
 
-private:
 	static QList<BrushType*> getAllBrushType();
 
 protected:
 	void setTile( QPoint coordinate, TileInfo tileInfo );
 	void eraseTile( QPoint coordinate );
 
-public:
-	QString m_name = "Unnamed";
-
 protected:
+	QString m_name = "Unnamed";
 	QList<TileModified> m_readyToPaintCoordList;
+
+private:
+	BrushType* m_brushType;
 
 };

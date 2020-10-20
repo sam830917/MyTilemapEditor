@@ -2,6 +2,7 @@
 #include "Core/Tileset.h"
 #include "XmlUtils.h"
 #include <QFileInfo>
+#include <QDir>
 
 static Project* g_project = nullptr;
 static TileInfo g_currentTileInfo;
@@ -68,6 +69,32 @@ void saveTilesetIntoProject( Tileset* tileset )
 	XmlElement* newTilesetEle = doc->NewElement( "Tileset" );
 	newTilesetEle->SetAttribute( "path", tileset->getRelativeFilePath().toStdString().c_str() );
 	tilesetEle->LinkEndChild( newTilesetEle );
+
+	saveXmlFile( *doc, getProjectFilePath() );
+}
+
+void saveBrushIntoProject( const QString& filePath )
+{
+	if( getProject() == nullptr )
+		return;
+
+	XmlDocument* doc = getProject()->getDocument();
+	XmlElement* root = doc->RootElement();
+
+	if( !root )
+		return;
+
+	XmlElement* brushesEle = root->FirstChildElement( "Brushes" );
+	if( !brushesEle )
+	{
+		brushesEle = doc->NewElement( "Brushes" );
+		root->LinkEndChild( brushesEle );
+	}
+
+	XmlElement* newBrushEle = doc->NewElement( "Brush" );
+	QDir dir( getProjectRootPath() );
+	newBrushEle->SetAttribute( "path", dir.relativeFilePath( filePath ).toStdString().c_str() );
+	brushesEle->LinkEndChild( newBrushEle );
 
 	saveXmlFile( *doc, getProjectFilePath() );
 }

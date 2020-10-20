@@ -101,21 +101,5 @@
     </hint>
    </hints>
   </connection>
-  <connection>
-   <sender>m_okBtn</sender>
-   <signal>clicked()</signal>
-   <receiver>AddBrushUI</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>167</x>
-     <y>538</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>147</x>
-     <y>285</y>
-    </hint>
-   </hints>
-  </connection>
  </connections>
 </ui>

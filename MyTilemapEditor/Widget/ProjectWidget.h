@@ -10,6 +10,7 @@
 #include "Core/MapInfo.h"
 
 class Tileset;
+class Brush;
 
 QT_FORWARD_DECLARE_CLASS( QFileSystemModel )
 QT_FORWARD_DECLARE_CLASS( QStandardItemModel )
@@ -49,6 +50,7 @@ signals:
 	void loadProjectSuccessfully();
 	void loadTilesetSuccessfully( Tileset* tileset );
 	void loadMapSuccessfully( MapInfo mapInfo, QList<LayerInfo> layerInfoList );
+	void loadBrushSuccessfully( Brush* brush, QString filePath );
 	void tilesetRenamed( const QString& path, const QString& oldName, const QString& newName );
 
 private:
