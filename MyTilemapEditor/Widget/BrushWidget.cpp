@@ -101,7 +101,9 @@ void BrushWidget::editBrush( QListWidgetItem* item )
 	QList<BrushType*> brushTypeList = Brush::getAllBrushType();
 	BrushType* type = brushTypeList[m_brushListBox->currentIndex()];
 	Brush* newBrush = copyBrush( m_brushFileList[index].m_brush );
+	newBrush->setBrushType( type );
 	dialog.addItem( newBrush->createAddDialogItem() );
+	dialog.setBrushFile( BrushFile( newBrush, m_brushFileList[index].m_filePath ) );
 
 	if( dialog.exec() == QDialog::Accepted )
 	{

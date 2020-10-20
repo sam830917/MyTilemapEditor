@@ -165,7 +165,7 @@ void loadBrushItemXmlElement( XmlElement* itemEle, Brush* brush )
 		else if( "TILE_INFO" == type )
 		{
 			QString tilesetFilePath = parseXmlAttribute( *itemEle, "tileset", QString() );
-			int index = parseXmlAttribute( *itemEle, "index", 0 );
+			int tileIndex = parseXmlAttribute( *itemEle, "index", 0 );
 			if ( !tilesetFilePath.isEmpty() )
 			{
 				AddBrushItem* brushItem = brushItems[index];
@@ -173,7 +173,7 @@ void loadBrushItemXmlElement( XmlElement* itemEle, Brush* brush )
 				{
 					TileSelector* item = CAST_WIDGET_ITEM( TileSelector, brushItem );
 					QString filePath = getProjectRootPath() + "/" + tilesetFilePath;
-					TileInfo tileinfo( convertToTileset( filePath ), index );
+					TileInfo tileinfo( convertToTileset( filePath ), tileIndex );
 					item->setTileInfo( tileinfo );
 				}
 			}

@@ -42,6 +42,9 @@ struct AddBrushItem
 
 struct BrushFile
 {
+	BrushFile() {}
+	BrushFile( Brush* brush, QString filePath ) :m_brush(brush), m_filePath(filePath) {}
+
 	Brush* m_brush;
 	QString m_filePath;
 };

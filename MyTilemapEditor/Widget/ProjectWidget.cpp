@@ -121,10 +121,9 @@ void ProjectWidget::initialTreeView()
 {
 	m_fileModel = new QFileSystemModel( this );
 	QStringList nameFilter;
-	nameFilter << "*.tileset" << "*.map";
+	nameFilter << "*.tileset" << "*.map" << "*.brush";
 	m_fileModel->setNameFilters( nameFilter );
 	m_fileModel->setNameFilterDisables( false );
-	//m_fileModel->setReadOnly( false );
 	connect( m_fileModel, &QFileSystemModel::fileRenamed, this, &ProjectWidget::fileRenamed );
 
 	m_treeView = new QTreeView( this );

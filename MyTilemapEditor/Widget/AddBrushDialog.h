@@ -16,6 +16,7 @@ public:
 
 	void addItem( QList<AddBrushItem*> items );
 	void setBrush( Brush* brush ) { m_brushFile.m_brush = brush; }
+	void setBrushFile( BrushFile brushFile ) { m_brushFile = brushFile; }
 
 public slots:
 	void saveBrush();

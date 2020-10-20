@@ -36,15 +36,35 @@ void AddBrushDialog::saveBrush()
 		QMessageBox::warning( this, tr( "Warning" ), tr( "Name cannot be empty!" ) );
 		return;
 	}
-	QString filePath = getProjectRootPath() + "/" + name + ".brush";
-	QFileInfo file = QFileInfo(filePath);
-	if ( file.exists() )
+	QString filePath = m_brushFile.m_filePath;
+	if ( m_brushFile.m_filePath.isEmpty() )
 	{
-		QMessageBox::warning( this, tr( "Warning" ), ( "Brush name : " + name + " already exists!" ) );
-		return;
+		filePath = getProjectRootPath() + "/" + name + ".brush";
+		QFileInfo fileinfo = QFileInfo( filePath );
+		if( fileinfo.exists() )
+		{
+			QMessageBox::warning( this, tr( "Warning" ), ("Brush name : \"" + name + "\" already exists!") );
+			return;
+		}
 	}
-
-	if ( saveBrushAsFile( m_brushFile.m_brush, filePath ) )
+	else
+	{
+		QString newFilePath = getProjectRootPath() + "/" + name + ".brush";
+		if ( filePath != newFilePath )
+		{
+			QFileInfo fileinfo = QFileInfo( newFilePath );
+			if( fileinfo.exists() )
+			{
+				QMessageBox::warning( this, tr( "Warning" ), ("Brush name : \"" + name + "\" already exists!") );
+				return;
+			}
+			// Delete old file
+			QFile file( filePath );
+			file.remove();
+			filePath = newFilePath;
+		}
+	}
+	if( saveBrushAsFile( m_brushFile.m_brush, filePath ) )
 	{
 		m_brushFile.m_filePath = filePath;
 		accept();
@@ -52,5 +72,6 @@ void AddBrushDialog::saveBrush()
 	else
 	{
 		QMessageBox::warning( this, tr( "Warning" ), tr( "Save brush file failed!" ) );
+		reject();
 	}
 }
