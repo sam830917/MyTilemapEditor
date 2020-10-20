@@ -9,8 +9,11 @@ TileInfo::TileInfo( const Tileset* tileset, int index )
 
 TileInfo::TileInfo( const TileInfo& copyFrom )
 {
-	m_index = copyFrom.m_index;
-	m_tileset = copyFrom.m_tileset;
+	if ( copyFrom.isValid() )
+	{
+		m_index = copyFrom.m_index;
+		m_tileset = copyFrom.m_tileset;
+	}
 }
 
 TileInfo::TileInfo()

@@ -20,6 +20,7 @@ enum class eItemType
 {
 	STRING,
 	TILE_INFO,
+	TILE_INFO_LIST,
 
 	UNKNOWN,
 };
@@ -38,6 +39,7 @@ struct AddBrushItem
 	eItemType m_type = eItemType::UNKNOWN;
 	QString m_name;
 	QWidget* m_widgetItem;
+	QTreeWidgetItem* m_treeItem;
 };
 
 struct BrushFile
@@ -51,8 +53,10 @@ struct BrushFile
 
 void createBrushUIItem( const QString& name, QString* val, QList<AddBrushItem*>& itemList );
 void createBrushUIItem( const QString& name, TileInfo* val, QList<AddBrushItem*>& itemList );
+void createBrushUIItem( const QString& name, QList<TileInfo>* val, QList<AddBrushItem*>& itemList );
 
 Brush* copyBrush( Brush* referBrush );
 
 bool saveBrushAsFile( Brush* brush, QString filePath );
 Brush* loadBrush( const QString& brushFilePath );
+bool isListType( eItemType type );

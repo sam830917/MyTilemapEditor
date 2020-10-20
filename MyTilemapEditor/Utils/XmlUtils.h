@@ -12,6 +12,7 @@ class Brush;
 typedef tinyxml2::XMLElement XmlElement;
 typedef tinyxml2::XMLDocument XmlDocument;
 typedef tinyxml2::XMLAttribute XmlAttribute;
+typedef tinyxml2::XMLText XmlText;
 
 int			parseXmlAttribute( const XmlElement& element, const char* attributeName, int defaultValue );
 char		parseXmlAttribute( const XmlElement& element, const char* attributeName, char defaultValue );

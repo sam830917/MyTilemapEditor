@@ -3,9 +3,11 @@
 #include "Core/TileInfo.h"
 #include "Core/Tileset.h"
 #include "Core/TileSelector.h"
+#include "Core/TileInfoListContainer.h"
 #include "Utils/XmlUtils.h"
 #include "Utils/ProjectCommon.h"
 #include <QLineEdit>
+#include <QPushButton>
 
 #define CAST_WIDGET_ITEM(type, item) dynamic_cast<type*>(item->m_widgetItem);
 
@@ -18,9 +20,12 @@ void createBrushUIItem( const QString& name, QString* val, QList<AddBrushItem*>&
 	QLineEdit* stringInput = new QLineEdit();
 	stringInput->setText( *val );
 	QObject::connect( stringInput, &QLineEdit::textChanged, [=]( const QString& newValue ) { *val = newValue; } );
+	QTreeWidgetItem* item = new QTreeWidgetItem();
+	item->setText( 0, name );
 	stringItem->m_name = name;
 	stringItem->m_widgetItem = stringInput;
 	stringItem->m_type = eItemType::STRING;
+	stringItem->m_treeItem = item;
 	itemList.push_back( stringItem );
 }
 
@@ -30,10 +35,25 @@ void createBrushUIItem( const QString& name, TileInfo* val, QList<AddBrushItem*>
 	TileSelector* tileSelector = new TileSelector( QSize( 50, 50 ) );
 	tileSelector->setTileInfo( *val );
 	QObject::connect( tileSelector, &TileSelector::tileChanged, [=]( TileInfo tileInfo ) { *val = tileInfo; } );
+	QTreeWidgetItem* item = new QTreeWidgetItem();
+	item->setText( 0, name );
 	tileItem->m_name = name;
 	tileItem->m_widgetItem = tileSelector;
 	tileItem->m_type = eItemType::TILE_INFO;
+	tileItem->m_treeItem = item;
 	itemList.push_back( tileItem );
+}
+
+void createBrushUIItem( const QString& name, QList<TileInfo>* val, QList<AddBrushItem*>& itemList )
+{
+	AddBrushItem* tileListItem = new AddBrushItem();
+	TileInfoListContainer* t = new TileInfoListContainer( val );
+	t->setText( 0, name );
+	tileListItem->m_name = name;
+	tileListItem->m_widgetItem = t->getTopItemWidget();
+	tileListItem->m_type = eItemType::TILE_INFO_LIST;
+	tileListItem->m_treeItem = t;
+	itemList.push_back( tileListItem );
 }
 
 void assignBrushItem( AddBrushItem* fromItem, AddBrushItem* toItem )
@@ -55,6 +75,22 @@ void assignBrushItem( AddBrushItem* fromItem, AddBrushItem* toItem )
 		TileSelector* from = CAST_WIDGET_ITEM( TileSelector, fromItem );
 		TileSelector* to = CAST_WIDGET_ITEM( TileSelector, toItem );
 		to->setTileInfo( from->getTileinfo() );
+		break;
+	}
+	case eItemType::TILE_INFO_LIST:
+	{
+		TileInfoListContainer* from = dynamic_cast<TileInfoListContainer*>(fromItem->m_treeItem);
+		TileInfoListContainer* to = dynamic_cast<TileInfoListContainer*>(toItem->m_treeItem);
+		for ( int i = 0; i < from->getTileSelectorList().size(); ++i )
+		{
+			TileSelector* fromTS = from->getTileSelectorList()[i];
+			if ( fromTS->getTileinfo().isValid() )
+			{
+				to->addTileSelectorList();
+				TileSelector* toTS = to->getTileSelectorList()[i];
+				toTS->setTileInfo( fromTS->getTileinfo() );
+			}
+		}
 		break;
 	}
 	default:
@@ -79,7 +115,7 @@ Brush* copyBrush( Brush* referBrush )
 	return newBrush;
 }
 
-bool setBrushItemXmlElement( XmlElement& itemEle, AddBrushItem* brushItem )
+bool setBrushItemXmlElement( XmlElement& itemEle, AddBrushItem* brushItem, XmlDocument& xmlDocument )
 {
 	switch( brushItem->m_type )
 	{
@@ -95,8 +131,28 @@ bool setBrushItemXmlElement( XmlElement& itemEle, AddBrushItem* brushItem )
 		TileSelector* item = CAST_WIDGET_ITEM( TileSelector, brushItem );
 		itemEle.SetAttribute( "type", "TILE_INFO" );
 		TileInfo tileinfo = item->getTileinfo();
-		itemEle.SetAttribute( "tileset", tileinfo.getTileset()->getRelativeFilePath().toStdString().c_str() );
-		itemEle.SetAttribute( "index", tileinfo.getIndex() );
+		if ( tileinfo.isValid() )
+		{
+			itemEle.SetAttribute( "tileset", tileinfo.getTileset()->getRelativeFilePath().toStdString().c_str() );
+			itemEle.SetAttribute( "index", tileinfo.getIndex() );
+		}
+		break;
+	}
+	case eItemType::TILE_INFO_LIST:
+	{
+		TileInfoListContainer* item = dynamic_cast<TileInfoListContainer*>(brushItem->m_treeItem);
+		itemEle.SetAttribute( "type", "TILE_INFO_LIST" );
+		for ( TileSelector* tileSelector : item->getTileSelectorList() )
+		{
+			XmlElement* childEle = xmlDocument.NewElement( "TileList" );
+			TileInfo tileinfo = tileSelector->getTileinfo();
+			if( tileinfo.isValid() )
+			{
+				childEle->SetAttribute( "tileset", tileinfo.getTileset()->getRelativeFilePath().toStdString().c_str() );
+				childEle->SetAttribute( "index", tileinfo.getIndex() );
+				itemEle.LinkEndChild( childEle );
+			}
+		}
 		break;
 	}
 	default:
@@ -117,7 +173,7 @@ bool saveBrushAsFile( Brush* brush, QString filePath )
 	for ( AddBrushItem* item : brushItems )
 	{
 		XmlElement* itemEle = xmlDocument->NewElement( "BrushItem" );
-		if ( !setBrushItemXmlElement( *itemEle, item ) )
+		if ( !setBrushItemXmlElement( *itemEle, item, *xmlDocument ) )
 		{
 			return false;
 		}
@@ -178,6 +234,27 @@ void loadBrushItemXmlElement( XmlElement* itemEle, Brush* brush )
 				}
 			}
 		}
+		else if( "TILE_INFO_LIST" == type )
+		{
+			for ( XmlElement* tileEle = itemEle->FirstChildElement( "TileList" ); tileEle; tileEle = tileEle->NextSiblingElement( "TileList" ) )
+			{
+				QString tilesetFilePath = parseXmlAttribute( *tileEle, "tileset", QString() );
+				int tileIndex = parseXmlAttribute( *tileEle, "index", 0 );
+
+				if( !tilesetFilePath.isEmpty() )
+				{
+					AddBrushItem* brushItem = brushItems[index];
+					if( brushItem->m_type == eItemType::TILE_INFO_LIST )
+					{
+						QString filePath = getProjectRootPath() + "/" + tilesetFilePath;
+						TileInfo tileinfo( convertToTileset( filePath ), tileIndex );
+						TileInfoListContainer* item = dynamic_cast<TileInfoListContainer*>(brushItem->m_treeItem);
+						item->addTileSelectorList();
+						item->getTileSelectorList()[item->getTileSelectorList().size() - 1]->setTileInfo(tileinfo);
+					}
+				}
+			}
+		}
 
 		index++;
 		itemEle = itemEle->NextSiblingElement( "BrushItem" );
@@ -229,4 +306,9 @@ Brush* loadBrush( const QString& brushFilePath )
 		return brush;
 	}
 	return nullptr;
+}
+
+bool isListType( eItemType type )
+{
+	return type == eItemType::TILE_INFO_LIST;
 }

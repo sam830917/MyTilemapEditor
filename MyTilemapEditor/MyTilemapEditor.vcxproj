@@ -107,9 +107,11 @@
     <ClCompile Include="Core\MapScene.cpp" />
     <ClCompile Include="Core\Project.cpp" />
     <ClCompile Include="Core\TileInfo.cpp" />
+    <ClCompile Include="Core\TileinfoListContainer.cpp" />
     <ClCompile Include="Core\TileSelector.cpp" />
     <ClCompile Include="Core\Tileset.cpp" />
     <ClCompile Include="Core\Toolbar.cpp" />
+    <ClCompile Include="Core\TreeWidgetListContainer.cpp" />
     <ClCompile Include="Core\UndoCommand.cpp" />
     <ClCompile Include="ThirdParty\framelesswindowDarkStyle\DarkStyle.cpp" />
     <ClCompile Include="ThirdParty\framelesswindowDarkStyle\framelesswindow\framelesswindow.cpp" />
@@ -179,7 +181,9 @@
     <ClInclude Include="Core\Project.h" />
     <ClInclude Include="Core\TileInfo.h" />
     <QtMoc Include="Core\TileSelector.h" />
+    <ClInclude Include="Core\TileInfoListContainer.h" />
     <ClInclude Include="Core\Tileset.h" />
+    <ClInclude Include="Core\TreeWidgetListContainer.h" />
     <ClInclude Include="Core\UndoCommand.h" />
     <QtMoc Include="ThirdParty\framelesswindowDarkStyle\DarkStyle.h" />
     <QtMoc Include="ThirdParty\framelesswindowDarkStyle\framelesswindow\framelesswindow.h" />

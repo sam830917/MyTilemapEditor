@@ -30,6 +30,7 @@ QList<AddBrushItem*> LargeItemBrush::createAddDialogItem()
 {
 	QList<AddBrushItem*> items = CREATE_BASIC_ITEM;
 	CREATE_ITEM( "Tile", m_tile, items );
+	CREATE_ITEM( "TileList", m_tileList, items );
 
 	return items;
 }

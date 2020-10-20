@@ -14,4 +14,5 @@ public:
 
 private:
 	TileInfo m_tile;
+	QList<TileInfo> m_tileList;
 };
