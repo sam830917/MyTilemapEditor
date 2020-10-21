@@ -19,6 +19,7 @@ typedef Brush* (*BrushConstructorFunction)();
 enum class eItemType
 {
 	STRING,
+	INT,
 	TILE_INFO,
 	TILE_INFO_LIST,
 
@@ -52,6 +53,7 @@ struct BrushFile
 };
 
 void createBrushUIItem( const QString& name, QString* val, QList<AddBrushItem*>& itemList );
+void createBrushUIItem( const QString& name, int* val, QList<AddBrushItem*>& itemList );
 void createBrushUIItem( const QString& name, TileInfo* val, QList<AddBrushItem*>& itemList );
 void createBrushUIItem( const QString& name, QList<TileInfo>* val, QList<AddBrushItem*>& itemList );
 

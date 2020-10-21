@@ -14,6 +14,7 @@ public:
 
 private:
 	TileInfo m_tile;
-	QList<TileInfo> m_verticalList;
-	QList<TileInfo> m_horizontalList;
+	QList<TileInfo> m_tileList;
+	int m_width = 0;
+	int m_height = 0;
 };

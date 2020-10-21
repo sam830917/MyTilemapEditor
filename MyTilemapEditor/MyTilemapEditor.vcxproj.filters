@@ -144,6 +144,9 @@
     <ClCompile Include="Core\ListContainerBase.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Core\IntInput.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Core\MainWindow.h">
@@ -279,6 +282,9 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\ListContainerBase.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\IntInput.h">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>

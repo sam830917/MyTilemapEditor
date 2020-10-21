@@ -4,6 +4,7 @@
 #include "Core/Tileset.h"
 #include "Core/TileSelector.h"
 #include "Core/TileInfoListContainer.h"
+#include "Core//IntInput.h"
 #include "Utils/XmlUtils.h"
 #include "Utils/ProjectCommon.h"
 #include <QLineEdit>
@@ -56,6 +57,20 @@ void createBrushUIItem( const QString& name, QList<TileInfo>* val, QList<AddBrus
 	itemList.push_back( tileListItem );
 }
 
+void createBrushUIItem( const QString& name, int* val, QList<AddBrushItem*>& itemList )
+{
+	AddBrushItem* stringItem = new AddBrushItem();
+	IntInput* intInput = new IntInput(val);
+	QObject::connect( intInput, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), [=]( int newValue ) {  *val = newValue; } );
+	QTreeWidgetItem* item = new QTreeWidgetItem();
+	item->setText( 0, name );
+	stringItem->m_name = name;
+	stringItem->m_widgetItem = intInput;
+	stringItem->m_type = eItemType::INT;
+	stringItem->m_treeItem = item;
+	itemList.push_back( stringItem );
+}
+
 void assignBrushItem( AddBrushItem* fromItem, AddBrushItem* toItem )
 {
 	if ( fromItem->m_type != toItem->m_type )
@@ -68,6 +83,13 @@ void assignBrushItem( AddBrushItem* fromItem, AddBrushItem* toItem )
 		QLineEdit* from = CAST_WIDGET_ITEM( QLineEdit, fromItem );
 		QLineEdit* to = CAST_WIDGET_ITEM( QLineEdit, toItem );
 		to->setText( from->text() );
+		break;
+	}
+	case eItemType::INT:
+	{
+		IntInput* from = CAST_WIDGET_ITEM( IntInput, fromItem );
+		IntInput* to = CAST_WIDGET_ITEM( IntInput, toItem );
+		to->setValue( from->value() );
 		break;
 	}
 	case eItemType::TILE_INFO:
@@ -129,6 +151,13 @@ bool setBrushItemXmlElement( XmlElement& itemEle, AddBrushItem* brushItem, XmlDo
 		QLineEdit* item = CAST_WIDGET_ITEM( QLineEdit, brushItem );
 		itemEle.SetAttribute( "type", "STRING" );
 		itemEle.SetAttribute( "value", item->text().toStdString().c_str() );
+		break;
+	}
+	case eItemType::INT:
+	{
+		IntInput* item = CAST_WIDGET_ITEM( IntInput, brushItem );
+		itemEle.SetAttribute( "type", "INT" );
+		itemEle.SetAttribute( "value", item->value() );
 		break;
 	}
 	case eItemType::TILE_INFO:
@@ -221,6 +250,16 @@ void loadBrushItemXmlElement( XmlElement* itemEle, Brush* brush )
 					QLineEdit* item = CAST_WIDGET_ITEM( QLineEdit, brushItem );
 					item->setText( value );
 				}
+			}
+		}
+		else if( "INT" == type )
+		{
+			int value = parseXmlAttribute( *itemEle, "value", 0 );
+			AddBrushItem* brushItem = brushItems[index];
+			if( brushItem->m_type == eItemType::INT )
+			{
+				IntInput* item = CAST_WIDGET_ITEM( IntInput, brushItem );
+				item->setValue( value );
 			}
 		}
 		else if( "TILE_INFO" == type )
