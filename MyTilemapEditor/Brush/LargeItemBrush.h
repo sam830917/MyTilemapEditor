@@ -14,5 +14,6 @@ public:
 
 private:
 	TileInfo m_tile;
-	QList<TileInfo> m_tileList;
+	QList<TileInfo> m_verticalList;
+	QList<TileInfo> m_horizontalList;
 };

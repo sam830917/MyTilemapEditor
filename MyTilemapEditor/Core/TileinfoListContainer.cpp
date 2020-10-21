@@ -24,6 +24,8 @@ TileInfoListContainer::TileInfoListContainer( QList<TileInfo>* connectList )
 	QObject::connect( m_plusButton, &QPushButton::clicked, [=]()
 		{
 			addTileSelectorList();
+			setExpanded( false );
+			setExpanded( true );
 		} );
 }
 
@@ -56,6 +58,8 @@ void TileInfoListContainer::attachedTreeWidget()
 				removeChild( childItem );
 				deleteChild( index );
 				m_connectList->removeAt( index );
+				setExpanded(false);
+				setExpanded(true);
 			} );
 	}
 }
@@ -102,6 +106,8 @@ void TileInfoListContainer::addTileSelectorList()
 				removeChild( childItem );
 				deleteChild( index );
 				m_connectList->removeAt( index );
+				setExpanded( false );
+				setExpanded( true );
 			} );
 	}
 

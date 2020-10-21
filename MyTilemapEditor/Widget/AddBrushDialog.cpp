@@ -10,7 +10,8 @@ AddBrushDialog::AddBrushDialog( QWidget* parent /*= Q_NULLPTR */ )
 {
 	m_ui.setupUi( this );
 	m_ui.m_treeWidget->setColumnCount( 2 );
-	m_ui.m_treeWidget->setHeaderHidden( true );
+	m_ui.m_treeWidget->headerItem()->setText( 0, "Name" );
+	m_ui.m_treeWidget->headerItem()->setText( 1, "Value" );
 	m_ui.m_treeWidget->setSelectionMode( QAbstractItemView::NoSelection );
 
 	connect( m_ui.m_okBtn, SIGNAL( clicked() ), this, SLOT( saveBrush() ) );
