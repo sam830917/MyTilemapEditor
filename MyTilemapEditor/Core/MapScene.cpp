@@ -175,7 +175,7 @@ void MapScene::editMapOnPoint( const QPointF& point )
 			QList<TileModified> modifiedList = brush->popReadyToPaintCoordList();
 			for ( TileModified m : modifiedList )
 			{
-				paintMap( QPoint( coord.width(), coord.height() ), m.m_tileInfo );
+				paintMap( m.m_coordinate, m.m_tileInfo );
 			}
 		}
 		else
@@ -192,7 +192,7 @@ void MapScene::editMapOnPoint( const QPointF& point )
 			QList<TileModified> modifiedList = brush->popReadyToPaintCoordList();
 			for( TileModified m : modifiedList )
 			{
-				paintMap( QPoint( coord.width(), coord.height() ), m.m_tileInfo );
+				paintMap( m.m_coordinate, m.m_tileInfo );
 			}
 		}
 		else
@@ -288,6 +288,10 @@ void MapScene::paintMap( const QMap<int, TileInfo>& tileInfoMap, int layerIndex 
 
 void MapScene::paintMap( QPoint coord, TileInfo tileInfo )
 {
+	if ( coord.x() >= m_mapInfo.getMapSize().width() || coord.y() >= m_mapInfo.getMapSize().height() )
+	{
+		return;
+	}
 	int index = m_mapInfo.getIndex( coord );
 	paintMap( index, tileInfo );
 }

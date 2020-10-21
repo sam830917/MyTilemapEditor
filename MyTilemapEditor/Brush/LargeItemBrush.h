@@ -13,7 +13,6 @@ public:
 	virtual QList<AddBrushItem*> createAddDialogItem() override;
 
 private:
-	TileInfo m_tile;
 	QList<TileInfo> m_tileList;
 	int m_width = 0;
 	int m_height = 0;
