@@ -517,8 +517,10 @@ void MapScene::selecteAllTiles()
 		return;
 	}
 	setIsShowSelection( true );
-	m_selectedMinCoord = QPoint( 0, 0 );
-	m_selectedMaxCoord = QPoint( m_mapInfo.getMapSize().width(), m_mapInfo.getMapSize().height() );
+	for( SelectMask* mask : m_selectedTileItemList )
+	{
+		mask->setSelected( true );
+	}
 	updateSelection();
 }
 
