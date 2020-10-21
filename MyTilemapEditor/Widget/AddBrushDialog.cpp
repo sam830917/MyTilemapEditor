@@ -1,7 +1,7 @@
 #include "Widget/AddBrushDialog.h"
 #include "Brush/Brush.h"
 #include "Utils/ProjectCommon.h"
-#include "Core/TreeWidgetListContainer.h"
+#include "Core/ListContainerBase.h"
 #include <QSpacerItem>
 #include <QMessageBox>
 #include <QFileInfo>
@@ -24,7 +24,7 @@ void AddBrushDialog::addItem( QList<AddBrushItem*> items )
 		m_ui.m_treeWidget->setItemWidget( item->m_treeItem, 1, item->m_widgetItem );
 		if ( isListType( item->m_type ) )
 		{
-			TreeWidgetListContainer* c = dynamic_cast<TreeWidgetListContainer*>( item->m_treeItem );
+			ListContainerBase* c = dynamic_cast<ListContainerBase*>( item->m_treeItem );
 			c->setExpanded(true);
 			c->attachedTreeWidget();
 		}

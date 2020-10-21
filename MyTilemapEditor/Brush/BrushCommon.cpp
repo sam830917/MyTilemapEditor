@@ -81,14 +81,19 @@ void assignBrushItem( AddBrushItem* fromItem, AddBrushItem* toItem )
 	{
 		TileInfoListContainer* from = dynamic_cast<TileInfoListContainer*>(fromItem->m_treeItem);
 		TileInfoListContainer* to = dynamic_cast<TileInfoListContainer*>(toItem->m_treeItem);
+		int emptyTileNumber = 0;
 		for ( int i = 0; i < from->getTileSelectorList().size(); ++i )
 		{
 			TileSelector* fromTS = from->getTileSelectorList()[i];
 			if ( fromTS->getTileinfo().isValid() )
 			{
 				to->addTileSelectorList();
-				TileSelector* toTS = to->getTileSelectorList()[i];
+				TileSelector* toTS = to->getTileSelectorList()[i - emptyTileNumber];
 				toTS->setTileInfo( fromTS->getTileinfo() );
+			}
+			else
+			{
+				emptyTileNumber++;
 			}
 		}
 		break;

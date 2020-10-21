@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Core/TreeWidgetListContainer.h"
+#include "Core/ListContainerBase.h"
 #include "Core/TileInfo.h"
 
 class TileSelector;
 
-class TileInfoListContainer : public TreeWidgetListContainer
+class TileInfoListContainer : public ListContainerBase
 {
 public:
 	TileInfoListContainer();

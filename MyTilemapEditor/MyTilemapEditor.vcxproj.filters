@@ -138,10 +138,10 @@
     <ClCompile Include="Brush\BrushCommon.cpp">
       <Filter>Brush</Filter>
     </ClCompile>
-    <ClCompile Include="Core\TreeWidgetListContainer.cpp">
+    <ClCompile Include="Core\TileinfoListContainer.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="Core\TileinfoListContainer.cpp">
+    <ClCompile Include="Core\ListContainerBase.cpp">
       <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
@@ -275,10 +275,10 @@
     <ClInclude Include="Brush\BrushCommon.h">
       <Filter>Brush</Filter>
     </ClInclude>
-    <ClInclude Include="Core\TreeWidgetListContainer.h">
+    <ClInclude Include="Core\TileInfoListContainer.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Core\TileInfoListContainer.h">
+    <ClInclude Include="Core\ListContainerBase.h">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>

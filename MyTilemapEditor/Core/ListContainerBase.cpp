@@ -1,7 +1,7 @@
-#include "Core/TreeWidgetListContainer.h"
+#include "Core/ListContainerBase.h"
 #include <QString>
 
-TreeWidgetListContainer::TreeWidgetListContainer( bool needInitial )
+ListContainerBase::ListContainerBase( bool needInitial )
 	:QTreeWidgetItem()
 {
 	if ( needInitial )
@@ -35,16 +35,16 @@ TreeWidgetListContainer::TreeWidgetListContainer( bool needInitial )
 	}
 }
 
-TreeWidgetListContainer::~TreeWidgetListContainer()
+ListContainerBase::~ListContainerBase()
 {
 
 }
 
-QWidget* TreeWidgetListContainer::createChildWidget()
+QWidget* ListContainerBase::createChildWidget()
 {
 	return new QPushButton();
 }
 
-void TreeWidgetListContainer::deleteChild( int index )
+void ListContainerBase::deleteChild( int index )
 {
 }

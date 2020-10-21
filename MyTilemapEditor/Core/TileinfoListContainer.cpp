@@ -2,13 +2,13 @@
 #include "Core/TileSelector.h"
 
 TileInfoListContainer::TileInfoListContainer()
-	:TreeWidgetListContainer()
+	:ListContainerBase()
 {
 
 }
 
 TileInfoListContainer::TileInfoListContainer( QList<TileInfo>* connectList )
-	: TreeWidgetListContainer( false ),
+	: ListContainerBase( false ),
 	m_connectList(connectList)
 {
 	m_plusButton = new QPushButton();
@@ -55,6 +55,7 @@ void TileInfoListContainer::attachedTreeWidget()
 				int index = indexOfChild( childItem );
 				removeChild( childItem );
 				deleteChild( index );
+				m_connectList->removeAt( index );
 			} );
 	}
 }
@@ -100,6 +101,7 @@ void TileInfoListContainer::addTileSelectorList()
 				int index = indexOfChild( childItem );
 				removeChild( childItem );
 				deleteChild( index );
+				m_connectList->removeAt( index );
 			} );
 	}
 

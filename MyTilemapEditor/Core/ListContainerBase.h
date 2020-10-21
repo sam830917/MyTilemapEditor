@@ -4,11 +4,11 @@
 #include <QPushButton>
 #include <QWidget>
 
-class TreeWidgetListContainer : public QTreeWidgetItem
+class ListContainerBase : public QTreeWidgetItem
 {
 public:
-	TreeWidgetListContainer( bool needInitial = true );
-	~TreeWidgetListContainer();
+	ListContainerBase( bool needInitial = true );
+	~ListContainerBase();
 
 	virtual QWidget* createChildWidget();
  	virtual void deleteChild( int index );
