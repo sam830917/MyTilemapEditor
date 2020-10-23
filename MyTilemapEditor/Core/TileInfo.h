@@ -24,6 +24,6 @@ public:
 	bool        operator!=( const TileInfo& compare ) const;
 
 private:
-	const Tileset* m_tileset;
+	const Tileset* m_tileset = nullptr;
 	int m_index = -1;
 };

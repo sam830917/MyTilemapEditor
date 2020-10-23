@@ -33,6 +33,11 @@ void TileSelectorScene::setTileInfo( TileInfo tileinfo )
 {
 	if ( tileinfo.isValid() )
 	{
+		if ( m_image )
+		{
+			delete m_image;
+			m_image = nullptr;
+		}
 		QPixmap img = tileinfo.getTileImage();
 		m_image = addPixmap( img.scaled( m_parentView->getSize().width(), m_parentView->getSize().height(), Qt::KeepAspectRatio ) );
 		m_parentView->m_selectedTile = tileinfo;
@@ -56,6 +61,7 @@ void TileSelectorScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 	{
 		TileInfo tileinfo = dialog.getSelectTile();
 		delete m_image;
+		m_image = nullptr;
 		setTileInfo( tileinfo );
 	}
 }

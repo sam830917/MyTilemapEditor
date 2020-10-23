@@ -24,7 +24,10 @@ void LargeItemBrush::paint( const QPoint& currentCoord, const MapInfo& mapInfo )
 		for( int x = 0; x < m_width; ++x )
 		{
 			int index = y * m_width + x;
-			setTile( QPoint( currentCoord.x() + x, currentCoord.y() + y ), m_tileList[index] );
+			if( index < m_tileList.size() )
+			{
+				setTile( QPoint( currentCoord.x() + x, currentCoord.y() + y ), m_tileList[index] );
+			}
 		}
 	}
 }

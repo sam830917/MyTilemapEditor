@@ -95,6 +95,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Brush\AlwaysSameTileBrush.cpp" />
     <ClCompile Include="Brush\Brush.cpp" />
     <ClCompile Include="Brush\BrushCommon.cpp" />
     <ClCompile Include="Brush\LargeItemBrush.cpp" />
@@ -171,6 +172,7 @@
     <QtMoc Include="Widget\SelectTileDialog.h" />
     <QtMoc Include="Widget\AddBrushDialog.h" />
     <QtMoc Include="Widget\BrushWidget.h" />
+    <ClInclude Include="Brush\AlwaysSameTileBrush.h" />
     <ClInclude Include="Brush\Brush.h" />
     <ClInclude Include="Brush\BrushCommon.h" />
     <ClInclude Include="Brush\LargeItemBrush.h" />

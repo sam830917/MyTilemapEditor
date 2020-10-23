@@ -147,6 +147,9 @@
     <ClCompile Include="Core\IntInput.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Brush\AlwaysSameTileBrush.cpp">
+      <Filter>Brush</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Core\MainWindow.h">
@@ -286,6 +289,9 @@
     </ClInclude>
     <ClInclude Include="Core\IntInput.h">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Brush\AlwaysSameTileBrush.h">
+      <Filter>Brush</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
