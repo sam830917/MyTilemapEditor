@@ -30,6 +30,12 @@ QPixmap TileInfo::getTileImage()
 	return m_tileset->getImage()->copy( point.x(), point.y(), m_tileset->getTileSize().width(), m_tileset->getTileSize().height() );
 }
 
+void TileInfo::operator=( const TileInfo& compare )
+{
+	this->m_tileset = compare.m_tileset;
+	this->m_index = compare.m_index;
+}
+
 bool TileInfo::operator==( const TileInfo& compare ) const
 {
 	return m_tileset == compare.m_tileset && m_index == compare.m_index;

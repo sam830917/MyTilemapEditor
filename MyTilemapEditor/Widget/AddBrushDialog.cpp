@@ -1,10 +1,12 @@
 #include "Widget/AddBrushDialog.h"
 #include "Brush/Brush.h"
+#include "Brush/BrushParser.h"
 #include "Utils/ProjectCommon.h"
 #include "Core/ListContainerBase.h"
 #include <QSpacerItem>
 #include <QMessageBox>
 #include <QFileInfo>
+#include <QLineEdit>
 
 AddBrushDialog::AddBrushDialog( QWidget* parent /*= Q_NULLPTR */ )
 {
@@ -19,6 +21,16 @@ AddBrushDialog::AddBrushDialog( QWidget* parent /*= Q_NULLPTR */ )
 
 void AddBrushDialog::addItem( QList<AddBrushItem*> items )
 {
+	m_brushUI = items;
+	QLineEdit* lineInput = new QLineEdit(this);
+	QObject::connect( lineInput, &QLineEdit::textChanged, [=]( const QString& newValue ) { m_name = newValue; } );
+	lineInput->setText( m_name );
+	QTreeWidgetItem* wItem = new QTreeWidgetItem();
+
+	wItem->setText( 0, "Name" );
+	m_ui.m_treeWidget->addTopLevelItem( wItem );
+	m_ui.m_treeWidget->setItemWidget( wItem, 1, lineInput );
+
 	for ( AddBrushItem* item : items )
 	{
 		m_ui.m_treeWidget->addTopLevelItem( item->m_treeItem );
@@ -34,51 +46,42 @@ void AddBrushDialog::addItem( QList<AddBrushItem*> items )
 
 void AddBrushDialog::saveBrush()
 {
-	if ( !m_brushFile.m_brush )
-		return;
-
-	QString& name = m_brushFile.m_brush->getName();
-	if( name.isEmpty() )
+	if( m_name.isEmpty() )
 	{
 		QMessageBox::warning( this, tr( "Warning" ), tr( "Name cannot be empty!" ) );
 		return;
 	}
-	QString filePath = m_brushFile.m_filePath;
-	if ( m_brushFile.m_filePath.isEmpty() )
+	QString filePath = getProjectRootPath() + "/" + m_name + ".brush";
+	if ( !m_isModify )
 	{
-		filePath = getProjectRootPath() + "/" + name + ".brush";
 		QFileInfo fileinfo = QFileInfo( filePath );
 		if( fileinfo.exists() )
 		{
-			QMessageBox::warning( this, tr( "Warning" ), ("Brush name : \"" + name + "\" already exists!") );
+			QMessageBox::warning( this, tr( "Warning" ), ("Brush name : \"" + m_name + "\" already exists!") );
 			return;
 		}
-	}
-	else
-	{
-		QString newFilePath = getProjectRootPath() + "/" + name + ".brush";
-		if ( filePath != newFilePath )
+		if( m_brushParser->saveBrushAsFile( m_brushUI, filePath, m_brushFilePath ) )
 		{
-			QFileInfo fileinfo = QFileInfo( newFilePath );
-			if( fileinfo.exists() )
-			{
-				QMessageBox::warning( this, tr( "Warning" ), ("Brush name : \"" + name + "\" already exists!") );
-				return;
-			}
-			// Delete old file
-			QFile file( filePath );
-			file.remove();
-			filePath = newFilePath;
+			m_brushFilePath = filePath;
+			accept();
+		}
+		else
+		{
+			QMessageBox::warning( this, tr( "Warning" ), tr( "Save brush file failed!" ) );
+			reject();
 		}
 	}
-	if( saveBrushAsFile( m_brushFile.m_brush, filePath ) )
-	{
-		m_brushFile.m_filePath = filePath;
-		accept();
-	}
 	else
 	{
-		QMessageBox::warning( this, tr( "Warning" ), tr( "Save brush file failed!" ) );
-		reject();
+		if( m_brushParser->modifyBrushAsFile( m_brushUI, filePath, m_brushIndex ) )
+		{
+			m_brushFilePath = filePath;
+			accept();
+		}
+		else
+		{
+			QMessageBox::warning( this, tr( "Warning" ), tr( "Save brush file failed!" ) );
+			reject();
+		}
 	}
 }

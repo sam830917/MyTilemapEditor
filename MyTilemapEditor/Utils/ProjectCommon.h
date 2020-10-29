@@ -10,6 +10,18 @@
 
 class Tileset;
 
+enum class eDrawTool
+{
+	CURSOR,
+	MOVE,
+	BRUSH,
+	ERASER,
+	BUCKET,
+	MAGIC_WAND,
+	SELECT_SAME_TILE,
+};
+Q_DECLARE_METATYPE( eDrawTool );
+
 QString			getProjectFilePath();
 QString			getProjectRootPath();
 Project* const	getProject();

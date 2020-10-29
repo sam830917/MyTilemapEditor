@@ -1,10 +1,12 @@
 #include "Widget/BrushWidget.h"
 #include "Widget/AddBrushDialog.h"
 #include "Brush/Brush.h"
-#include "Utils/ProjectCommon.h"
+#include "Brush/BrushParser.h"
 #include <QBoxLayout>
 #include <QToolBar>
 #include <QComboBox>
+#include <QFileInfo>
+#include <QPoint>
 
 BrushWidget::BrushWidget( const QString& title, QWidget* parent /*= Q_NULLPTR */ )
 	:QDockWidget( title, parent )
@@ -19,25 +21,27 @@ BrushWidget::BrushWidget( const QString& title, QWidget* parent /*= Q_NULLPTR */
 	m_layout->addWidget( m_listWidget );
 	setWidget( placeholder );
 
-	Brush* defaultBrush = new Brush();
-	defaultBrush->setName( "Default" );
-	addBrush( defaultBrush );
+	m_listWidget->addItem( "Default" );
 	m_listWidget->setCurrentRow(0);
 
 	connect( m_listWidget, &QListWidget::itemDoubleClicked, this, &BrushWidget::editBrush );
+
+	m_brushParser = new BrushParser();
+	initialBrushFile();
 }
 
 BrushWidget::~BrushWidget()
 {
+	delete m_brushParser;
 }
 
-void BrushWidget::addBrush( Brush* brush, QString filePath )
+void BrushWidget::addBrush( const QString& filePath )
 {
-	BrushFile frushFile;
-	frushFile.m_brush = brush;
-	frushFile.m_filePath = filePath;
-	m_brushFileList.push_back(frushFile);
-	m_listWidget->addItem( brush->getName() );
+	if ( m_brushParser->loadBrushFile( filePath ) )
+	{
+		QFileInfo fileInfo( filePath );
+		m_listWidget->addItem( fileInfo.completeBaseName() );
+	}
 }
 
 void BrushWidget::initialToolbar()
@@ -52,12 +56,19 @@ void BrushWidget::initialToolbar()
 	m_toolbar->addWidget( m_brushListBox );
 	m_toolbar->addAction( m_newBrushAction );
 
-	QList<BrushType*> brushTypeList = Brush::getAllBrushType();
-	for ( BrushType* type : brushTypeList )
-	{
-		m_brushListBox->addItem( type->m_displayName );
-	}
-	connect( m_newBrushAction, &QAction::triggered, this, &BrushWidget::createNewBrush );
+// 	QList<BrushType*> brushTypeList = Brush::getAllBrushType();
+// 	for ( BrushType* type : brushTypeList )
+// 	{
+// 		m_brushListBox->addItem( type->m_displayName );
+// 	}
+ 	connect( m_newBrushAction, &QAction::triggered, this, &BrushWidget::createNewBrush );
+}
+
+void BrushWidget::initialBrushFile()
+{
+	QString path = QCoreApplication::applicationDirPath() + "/Brushes/Brush.js";
+	QFileInfo info(path);
+	m_brushListBox->addItem( info.completeBaseName(), QVariant::fromValue(path) );
 }
 
 void BrushWidget::getCurrentBrush( Brush*& brush ) const
@@ -73,49 +84,55 @@ void BrushWidget::getCurrentBrush( Brush*& brush ) const
 	}
 }
 
+void BrushWidget::getPaintMapModified( QList<TileModified>& modifiredList, const QPoint& point, eDrawTool tool )
+{
+	if ( m_listWidget->currentRow() > 0 )
+	{
+		modifiredList = m_brushParser->getPaintMapResult( m_listWidget->currentRow() - 1, point, tool );
+	}
+	else
+	{
+		modifiredList.push_back( TileModified( point, getCurrentTile() ) );
+	}
+}
+
 void BrushWidget::createNewBrush()
 {
 	AddBrushDialog dialog( this );
-	QList<BrushType*> brushTypeList = Brush::getAllBrushType();
-	int index = m_brushListBox->currentIndex();
- 	BrushType* type = brushTypeList[index];
-	Brush* newBrush = type->m_constructorFunction();
-	newBrush->setBrushType( type );
-	dialog.addItem( newBrush->createAddDialogItem() );
-	dialog.setBrush( newBrush );
+
+	QVariant variant = m_brushListBox->currentData();
+	QString path = variant.toString();
+ 	dialog.addItem( m_brushParser->createBrushUI( m_brushListBox->currentText() ) );
+	dialog.setFilePath( path );
+	dialog.m_brushParser = m_brushParser;
 
 	if( dialog.exec() == QDialog::Accepted )
 	{
-		addBrush( newBrush, dialog.m_brushFile.m_filePath );
-		saveBrushIntoProject( dialog.m_brushFile.m_filePath );
+		m_listWidget->addItem( dialog.m_name );
+ 		saveBrushIntoProject( dialog.m_brushFilePath );
 	}
 }
 
 void BrushWidget::editBrush( QListWidgetItem* item )
 {
 	int index = m_listWidget->row( item );
-	if ( index <= 0 || index >= m_brushFileList.size() )
+	if ( index <= 0 )
 		return;
 
 	AddBrushDialog dialog( this );
-	QList<BrushType*> brushTypeList = Brush::getAllBrushType();
-	BrushType* type = brushTypeList[m_brushListBox->currentIndex()];
-	Brush* newBrush = copyBrush( m_brushFileList[index].m_brush );
-	newBrush->setBrushType( type );
-	dialog.addItem( newBrush->createAddDialogItem() );
-	dialog.setBrushFile( BrushFile( newBrush, m_brushFileList[index].m_filePath ) );
+	dialog.m_name = m_brushParser->getFileName( index - 1 );
+	dialog.m_brushParser = m_brushParser;
+	dialog.m_isModify = true;
+	dialog.m_brushIndex = index - 1;
+	QString brushFilePath = m_brushParser->getBrushFilePathByIndex( index - 1 );
+	QString oldFilePath = m_brushParser->getFilePathByIndex( index - 1 );
+	dialog.addItem( m_brushParser->createBrushUIByCurrentBrush( index - 1 ) );
+	dialog.setFilePath( brushFilePath );
 
 	if( dialog.exec() == QDialog::Accepted )
 	{
-		QString oldPath = m_brushFileList[index].m_filePath;
-		QString newPath = dialog.m_brushFile.m_filePath;
-		delete m_brushFileList[index].m_brush;
-		m_brushFileList[index] = dialog.m_brushFile;
-		m_listWidget->item( index )->setText( newBrush->getName() );
-		updateBrushFileInProject( oldPath, newPath );
-	}
-	else
-	{
-		delete newBrush;
+		m_listWidget->item( index )->setText( dialog.m_name );
+		QString newPath = dialog.m_brushFilePath;
+		updateBrushFileInProject( oldFilePath, newPath );
 	}
 }

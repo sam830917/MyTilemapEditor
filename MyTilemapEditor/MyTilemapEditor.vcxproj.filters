@@ -150,6 +150,12 @@
     <ClCompile Include="Brush\AlwaysSameTileBrush.cpp">
       <Filter>Brush</Filter>
     </ClCompile>
+    <ClCompile Include="Brush\BrushParser.cpp">
+      <Filter>Brush</Filter>
+    </ClCompile>
+    <ClCompile Include="Brush\BrushHelper.cpp">
+      <Filter>Brush</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Core\MainWindow.h">
@@ -203,6 +209,12 @@
     <QtMoc Include="Core\TileSelector.h">
       <Filter>Core</Filter>
     </QtMoc>
+    <QtMoc Include="Core\TileInfo.h">
+      <Filter>Core</Filter>
+    </QtMoc>
+    <QtMoc Include="Brush\BrushHelper.h">
+      <Filter>Brush</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="Resource Files\UI\MainWindow.ui">
@@ -254,9 +266,6 @@
     <ClInclude Include="Core\MapInfo.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Core\TileInfo.h">
-      <Filter>Core</Filter>
-    </ClInclude>
     <ClInclude Include="Core\UndoCommand.h">
       <Filter>Core</Filter>
     </ClInclude>
@@ -291,6 +300,9 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Brush\AlwaysSameTileBrush.h">
+      <Filter>Brush</Filter>
+    </ClInclude>
+    <ClInclude Include="Brush\BrushParser.h">
       <Filter>Brush</Filter>
     </ClInclude>
   </ItemGroup>

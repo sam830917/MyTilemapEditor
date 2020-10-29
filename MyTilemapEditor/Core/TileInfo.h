@@ -1,11 +1,13 @@
 #pragma once
 
+#include <QObject>
 #include <QPixmap>
 
 class Tileset;
 
-class TileInfo
+class TileInfo : public QObject
 {
+	Q_OBJECT
 public:
 	TileInfo();
 	TileInfo( const TileInfo& copyFrom );
@@ -20,6 +22,7 @@ public:
 
 	bool			isValid() const { return m_index != -1 && m_index >=0 && m_tileset; }
 
+	void        operator=( const TileInfo& compare );
 	bool        operator==( const TileInfo& compare ) const;
 	bool        operator!=( const TileInfo& compare ) const;
 

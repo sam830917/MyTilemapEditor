@@ -293,11 +293,7 @@ void ProjectWidget::openProject( const QString& filePath )
 			QString path = parseXmlAttribute( *brushEle, "path", QString() );
 			QString brushPath = getProjectRootPath() + "/" + path;
 
-			Brush* b = convertToBrush( brushPath );
-			if ( b )
-			{
-				loadBrushSuccessfully( b, brushPath );
-			}
+			loadBrushFile( brushPath );
 		}
 	}
 }

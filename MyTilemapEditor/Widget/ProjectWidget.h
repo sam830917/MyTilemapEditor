@@ -51,6 +51,7 @@ signals:
 	void loadTilesetSuccessfully( Tileset* tileset );
 	void loadMapSuccessfully( MapInfo mapInfo, QList<LayerInfo> layerInfoList );
 	void loadBrushSuccessfully( Brush* brush, QString filePath );
+	void loadBrushFile( const QString& filePath );
 	void tilesetRenamed( const QString& path, const QString& oldName, const QString& newName );
 
 private:

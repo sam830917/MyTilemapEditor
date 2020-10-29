@@ -233,7 +233,7 @@ void MainWindow::initialConnections()
 	connect( m_projectWidget, &ProjectWidget::isReadyCloseProject, this, &MainWindow::closeCurrentProject );
 	connect( m_projectWidget, &ProjectWidget::closeProject, m_centralWidget, &WorkspaceWidget::closeAllTab );
 	connect( m_projectWidget, &ProjectWidget::closeProject, m_tilesetWidget, &TilesetWidget::closeAllTab );
-	connect( m_projectWidget, &ProjectWidget::loadBrushSuccessfully, m_brushWidget, &BrushWidget::addBrush );
+	connect( m_projectWidget, &ProjectWidget::loadBrushFile, m_brushWidget, &BrushWidget::addBrush );
 
 	connect( m_centralWidget, &WorkspaceWidget::updateRedo, this, &MainWindow::replaceRedoAction );
 	connect( m_centralWidget, &WorkspaceWidget::updateUndo, this, &MainWindow::replaceUndoAction );
@@ -250,6 +250,7 @@ void MainWindow::initialConnections()
 	connect( m_centralWidget, &WorkspaceWidget::addNewLayerGroup, m_layerWidget, &LayerWidget::addNewLayerGroup );
 	connect( m_centralWidget, &WorkspaceWidget::showProperties, m_propertiesWidget, &PropertiesWidget::showProperties );
 	connect( m_centralWidget, &WorkspaceWidget::getCurrentBrush, m_brushWidget, &BrushWidget::getCurrentBrush );
+	connect( m_centralWidget, &WorkspaceWidget::getPaintMapModified, m_brushWidget, &BrushWidget::getPaintMapModified );
 
 	connect( m_layerWidget, &LayerWidget::addedNewLayerFromIndex,  m_centralWidget, &WorkspaceWidget::addNewLayerIntoMap );
 	connect( m_layerWidget, &LayerWidget::modifiedCurrentScene, m_centralWidget, &WorkspaceWidget::markCurrentSceneForModified );

@@ -35,6 +35,14 @@ struct BrushType
 	BrushConstructorFunction m_constructorFunction;
 };
 
+struct TileModified
+{
+	TileModified( QPoint coordinate, TileInfo tileInfo ):m_coordinate( coordinate ), m_tileInfo( tileInfo ) {}
+
+	QPoint m_coordinate;
+	TileInfo m_tileInfo;
+};
+
 struct AddBrushItem
 {
 	eItemType m_type = eItemType::UNKNOWN;
@@ -43,10 +51,10 @@ struct AddBrushItem
 	QTreeWidgetItem* m_treeItem;
 };
 
-struct BrushFile
+struct BrushFile_old
 {
-	BrushFile() {}
-	BrushFile( Brush* brush, QString filePath ) :m_brush(brush), m_filePath(filePath) {}
+	BrushFile_old() {}
+	BrushFile_old( Brush* brush, QString filePath ) :m_brush(brush), m_filePath(filePath) {}
 
 	Brush* m_brush;
 	QString m_filePath;

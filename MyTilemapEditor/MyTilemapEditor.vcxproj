@@ -57,12 +57,12 @@
   </ItemDefinitionGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
     <QtInstall>msvc2017_64</QtInstall>
-    <QtModules>core;gui;widgets</QtModules>
+    <QtModules>core;gui;qml;widgets</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
     <QtInstall>msvc2017_64</QtInstall>
-    <QtModules>core;gui;widgets</QtModules>
+    <QtModules>core;gui;qml;widgets</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')">
@@ -98,6 +98,8 @@
     <ClCompile Include="Brush\AlwaysSameTileBrush.cpp" />
     <ClCompile Include="Brush\Brush.cpp" />
     <ClCompile Include="Brush\BrushCommon.cpp" />
+    <ClCompile Include="Brush\BrushHelper.cpp" />
+    <ClCompile Include="Brush\BrushParser.cpp" />
     <ClCompile Include="Brush\LargeItemBrush.cpp" />
     <ClCompile Include="Core\Config.cpp" />
     <ClCompile Include="Core\IntInput.cpp" />
@@ -175,6 +177,8 @@
     <ClInclude Include="Brush\AlwaysSameTileBrush.h" />
     <ClInclude Include="Brush\Brush.h" />
     <ClInclude Include="Brush\BrushCommon.h" />
+    <QtMoc Include="Brush\BrushHelper.h" />
+    <ClInclude Include="Brush\BrushParser.h" />
     <ClInclude Include="Brush\LargeItemBrush.h" />
     <ClInclude Include="Core\Config.h" />
     <ClInclude Include="Core\IntInput.h" />
@@ -183,7 +187,7 @@
     <ClInclude Include="Core\MapInfo.h" />
     <ClInclude Include="Core\MapScene.h" />
     <ClInclude Include="Core\Project.h" />
-    <ClInclude Include="Core\TileInfo.h" />
+    <QtMoc Include="Core\TileInfo.h" />
     <QtMoc Include="Core\TileSelector.h" />
     <ClInclude Include="Core\TileInfoListContainer.h" />
     <ClInclude Include="Core\Tileset.h" />

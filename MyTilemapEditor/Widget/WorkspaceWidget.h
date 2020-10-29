@@ -3,6 +3,7 @@
 #include "Core/MapScene.h"
 #include "Core/MapInfo.h"
 #include "Core/LayerInfo.h"
+#include "Utils/ProjectCommon.h"
 #include "Brush/Brush.h"
 #include <QWidget>
 #include <QTabWidget>
@@ -10,18 +11,6 @@
 #include <QMap>
 
 QT_FORWARD_DECLARE_CLASS( QPushButton )
-
-enum class eDrawTool
-{
-	CURSOR,
-	MOVE,
-	BRUSH,
-	ERASER,
-	BUCKET,
-	MAGIC_WAND,
-	SELECT_SAME_TILE,
-};
-Q_DECLARE_METATYPE( eDrawTool );
 
 class WorkspaceWidget : public QWidget
 {
@@ -84,6 +73,7 @@ signals:
 	void showProperties( const QMap<QString, QString>& informationMap );
 	void addNewLayerGroup( MapInfo mapInfo, QList<LayerInfo> layerInfoList );
 	void getCurrentBrush( Brush*& brush ) const;
+	void getPaintMapModified( QList<TileModified>& modifiredList, const QPoint& point, eDrawTool tool );
 
 public:
 	QPushButton* m_newProjectButton;

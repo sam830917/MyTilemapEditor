@@ -9,7 +9,6 @@ class TileInfoListContainer : public ListContainerBase
 {
 public:
 	TileInfoListContainer();
-	TileInfoListContainer( QList<TileInfo>* connectList );
 	~TileInfoListContainer();
 
 	virtual void deleteChild( int index ) override;
@@ -18,8 +17,9 @@ public:
 	QList<TileSelector*> getTileSelectorList() const { return m_tileSelectorList; }
 
 	void addTileSelectorList();
+	void appendToInitialList( TileInfo tile ) { m_initialTileList.push_back(tile); }
 
 private:
 	QList<TileSelector*> m_tileSelectorList;
-	QList<TileInfo>* m_connectList;
+	QList<TileInfo> m_initialTileList;
 };

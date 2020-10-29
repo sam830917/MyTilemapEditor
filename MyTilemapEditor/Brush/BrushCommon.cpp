@@ -47,14 +47,14 @@ void createBrushUIItem( const QString& name, TileInfo* val, QList<AddBrushItem*>
 
 void createBrushUIItem( const QString& name, QList<TileInfo>* val, QList<AddBrushItem*>& itemList )
 {
-	AddBrushItem* tileListItem = new AddBrushItem();
-	TileInfoListContainer* t = new TileInfoListContainer( val );
-	t->setText( 0, name );
-	tileListItem->m_name = name;
-	tileListItem->m_widgetItem = t->getTopItemWidget();
-	tileListItem->m_type = eItemType::TILE_INFO_LIST;
-	tileListItem->m_treeItem = t;
-	itemList.push_back( tileListItem );
+// 	AddBrushItem* tileListItem = new AddBrushItem();
+// 	TileInfoListContainer* t = new TileInfoListContainer( val );
+// 	t->setText( 0, name );
+// 	tileListItem->m_name = name;
+// 	tileListItem->m_widgetItem = t->getTopItemWidget();
+// 	tileListItem->m_type = eItemType::TILE_INFO_LIST;
+// 	tileListItem->m_treeItem = t;
+// 	itemList.push_back( tileListItem );
 }
 
 void createBrushUIItem( const QString& name, int* val, QList<AddBrushItem*>& itemList )

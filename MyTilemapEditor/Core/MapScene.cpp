@@ -163,42 +163,21 @@ void MapScene::editMapOnPoint( const QPointF& point )
 	{
 		return;
 	}
-	Brush* brush = nullptr;
-	m_parentWidget->getCurrentBrush( brush );
 	switch( m_parentWidget->getCurrentDrawTool() )
 	{
 	case eDrawTool::BRUSH:
 	{
-		if ( brush )
+		QList<TileModified> modifiedList;
+		m_parentWidget->getPaintMapModified( modifiedList, QPoint( coord.width(), coord.height() ), m_parentWidget->getCurrentDrawTool() );
+		for( TileModified m : modifiedList )
 		{
-			brush->paint( QPoint( coord.width(), coord.height() ), m_mapInfo );
-			QList<TileModified> modifiedList = brush->popReadyToPaintCoordList();
-			for ( TileModified m : modifiedList )
-			{
-				paintMap( m.m_coordinate, m.m_tileInfo );
-			}
-		}
-		else
-		{
-			paintMap( coord );
+			paintMap( m.m_coordinate, m.m_tileInfo );
 		}
 		break;
 	}
 	case eDrawTool::ERASER:
 	{
-		if ( brush )
-		{
-			brush->erase( QPoint( coord.width(), coord.height() ), m_mapInfo );
-			QList<TileModified> modifiedList = brush->popReadyToPaintCoordList();
-			for( TileModified m : modifiedList )
-			{
-				paintMap( m.m_coordinate, m.m_tileInfo );
-			}
-		}
-		else
-		{
-			eraseMap( coord );
-		}
+		eraseMap( coord );
 		break;
 	}
 	default:

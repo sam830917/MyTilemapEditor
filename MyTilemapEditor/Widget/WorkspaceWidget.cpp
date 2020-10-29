@@ -2,7 +2,6 @@
 #include "AddMapDialog.h"
 #include "Core/Tileset.h"
 #include "Core/UndoCommand.h"
-#include "Utils/ProjectCommon.h"
 #include <QPushButton>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
