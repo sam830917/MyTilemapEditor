@@ -1,6 +1,5 @@
 #include "Widget/BrushWidget.h"
 #include "Widget/AddBrushDialog.h"
-#include "Brush/Brush.h"
 #include "Brush/BrushParser.h"
 #include <QBoxLayout>
 #include <QToolBar>
@@ -8,6 +7,7 @@
 #include <QFileInfo>
 #include <QPoint>
 #include <QDir>
+#include <QMessageBox>
 
 BrushWidget::BrushWidget( const QString& title, QWidget* parent /*= Q_NULLPTR */ )
 	:QDockWidget( title, parent )
@@ -57,11 +57,6 @@ void BrushWidget::initialToolbar()
 	m_toolbar->addWidget( m_brushListBox );
 	m_toolbar->addAction( m_newBrushAction );
 
-// 	QList<BrushType*> brushTypeList = Brush::getAllBrushType();
-// 	for ( BrushType* type : brushTypeList )
-// 	{
-// 		m_brushListBox->addItem( type->m_displayName );
-// 	}
  	connect( m_newBrushAction, &QAction::triggered, this, &BrushWidget::createNewBrush );
 }
 
@@ -74,19 +69,6 @@ void BrushWidget::initialBrushFile()
 		QString filePath = brushDirectory.filePath( fileName );
 		QFileInfo info( filePath );
 		m_brushListBox->addItem( info.completeBaseName(), QVariant::fromValue( filePath ) );
-	}
-}
-
-void BrushWidget::getCurrentBrush( Brush*& brush ) const
-{
-	int index = m_listWidget->currentRow();
-	if ( index < 0 || m_brushFileList.size() <= index )
-	{
-		brush = nullptr;
-	}
-	else
-	{
-		brush = m_brushFileList[index].m_brush;
 	}
 }
 
@@ -104,8 +86,13 @@ void BrushWidget::getPaintMapModified( QList<TileModified>& modifiredList, const
 
 void BrushWidget::createNewBrush()
 {
-	AddBrushDialog dialog( this );
+	if ( !getProject() )
+	{
+		QMessageBox::warning( this, tr( "Warning" ), tr( "No project is opening!" ) );
+		return;
+	}
 
+	AddBrushDialog dialog( this );
 	QVariant variant = m_brushListBox->currentData();
 	QString path = variant.toString();
  	dialog.addItem( m_brushParser->createBrushUI( m_brushListBox->currentText() ) );

@@ -117,14 +117,8 @@
     <ClCompile Include="Core\Config.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="Brush\Brush.cpp">
-      <Filter>Brush</Filter>
-    </ClCompile>
     <ClCompile Include="Widget\BrushWidget.cpp">
       <Filter>Widget</Filter>
-    </ClCompile>
-    <ClCompile Include="Brush\LargeItemBrush.cpp">
-      <Filter>Brush</Filter>
     </ClCompile>
     <ClCompile Include="Widget\AddBrushDialog.cpp">
       <Filter>Widget</Filter>
@@ -146,9 +140,6 @@
     </ClCompile>
     <ClCompile Include="Core\IntInput.cpp">
       <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Brush\AlwaysSameTileBrush.cpp">
-      <Filter>Brush</Filter>
     </ClCompile>
     <ClCompile Include="Brush\BrushParser.cpp">
       <Filter>Brush</Filter>
@@ -281,12 +272,6 @@
     <ClInclude Include="Core\Config.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Brush\Brush.h">
-      <Filter>Brush</Filter>
-    </ClInclude>
-    <ClInclude Include="Brush\LargeItemBrush.h">
-      <Filter>Brush</Filter>
-    </ClInclude>
     <ClInclude Include="Brush\BrushCommon.h">
       <Filter>Brush</Filter>
     </ClInclude>
@@ -298,9 +283,6 @@
     </ClInclude>
     <ClInclude Include="Core\IntInput.h">
       <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Brush\AlwaysSameTileBrush.h">
-      <Filter>Brush</Filter>
     </ClInclude>
     <ClInclude Include="Brush\BrushParser.h">
       <Filter>Brush</Filter>

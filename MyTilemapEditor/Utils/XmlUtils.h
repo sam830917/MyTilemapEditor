@@ -26,4 +26,3 @@ void		saveXmlFile( XmlDocument& doc, const QString& filePath );
 // convert functions
 Tileset*	convertToTileset( const QString& tilesetFilePath );
 void		convertToMapInfo( const QString& mapFilePath, MapInfo& mapInfo, QList<LayerInfo>& layerInfo );
-Brush*		convertToBrush( const QString& brushFilePath );

@@ -3,7 +3,7 @@
 #include "Tileset.h"
 #include "Widget/WorkspaceWidget.h"
 #include "Utils/ProjectCommon.h"
-#include "Brush/Brush.h"
+#include "Brush/BrushCommon.h"
 #include <QPainter>
 #include <QGraphicsSceneMouseEvent>
 #include <QDebug>

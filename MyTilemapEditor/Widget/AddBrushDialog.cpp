@@ -1,5 +1,4 @@
 #include "Widget/AddBrushDialog.h"
-#include "Brush/Brush.h"
 #include "Brush/BrushParser.h"
 #include "Utils/ProjectCommon.h"
 #include "Core/ListContainerBase.h"

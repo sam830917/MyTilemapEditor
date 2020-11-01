@@ -4,7 +4,7 @@
 #include "Core/MapInfo.h"
 #include "Core/LayerInfo.h"
 #include "Utils/ProjectCommon.h"
-#include "Brush/Brush.h"
+#include "Brush/BrushCommon.h"
 #include <QWidget>
 #include <QTabWidget>
 #include <QList>

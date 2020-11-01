@@ -3,7 +3,6 @@
 #include "Core/Tileset.h"
 #include "Core/MapInfo.h"
 #include "Core/LayerInfo.h"
-#include "Brush/Brush.h"
 #include "Brush/BrushCommon.h"
 #include <string>
 #include <QFile>
@@ -189,9 +188,4 @@ void convertToMapInfo( const QString& mapFilePath, MapInfo& mapInfo, QList<Layer
 	}
 
 	return;
-}
-
-Brush* convertToBrush( const QString& brushFilePath )
-{
-	return loadBrush( brushFilePath );
 }

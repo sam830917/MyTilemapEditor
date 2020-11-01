@@ -25,7 +25,6 @@ private:
 	void initialBrushFile();
 
 public slots:
-	void getCurrentBrush( Brush*& brush ) const;
 	void getPaintMapModified( QList<TileModified>& modifiredList, const QPoint& point, eDrawTool tool );
 	void createNewBrush();
 	void editBrush( QListWidgetItem* item );
@@ -37,6 +36,5 @@ private:
 	QComboBox* m_brushListBox;
 	QBoxLayout* m_layout;
 	QListWidget* m_listWidget;
-	QList<BrushFile_old> m_brushFileList;
 	BrushParser* m_brushParser;
 };
