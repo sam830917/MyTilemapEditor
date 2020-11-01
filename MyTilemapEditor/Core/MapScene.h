@@ -38,7 +38,7 @@ public:
 	MapInfo getMapInfo() { return m_mapInfo; }
 
 	void editMapOnPoint( const QPointF& point );
-	void editMapByFloodFill( int layerIndex, const QPoint& coord );
+	QList<QPoint> editMapByFloodFill( int layerIndex, const QPoint& coord );
 	void selectTilesByFloodFill( int layerIndex, const QPoint& coord );
 
 	void paintMap( int index, TileInfo tileInfo, int layerIndex );
@@ -61,7 +61,7 @@ private:
 	void paintMap( const QMap<int, TileInfo>& tileInfoMap, int layerIndex );
 	void showTileProperties( const QPointF& mousePos );
 	void showSelectedTileProperties();
-	void paintTileByFloodFill( int layerIndex, const QPoint& coord, const TileInfo& currentTileInfo, const TileInfo& newTileInfo );
+	void paintTileByFloodFill( int layerIndex, const QPoint& coord, const TileInfo& currentTileInfo, const TileInfo& newTileInfo, QList<QPoint>& readyToPaintTileIndexes );
 	void selectTilesByFloodFill( int layerIndex, const QPoint& coord, const TileInfo& currentTileInfo, const TileInfo& newTileInfo );
 
 protected:
@@ -87,4 +87,5 @@ private:
 	QPointF m_startPos;
 	QPoint m_selectedMinCoord;
 	QPoint m_selectedMaxCoord;
+	QPoint m_lastPaintCoord;
 };

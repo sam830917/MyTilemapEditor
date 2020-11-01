@@ -1,5 +1,6 @@
 #include "Brush/BrushHelper.h"
 #include <QDebug>
+#include <QTime>
 #include <QPoint>
 
 BrushHelper::BrushHelper( QObject* parent /*= nullptr */ )
@@ -24,6 +25,18 @@ void BrushHelper::EraseTile( int coordX, int coordY )
 {
 	TileModified tileModified( QPoint( coordX, coordY ), TileInfo() );
 	m_readyToPaintCoordList.push_back( tileModified );
+}
+
+int BrushHelper::GetRandomInRange( int low, int high )
+{
+	QTime time = QTime::currentTime();
+	qsrand((uint)time.msec());
+	int range = ( ( high ) - low ) + low;
+	if ( range == 0 )
+	{
+		return 0;
+	}
+	return qrand() % range;
 }
 
 QList<TileModified> BrushHelper::popReadyToPaintCoordList()

@@ -163,6 +163,14 @@ void MapScene::editMapOnPoint( const QPointF& point )
 	{
 		return;
 	}
+	if ( m_lastPaintCoord == QPoint( coord.width(), coord.height() ) )
+	{
+		return;
+	}
+	else
+	{
+		m_lastPaintCoord = QPoint( coord.width(), coord.height() );
+	}
 	switch( m_parentWidget->getCurrentDrawTool() )
 	{
 	case eDrawTool::BRUSH:
@@ -185,10 +193,13 @@ void MapScene::editMapOnPoint( const QPointF& point )
 	}
 }
 
-void MapScene::editMapByFloodFill( int layerIndex, const QPoint& coord )
+QList<QPoint> MapScene::editMapByFloodFill( int layerIndex, const QPoint& coord )
 {
+	QList<QPoint> readyToPaintTileIndexes;
 	TileInfo currentTileInfo = m_layers[layerIndex]->m_tileList[m_mapInfo.getIndex( coord )]->m_tileInfo;
-	paintTileByFloodFill( layerIndex, coord, currentTileInfo, getCurrentTile() );
+	paintTileByFloodFill( layerIndex, coord, currentTileInfo, getCurrentTile(), readyToPaintTileIndexes );
+
+	return readyToPaintTileIndexes;
 }
 
 void MapScene::selectTilesByFloodFill( int layerIndex, const QPoint& coord )
@@ -355,23 +366,31 @@ void MapScene::showSelectedTileProperties()
 	m_parentWidget->showProperties( informationMap );
 }
 
-void MapScene::paintTileByFloodFill( int layerIndex, const QPoint& coord, const TileInfo& currentTileInfo, const TileInfo& newTileInfo )
+void MapScene::paintTileByFloodFill( int layerIndex, const QPoint& coord, const TileInfo& currentTileInfo, const TileInfo& newTileInfo, QList<QPoint>& readyToPaintTileIndexes )
 {
 	if( coord.x() < 0 || coord.x() >= m_mapInfo.getMapSize().width() || coord.y() < 0 || coord.y() >= m_mapInfo.getMapSize().height() )
 		return;
 
-	if ( m_layers[layerIndex]->m_tileList[m_mapInfo.getIndex( coord )]->m_tileInfo != currentTileInfo )
+	int tileIndex = m_mapInfo.getIndex( coord );
+	if ( m_layers[layerIndex]->m_tileList[tileIndex]->m_tileInfo != currentTileInfo )
 		return;
 
-	if( m_layers[layerIndex]->m_tileList[m_mapInfo.getIndex( coord )]->m_tileInfo == newTileInfo )
+	if( m_layers[layerIndex]->m_tileList[tileIndex]->m_tileInfo == newTileInfo )
 		return;
 
-	paintMap( m_mapInfo.getIndex(coord), newTileInfo, layerIndex );
+	for ( int i = 0; i < readyToPaintTileIndexes.size(); ++i )
+	{
+		if ( m_mapInfo.getIndex( readyToPaintTileIndexes[i] ) == tileIndex )
+		{
+			return;
+		}
+	}
+	readyToPaintTileIndexes.push_back( coord );
 
-	paintTileByFloodFill( layerIndex, QPoint( coord.x() + 1, coord.y() ), currentTileInfo, newTileInfo );
-	paintTileByFloodFill( layerIndex, QPoint( coord.x() - 1, coord.y() ), currentTileInfo, newTileInfo );
-	paintTileByFloodFill( layerIndex, QPoint( coord.x(), coord.y() + 1 ), currentTileInfo, newTileInfo );
-	paintTileByFloodFill( layerIndex, QPoint( coord.x(), coord.y() - 1 ), currentTileInfo, newTileInfo );
+	paintTileByFloodFill( layerIndex, QPoint( coord.x() + 1, coord.y() ), currentTileInfo, newTileInfo, readyToPaintTileIndexes );
+	paintTileByFloodFill( layerIndex, QPoint( coord.x() - 1, coord.y() ), currentTileInfo, newTileInfo, readyToPaintTileIndexes );
+	paintTileByFloodFill( layerIndex, QPoint( coord.x(), coord.y() + 1 ), currentTileInfo, newTileInfo, readyToPaintTileIndexes );
+	paintTileByFloodFill( layerIndex, QPoint( coord.x(), coord.y() - 1 ), currentTileInfo, newTileInfo, readyToPaintTileIndexes );
 }
 
 void MapScene::selectTilesByFloodFill( int layerIndex, const QPoint& coord, const TileInfo& currentTileInfo, const TileInfo& newTileInfo )
@@ -566,7 +585,18 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 				TileInfo& info = tile->getTileInfo();
 				m_beforeDrawTileInfo.push_back( info );
 			}
-			editMapByFloodFill( currentIndex, coord );
+
+			// Implement Flood fill and Paint tiles
+			QList<QPoint> readyToPaintTileIndexes = editMapByFloodFill( currentIndex, coord );
+			for( int i = 0; i < readyToPaintTileIndexes.size(); ++i )
+			{
+				QList<TileModified> modifiedList;
+				m_parentWidget->getPaintMapModified( modifiedList, readyToPaintTileIndexes[i], eDrawTool::BRUSH );
+				for( TileModified m : modifiedList )
+				{
+					paintMap( m.m_coordinate, m.m_tileInfo );
+				}
+			}
 			QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, m_layers[currentIndex]->m_tileList );
 			m_undoStack->push( command );
 		}
@@ -652,6 +682,7 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 			{
 				return;
 			}
+			m_lastPaintCoord = QPoint( -1, -1 );
 			editMapOnPoint( mousePos );
 		}
 	}

@@ -136,7 +136,6 @@ void updateBrushFileInProject( const QString& oldFilePath, const QString& newFil
 
 	XmlDocument* doc = getProject()->getDocument();
 	XmlElement* root = doc->RootElement();
-
 	if( !root )
 		return;
 
@@ -152,7 +151,7 @@ void updateBrushFileInProject( const QString& oldFilePath, const QString& newFil
 		QString path = parseXmlAttribute( *brushEle, "path", QString() );
 		if ( !path.isEmpty() )
 		{
-			if ( oldRelativePath == oldRelativePath )
+			if ( path == oldRelativePath )
 			{
 				brushesEle->DeleteChild( brushEle );
 				XmlElement* newBrushEle = doc->NewElement( "Brush" );

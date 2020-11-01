@@ -33,6 +33,7 @@ public:
 	bool saveBrushAsFile( QList<AddBrushItem*> items, const QString& saveFilePath, const QString& brushFilePath, QJSEngine* jsEngine = nullptr );
 	bool modifyBrushAsFile( QList<AddBrushItem*> items, const QString& saveFilePath, int brushIndex );
 	void deleteBrush( int index );
+	void deleteAllBrush();
 
 	QList<TileModified> getPaintMapResult( int brushIndex, const QPoint& coord, eDrawTool tool );
 	QString getFilePathByIndex( int index );

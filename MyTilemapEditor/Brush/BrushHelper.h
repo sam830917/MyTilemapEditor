@@ -13,6 +13,7 @@ public:
 
 	Q_INVOKABLE void SetTile( int coordX, int coordY, TileInfo* tileInfo );
 	Q_INVOKABLE void EraseTile( int coordX, int coordY );
+	Q_INVOKABLE int GetRandomInRange( int low, int high );
 
 	QList<TileModified> popReadyToPaintCoordList();
 
