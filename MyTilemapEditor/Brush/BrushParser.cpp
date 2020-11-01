@@ -4,6 +4,7 @@
 #include "Core/Tileset.h"
 #include "Core/TileSelector.h"
 #include "Core/TileInfoListContainer.h"
+#include "Core//IntInput.h"
 #include "Utils/XmlUtils.h"
 #include <QJSEngine>
 #include <QFile>
@@ -72,6 +73,10 @@ void BrushParser::initialBrushFile( const QString& filePath )
 			{
 				item.m_itemType = eItemType::TILE_INFO_LIST;
 			}
+			else if( "Int" == type )
+			{
+				item.m_itemType = eItemType::INT;
+			}
 			QString id = object.property( "id" ).toString();
 			item.m_id = id;
 			item.m_labelName = labelName;
@@ -105,6 +110,10 @@ QList<AddBrushItem*> BrushParser::createBrushUI( const QString& brushName )
 		{
 			createTileUI( brushItem.m_labelName, itemList );
 		}
+		else if( eItemType::INT == brushItem.m_itemType )
+		{
+			createIntUI( brushItem.m_labelName, itemList );
+		}
 		else if( eItemType::TILE_INFO_LIST == brushItem.m_itemType )
 		{
 			QList<TileInfo> tileList;
@@ -137,6 +146,19 @@ QList<AddBrushItem*> BrushParser::createBrushUIByCurrentBrush( int index )
 			{
 				QString str = value.toString();
 				createStringUI( brushItem.m_labelName, itemList, str );
+			}
+		}
+		else if( eItemType::INT == brushItem.m_itemType )
+		{
+			QJSValue value = jsEngine->globalObject().property( brushItem.m_id );
+			if( value.isUndefined() )
+			{
+				createIntUI( brushItem.m_labelName, itemList );
+			}
+			else
+			{
+				int val = value.toInt();
+				createIntUI( brushItem.m_labelName, itemList, val );
 			}
 		}
 		else if( eItemType::TILE_INFO == brushItem.m_itemType )
@@ -199,6 +221,11 @@ bool BrushParser::loadBrushFile( const QString& filePath )
 				{
 					jsEngine->globalObject().setProperty( itemInfo.m_id, value );
 				}
+			}
+			else if( "INT" == type )
+			{
+				int value = parseXmlAttribute( *brushItem, "value", 0 );
+				jsEngine->globalObject().setProperty( itemInfo.m_id, value );
 			}
 			else if ( "TILE_INFO" == type )
 			{
@@ -286,6 +313,14 @@ bool BrushParser::saveBrushAsFile( QList<AddBrushItem*> items, const QString& sa
 			itemEle->SetAttribute( "type", "STRING" );
 			itemEle->SetAttribute( "value", input->text().toStdString().c_str() );
 			jsEngine->globalObject().setProperty( brushItem.m_id, input->text() );
+			break;
+		}
+		case eItemType::INT:
+		{
+			IntInput* input = dynamic_cast<IntInput*>(item->m_widgetItem);
+			itemEle->SetAttribute( "type", "INT" );
+			itemEle->SetAttribute( "value", input->value() );
+			jsEngine->globalObject().setProperty( brushItem.m_id, input->value() );
 			break;
 		}
 		case eItemType::TILE_INFO:
@@ -482,6 +517,19 @@ void BrushParser::createTileListUI( const QString& labelName, QList<AddBrushItem
 	tileListItem->m_type = eItemType::TILE_INFO_LIST;
 	tileListItem->m_treeItem = t;
 	itemList.push_back( tileListItem );
+}
+
+void BrushParser::createIntUI( const QString& labelName, QList<AddBrushItem*>& itemList, int value )
+{
+	AddBrushItem* stringItem = new AddBrushItem();
+	IntInput* intInput = new IntInput( value );
+	QTreeWidgetItem* item = new QTreeWidgetItem();
+	item->setText( 0, labelName );
+	stringItem->m_name = labelName;
+	stringItem->m_widgetItem = intInput;
+	stringItem->m_type = eItemType::INT;
+	stringItem->m_treeItem = item;
+	itemList.push_back( stringItem );
 }
 
 QJSEngine* BrushParser::createJSEngine( const QString& filePath )

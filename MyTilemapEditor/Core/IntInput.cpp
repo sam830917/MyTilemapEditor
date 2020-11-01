@@ -16,6 +16,13 @@ IntInput::IntInput( int* connectInt )
 	setValue( *connectInt );
 }
 
+IntInput::IntInput( int value )
+{
+	setMinimum( -2147483648 );
+	setMaximum( 2147483647 );
+	setValue( value );
+}
+
 IntInput::~IntInput()
 {
 
