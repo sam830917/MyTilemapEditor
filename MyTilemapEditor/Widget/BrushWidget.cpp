@@ -7,6 +7,7 @@
 #include <QComboBox>
 #include <QFileInfo>
 #include <QPoint>
+#include <QDir>
 
 BrushWidget::BrushWidget( const QString& title, QWidget* parent /*= Q_NULLPTR */ )
 	:QDockWidget( title, parent )
@@ -66,9 +67,14 @@ void BrushWidget::initialToolbar()
 
 void BrushWidget::initialBrushFile()
 {
-	QString path = QCoreApplication::applicationDirPath() + "/Brushes/Brush.js";
-	QFileInfo info(path);
-	m_brushListBox->addItem( info.completeBaseName(), QVariant::fromValue(path) );
+	QDir brushDirectory( QCoreApplication::applicationDirPath() + "/Brushes" );
+	QStringList brushFiles = brushDirectory.entryList( QStringList() << "*.js" << "*.JS", QDir::Files );
+	for ( QString fileName : brushFiles )
+	{
+		QString filePath = brushDirectory.filePath( fileName );
+		QFileInfo info( filePath );
+		m_brushListBox->addItem( info.completeBaseName(), QVariant::fromValue( filePath ) );
+	}
 }
 
 void BrushWidget::getCurrentBrush( Brush*& brush ) const

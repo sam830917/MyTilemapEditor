@@ -13,11 +13,20 @@
 #include <QJSValueIterator>
 #include <QDebug>
 #include <QLineEdit>
+#include <QDir>
+
+QString g_brushLibStr;
 
 BrushParser::BrushParser()
 {
 	// Load all brush files
-	initialBrushFile( QCoreApplication::applicationDirPath() + "/Brushes/Brush.js" );
+	QDir brushDirectory( QCoreApplication::applicationDirPath() + "/Brushes" );
+	QStringList brushFiles = brushDirectory.entryList( QStringList() << "*.js" << "*.JS", QDir::Files );
+	for( QString fileName : brushFiles )
+	{
+		QString filePath = brushDirectory.filePath( fileName );
+		initialBrushFile( filePath );
+	}
 }
 
 void BrushParser::initialBrushFile( const QString& filePath )
@@ -480,6 +489,17 @@ QJSEngine* BrushParser::createJSEngine( const QString& filePath )
 	QFile jsFile( filePath );
 	QJSEngine* jsEngine = new QJSEngine();
 
+	if ( g_brushLibStr.isEmpty() )
+	{
+		QFile file( QCoreApplication::applicationDirPath() + "/brush-lib.js" );
+		QTextStream fileIn( &file );
+		if( file.open( QFile::ReadOnly | QFile::Text ) )
+		{
+			g_brushLibStr = fileIn.readAll();
+		}
+	}
+	jsEngine->evaluate( g_brushLibStr );
+
 	QTextStream in( &jsFile );
 	if( jsFile.open( QFile::ReadOnly | QFile::Text ) )
 	{
@@ -500,9 +520,11 @@ QJSEngine* BrushParser::createJSEngine( const QString& filePath )
 			qDebug() << errorValue.property( "name" ).toString() << ", " \
 				<< errorValue.property( "message" ).toString();
 			qDebug() << errorValue.property( "lineNumber" ).toInt();
+			delete jsEngine;
 			return nullptr;
 		}
 		return jsEngine;
 	}
+	delete jsEngine;
 	return nullptr;
 }
