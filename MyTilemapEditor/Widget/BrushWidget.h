@@ -27,12 +27,15 @@ private:
 public slots:
 	void getPaintMapModified( QList<TileModified>& modifiredList, const QPoint& point, eDrawTool tool );
 	void createNewBrush();
+	void deleteNewBrush();
+	void closeAllBrush();
 	void editBrush( QListWidgetItem* item );
 	void addBrush( const QString& filePath );
 
 private:
 	QToolBar* m_toolbar;
 	QAction* m_newBrushAction;
+	QAction* m_deleteBrushAction;
 	QComboBox* m_brushListBox;
 	QBoxLayout* m_layout;
 	QListWidget* m_listWidget;

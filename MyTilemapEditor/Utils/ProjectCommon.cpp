@@ -99,6 +99,36 @@ void saveBrushIntoProject( const QString& filePath )
 	saveXmlFile( *doc, getProjectFilePath() );
 }
 
+void deleteBrushInProject( const QString& filePath )
+{
+	XmlDocument* doc = getProject()->getDocument();
+	XmlElement* root = doc->RootElement();
+
+	if( !root )
+		return;
+
+	XmlElement* brushesEle = root->FirstChildElement( "Brushes" );
+	if( !brushesEle )
+	{
+		return;
+	}
+	QDir dir( getProjectRootPath() );
+	QString oldRelativePath = dir.relativeFilePath( filePath );
+	for( XmlElement* brushEle = brushesEle->FirstChildElement( "Brush" ); brushEle; brushEle = brushEle->NextSiblingElement( "Brush" ) )
+	{
+		QString path = parseXmlAttribute( *brushEle, "path", QString() );
+		if( !path.isEmpty() )
+		{
+			if( oldRelativePath == oldRelativePath )
+			{
+				brushesEle->DeleteChild( brushEle );
+				saveXmlFile( *doc, getProjectFilePath() );
+				return;
+			}
+		}
+	}
+}
+
 void updateBrushFileInProject( const QString& oldFilePath, const QString& newFilePath )
 {
 	if( getProject() == nullptr )

@@ -52,12 +52,16 @@ void BrushWidget::initialToolbar()
 	m_layout->addWidget( m_toolbar );
 
 	m_newBrushAction = new QAction( QIcon( ":/MainWindow/Icon/plus.png" ), tr( "&New Brush" ), this );
+	m_deleteBrushAction = new QAction( QIcon( ":/MainWindow/Icon/minus.png" ), tr( "&Delete Brush" ), this );
 	m_newBrushAction->setToolTip( tr( "New Brush" ) );
+	m_deleteBrushAction->setToolTip( tr( "Delete Brush" ) );
 	m_brushListBox = new QComboBox( this );
 	m_toolbar->addWidget( m_brushListBox );
 	m_toolbar->addAction( m_newBrushAction );
+	m_toolbar->addAction( m_deleteBrushAction );
 
  	connect( m_newBrushAction, &QAction::triggered, this, &BrushWidget::createNewBrush );
+ 	connect( m_deleteBrushAction, &QAction::triggered, this, &BrushWidget::deleteNewBrush );
 }
 
 void BrushWidget::initialBrushFile()
@@ -104,6 +108,56 @@ void BrushWidget::createNewBrush()
 		m_listWidget->addItem( dialog.m_name );
  		saveBrushIntoProject( dialog.m_brushFilePath );
 	}
+}
+
+void BrushWidget::deleteNewBrush()
+{
+	if( !getProject() )
+	{
+		QMessageBox::warning( this, tr( "Warning" ), tr( "No project is opening!" ) );
+		return;
+	}
+
+	int brushIndex = m_listWidget->currentRow();
+	if ( brushIndex == 0 )
+	{
+		return;
+	}
+	QMessageBox msgBox;
+	msgBox.setWindowTitle( "Confirm Delete Brush" );
+	msgBox.setText( "Do you want to delete selected brush?" );
+	msgBox.setIcon( QMessageBox::Warning );
+	msgBox.setStandardButtons( QMessageBox::Yes | QMessageBox::No );
+	msgBox.setDefaultButton( QMessageBox::No );
+	int ret = msgBox.exec();
+	switch( ret )
+	{
+	case QMessageBox::Yes:
+	{
+		QString filePath = m_brushParser->getFilePathByIndex( brushIndex - 1 );
+		QFile file( filePath );
+		file.remove();
+		deleteBrushInProject( filePath );
+		m_brushParser->deleteBrush( brushIndex - 1 );
+		m_listWidget->takeItem( brushIndex );
+		break;
+	}
+	case QMessageBox::No:
+		return;
+	default:
+		// should never be reached
+		break;
+	}
+}
+
+void BrushWidget::closeAllBrush()
+{
+	int brushCount = m_listWidget->count();
+	for ( int i = 1; i < brushCount; ++i )
+	{
+		m_listWidget->takeItem(i);
+	}
+	m_brushParser->deleteAllBrush();
 }
 
 void BrushWidget::editBrush( QListWidgetItem* item )

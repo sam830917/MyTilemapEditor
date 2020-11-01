@@ -188,6 +188,16 @@ QList<AddBrushItem*> BrushParser::createBrushUIByCurrentBrush( int index )
 
 bool BrushParser::loadBrushFile( const QString& filePath )
 {
+	// Check is already exist
+	for ( int i = 0; i < m_brushes.size(); ++i )
+	{
+		QString path = getFilePathByIndex(i);
+		if ( filePath == path )
+		{
+			return false;
+		}
+	}
+
 	XmlDocument* doc = new XmlDocument;
 	doc->LoadFile( filePath.toStdString().c_str() );
 	if( doc->Error() )
@@ -403,6 +413,21 @@ bool BrushParser::modifyBrushAsFile( QList<AddBrushItem*> items, const QString& 
 		file.remove();
 	}
 	return true;
+}
+
+void BrushParser::deleteBrush( int index )
+{
+	delete m_brushes[index];
+	m_brushes.removeAt(index);
+}
+
+void BrushParser::deleteAllBrush()
+{
+	for ( int i = 0; i < m_brushes.size(); ++i )
+	{
+		delete m_brushes[i];
+	}
+	m_brushes.clear();
 }
 
 QList<TileModified> BrushParser::getPaintMapResult( int brushIndex, const QPoint& coord, eDrawTool tool )
