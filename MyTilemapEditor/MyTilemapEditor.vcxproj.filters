@@ -147,6 +147,9 @@
     <ClCompile Include="Brush\BrushHelper.cpp">
       <Filter>Brush</Filter>
     </ClCompile>
+    <ClCompile Include="Core\TileGridSelector.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Core\MainWindow.h">
@@ -286,6 +289,9 @@
     </ClInclude>
     <ClInclude Include="Brush\BrushParser.h">
       <Filter>Brush</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\TileGridSelector.h">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

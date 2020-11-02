@@ -31,6 +31,7 @@ class MapScene : public QGraphicsScene
 	friend class LayerRenameCommand;
 	friend class Layer;
 	friend class SelectMask;
+	friend class BrushHelper;
 
 public:
 	MapScene( MapInfo mapInfo, WorkspaceWidget* parent = Q_NULLPTR );

@@ -22,5 +22,7 @@
         <file>Icon/bucket.png</file>
         <file>Icon/magic-wand.png</file>
         <file>Icon/same-tile.png</file>
+        <file>Icon/circle.png</file>
+        <file>Icon/cross.png</file>
     </qresource>
 </RCC>

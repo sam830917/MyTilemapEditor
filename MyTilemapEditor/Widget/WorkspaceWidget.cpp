@@ -12,6 +12,8 @@
 #include <QDebug>
 #include <QShortcut>
 
+MapScene* g_currentMapScene = nullptr;
+
 WorkspaceWidget::WorkspaceWidget( QWidget* parent /*= Q_NULLPTR */ )
 	:QWidget(parent)
 {
@@ -34,7 +36,7 @@ WorkspaceWidget::WorkspaceWidget( QWidget* parent /*= Q_NULLPTR */ )
 	m_mapTabWidget->setTabsClosable(true);
 	m_mapTabWidget->installEventFilter( this );
 	disableTabWidget( true );
-	connect(m_mapTabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
+	connect( m_mapTabWidget, SIGNAL( tabCloseRequested(int) ), this, SLOT( closeTab( int ) ) );
 	connect( m_mapTabWidget, SIGNAL( currentChanged( int ) ), this, SLOT( changeTab( int ) ) );
 }
 
@@ -232,6 +234,7 @@ void WorkspaceWidget::changeTab( int index )
 {
 	if ( index == -1 )
 	{
+		g_currentMapScene = nullptr;
 		updateUndo( nullptr );
 		updateRedo( nullptr );
 	}
@@ -240,6 +243,7 @@ void WorkspaceWidget::changeTab( int index )
 		MapScene* mapScene = m_mapSceneList[index];
 		if( mapScene )
 		{
+			g_currentMapScene = mapScene;
 			updateUndo( mapScene->m_undoStack->createUndoAction( this, tr( "&Undo" ) ) );
 			updateRedo( mapScene->m_undoStack->createRedoAction( this, tr( "&Redo" ) ) );
 		}

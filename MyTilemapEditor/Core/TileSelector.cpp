@@ -66,6 +66,7 @@ void TileSelectorScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 	}
 }
 
+//----------------------------------------------------------------------------------------------------
 TileSelector::TileSelector( const QSize& size )
 	:QGraphicsView(),
 	m_size(size)

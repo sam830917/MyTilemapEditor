@@ -12,6 +12,7 @@ enum class eItemType
 	INT,
 	TILE_INFO,
 	TILE_INFO_LIST,
+	TILE_GRID_BOOL,
 
 	UNKNOWN,
 };

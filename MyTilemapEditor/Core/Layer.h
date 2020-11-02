@@ -14,6 +14,7 @@ class Layer
 	friend class LayerAddCommand;
 	friend class LayerDeleteCommand;
 	friend class Tile;
+	friend class BrushHelper;
 
 public:
 	Layer( MapScene* mapScene, int zValue );

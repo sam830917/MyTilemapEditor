@@ -9,7 +9,7 @@ class TileInfo : public QObject
 {
 	Q_OBJECT
 public:
-	TileInfo();
+	Q_INVOKABLE TileInfo();
 	TileInfo( const TileInfo& copyFrom );
 	TileInfo( const Tileset* tileset, int index );
 	~TileInfo();
@@ -20,11 +20,11 @@ public:
 
 	void setTileInfo( const Tileset* tileset, int index ) { m_tileset = tileset; m_index = index; }
 
-	bool			isValid() const { return m_index != -1 && m_index >=0 && m_tileset; }
+	Q_INVOKABLE bool	isValid() const { return m_index != -1 && m_index >=0 && m_tileset; }
 
-	void        operator=( const TileInfo& compare );
-	bool        operator==( const TileInfo& compare ) const;
-	bool        operator!=( const TileInfo& compare ) const;
+	Q_INVOKABLE void        operator=( const TileInfo& compare );
+	Q_INVOKABLE bool        operator==( const TileInfo& compare ) const;
+	Q_INVOKABLE bool        operator!=( const TileInfo& compare ) const;
 
 private:
 	const Tileset* m_tileset = nullptr;

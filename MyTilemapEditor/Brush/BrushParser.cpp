@@ -4,6 +4,7 @@
 #include "Core/Tileset.h"
 #include "Core/TileSelector.h"
 #include "Core/TileInfoListContainer.h"
+#include "Core/TileGridSelector.h"
 #include "Core//IntInput.h"
 #include "Utils/XmlUtils.h"
 #include <QJSEngine>
@@ -17,6 +18,7 @@
 #include <QDir>
 
 QString g_brushLibStr;
+QJSEngine* g_currentJsEngine = nullptr;
 
 BrushParser::BrushParser()
 {
@@ -77,6 +79,10 @@ void BrushParser::initialBrushFile( const QString& filePath )
 			{
 				item.m_itemType = eItemType::INT;
 			}
+			else if( "TileGridBool" == type )
+			{
+				item.m_itemType = eItemType::TILE_GRID_BOOL;
+			}
 			QString id = object.property( "id" ).toString();
 			item.m_id = id;
 			item.m_labelName = labelName;
@@ -106,18 +112,22 @@ QList<AddBrushItem*> BrushParser::createBrushUI( const QString& brushName )
 		{
 			createStringUI( brushItem.m_labelName, itemList );
 		}
-		else if( eItemType::TILE_INFO == brushItem.m_itemType )
-		{
-			createTileUI( brushItem.m_labelName, itemList );
-		}
 		else if( eItemType::INT == brushItem.m_itemType )
 		{
 			createIntUI( brushItem.m_labelName, itemList );
+		}
+		else if( eItemType::TILE_INFO == brushItem.m_itemType )
+		{
+			createTileUI( brushItem.m_labelName, itemList );
 		}
 		else if( eItemType::TILE_INFO_LIST == brushItem.m_itemType )
 		{
 			QList<TileInfo> tileList;
 			createTileListUI( brushItem.m_labelName, itemList, tileList );
+		}
+		else if( eItemType::TILE_GRID_BOOL == brushItem.m_itemType )
+		{
+			createTileGridUI( brushItem.m_labelName, itemList );
 		}
 	}
 
@@ -452,6 +462,7 @@ QList<TileModified> BrushParser::getPaintMapResult( int brushIndex, const QPoint
 	{
 		return emptyList;
 	}
+	g_currentJsEngine = jsEngine;
 	QJSValue object = QJSValue( coord.x() );
 	QJSValue object2 = QJSValue( coord.y() );
 	QJSValueList list;
@@ -542,6 +553,19 @@ void BrushParser::createTileListUI( const QString& labelName, QList<AddBrushItem
 	tileListItem->m_type = eItemType::TILE_INFO_LIST;
 	tileListItem->m_treeItem = t;
 	itemList.push_back( tileListItem );
+}
+
+void BrushParser::createTileGridUI( const QString& labelName, QList<AddBrushItem*>& itemList )
+{
+	AddBrushItem* tileItem = new AddBrushItem();
+	TileGridSelector* tileSelector = new TileGridSelector( eTileGridType::EDGE );
+	QTreeWidgetItem* item = new QTreeWidgetItem();
+	item->setText( 0, labelName );
+	tileItem->m_name = labelName;
+	tileItem->m_widgetItem = tileSelector;
+	tileItem->m_type = eItemType::TILE_INFO;
+	tileItem->m_treeItem = item;
+	itemList.push_back( tileItem );
 }
 
 void BrushParser::createIntUI( const QString& labelName, QList<AddBrushItem*>& itemList, int value )

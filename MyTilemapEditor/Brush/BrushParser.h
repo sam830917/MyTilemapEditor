@@ -47,6 +47,7 @@ private:
 	void createStringUI( const QString& labelName, QList<AddBrushItem*>& itemList, const QString& value = QString() );
 	void createTileUI( const QString& labelName, QList<AddBrushItem*>& itemList, const TileInfo& value = TileInfo() );
 	void createTileListUI( const QString& labelName, QList<AddBrushItem*>& itemList, QList<TileInfo> tileList );
+	void createTileGridUI( const QString& labelName, QList<AddBrushItem*>& itemList );
 	void createIntUI( const QString& labelName, QList<AddBrushItem*>& itemList, int value = 0 );
 
 	QJSEngine* createJSEngine( const QString& filePath );
