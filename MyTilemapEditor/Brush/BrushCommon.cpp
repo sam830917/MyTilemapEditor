@@ -11,5 +11,5 @@
 
 bool isListType( eItemType type )
 {
-	return type == eItemType::TILE_INFO_LIST;
+	return type == eItemType::TILE_INFO_LIST || type == eItemType::TILE_GRID_BOOL_LIST_EDGE;
 }

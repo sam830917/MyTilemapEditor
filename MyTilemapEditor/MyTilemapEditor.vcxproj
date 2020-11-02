@@ -107,6 +107,7 @@
     <ClCompile Include="Core\MapInfo.cpp" />
     <ClCompile Include="Core\MapScene.cpp" />
     <ClCompile Include="Core\Project.cpp" />
+    <ClCompile Include="Core\TileGridListContainer.cpp" />
     <ClCompile Include="Core\TileGridSelector.cpp" />
     <ClCompile Include="Core\TileInfo.cpp" />
     <ClCompile Include="Core\TileinfoListContainer.cpp" />
@@ -184,6 +185,7 @@
     <ClInclude Include="Core\Project.h" />
     <QtMoc Include="Core\TileInfo.h" />
     <QtMoc Include="Core\TileSelector.h" />
+    <ClInclude Include="Core\TileGridListContainer.h" />
     <ClInclude Include="Core\TileGridSelector.h" />
     <ClInclude Include="Core\TileInfoListContainer.h" />
     <ClInclude Include="Core\Tileset.h" />

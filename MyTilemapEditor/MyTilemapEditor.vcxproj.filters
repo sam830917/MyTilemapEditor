@@ -150,6 +150,9 @@
     <ClCompile Include="Core\TileGridSelector.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Core\TileGridListContainer.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Core\MainWindow.h">
@@ -291,6 +294,9 @@
       <Filter>Brush</Filter>
     </ClInclude>
     <ClInclude Include="Core\TileGridSelector.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\TileGridListContainer.h">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>

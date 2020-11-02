@@ -3,6 +3,7 @@
 #include <QList>
 #include <QMap>
 #include "Utils/ProjectCommon.h"
+#include "Core/TileGridSelector.h"
 #include "Brush/BrushCommon.h"
 #include "Brush/BrushHelper.h"
 
@@ -48,6 +49,7 @@ private:
 	void createTileUI( const QString& labelName, QList<AddBrushItem*>& itemList, const TileInfo& value = TileInfo() );
 	void createTileListUI( const QString& labelName, QList<AddBrushItem*>& itemList, QList<TileInfo> tileList );
 	void createTileGridUI( const QString& labelName, QList<AddBrushItem*>& itemList );
+	void createTileGridListUI( const QString& labelName, QList<AddBrushItem*>& itemList, eTileGridType type, QList<TileInfo> tileList, QList<QList<bool>> statesList );
 	void createIntUI( const QString& labelName, QList<AddBrushItem*>& itemList, int value = 0 );
 
 	QJSEngine* createJSEngine( const QString& filePath );

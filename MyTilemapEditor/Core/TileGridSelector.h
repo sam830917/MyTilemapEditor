@@ -7,12 +7,6 @@
 class TileGridSelectorScene;
 class TileGrid;
 
-enum class eGridState
-{
-	FREE,
-	ALLOW,
-	BLOCK
-};
 enum class eTileGridType
 {
 	EDGE,
@@ -26,7 +20,8 @@ public:
 	TileGridSelector( eTileGridType type = eTileGridType::EDGE_AND_CORNER, const QSize& size = QSize( 50, 50 ) );
 	~TileGridSelector();
 
-	QList<eGridState> getGridState() const;
+	QList<bool> getGridState() const;
+	void setGridState( QList<bool> states ) const;
 
 private:
 	QSize m_size;

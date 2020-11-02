@@ -27,7 +27,7 @@ protected:
 
 private:
 	QSize m_size;
-	eGridState m_state = eGridState::FREE;
+	bool m_state = true;
 };
 
 TileGrid::TileGrid( const QSize& size )
@@ -38,14 +38,14 @@ TileGrid::TileGrid( const QSize& size )
 
 void TileGrid::paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget /*= Q_NULLPTR */ )
 {
-	if ( m_state == eGridState::ALLOW )
+	if ( m_state )
 	{
 		QPixmap img = QPixmap( ":/MainWindow/Icon/circle.png" );
 		QRectF rect = boundingRect();
 		QPoint point = QPoint( rect.x() + 0.5f, rect.y() + 0.5f );
 		painter->drawPixmap( point.x(), point.y(), m_size.width(), m_size.height(), img );
 	}
-	else if ( m_state == eGridState::BLOCK )
+	else
 	{
 		QPixmap img = QPixmap( ":/MainWindow/Icon/cross.png" );
 		QRectF rect = boundingRect();
@@ -56,20 +56,7 @@ void TileGrid::paint( QPainter* painter, const QStyleOptionGraphicsItem* option,
 
 void TileGrid::mousePressEvent( QGraphicsSceneMouseEvent* event )
 {
-	switch( m_state )
-	{
-	case eGridState::FREE:
-		m_state = eGridState::ALLOW;
-		break;
-	case eGridState::ALLOW:
-		m_state = eGridState::BLOCK;
-		break;
-	case eGridState::BLOCK:
-		m_state = eGridState::FREE;
-		break;
-	default:
-		break;
-	}
+	m_state = !m_state;
 	update();
 }
 
@@ -183,12 +170,21 @@ TileGridSelector::~TileGridSelector()
 {
 }
 
-QList<eGridState> TileGridSelector::getGridState() const
+QList<bool> TileGridSelector::getGridState() const
 {
-	QList<eGridState> states;
+	QList<bool> states;
 	for ( int i = 0; i < m_scene->m_items.size(); ++i )
 	{
 		states.push_back( m_scene->m_items[i]->m_state );
 	}
 	return states;
+}
+
+void TileGridSelector::setGridState( QList<bool> states ) const
+{
+	for( int i = 0; i < states.size(); ++i )
+	{
+		m_scene->m_items[i]->m_state = states[i];
+		m_scene->m_items[i]->update();
+	}
 }
