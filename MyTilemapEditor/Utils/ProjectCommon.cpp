@@ -1,11 +1,13 @@
 #include "ProjectCommon.h"
 #include "Core/Tileset.h"
+#include "Widget/ConsoleWidget.h"
 #include "XmlUtils.h"
 #include <QFileInfo>
 #include <QDir>
 
 static Project* g_project = nullptr;
 static TileInfo g_currentTileInfo;
+extern ConsoleWidget* g_consoleWidget;
 
 QString getProjectFilePath()
 {
@@ -162,4 +164,9 @@ void updateBrushFileInProject( const QString& oldFilePath, const QString& newFil
 			}
 		}
 	}
+}
+
+void debugPrint( const QString& text )
+{
+	g_consoleWidget->print( text );
 }

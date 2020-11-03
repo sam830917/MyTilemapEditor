@@ -1,5 +1,6 @@
 #include "Brush/BrushParser.h"
 #include "Brush/BrushHelper.h"
+#include "Brush/Jsconsole.h"
 #include "Core/TileInfo.h"
 #include "Core/Tileset.h"
 #include "Core/TileSelector.h"
@@ -14,7 +15,6 @@
 #include <QTextStream>
 #include <QCoreApplication>
 #include <QJSValueIterator>
-#include <QDebug>
 #include <QLineEdit>
 #include <QDir>
 
@@ -43,10 +43,9 @@ void BrushParser::initialBrushFile( const QString& filePath )
 	QJSValue result = startupFun.call();
 	if( result.isError() )
 	{
-		qDebug() << "Error!";
-		qDebug() << result.property( "name" ).toString() << ", " \
-			<< result.property( "message" ).toString();
-		qDebug() << result.property( "lineNumber" ).toInt();
+		debugPrint( "Call Startup failed in file \"" + filePath + "\"" );
+		debugPrint( result.property( "name" ).toString() + ", " + result.property( "message" ).toString() +
+			" in line " + result.property( "lineNumber" ).toInt() );
 	}
 
 	QJSValue exposeVariables = jsEngine->globalObject().property( "exposeVariables" );
@@ -558,12 +557,15 @@ QList<TileModified> BrushParser::getPaintMapResult( int brushIndex, const QPoint
 	QJSEngine* jsEngine = m_brushes[brushIndex];
 
 	QJSValue toolFunction;
+	QString functionName = "painting function";
 	if ( tool == eDrawTool::BRUSH )
 	{
+		functionName = "Draw";
 		toolFunction = jsEngine->globalObject().property( "Draw" );
 	}
 	else if ( tool == eDrawTool::ERASER )
 	{
+		functionName = "Erase";
 		toolFunction = jsEngine->globalObject().property( "Erase" );
 	}
 	else
@@ -579,9 +581,9 @@ QList<TileModified> BrushParser::getPaintMapResult( int brushIndex, const QPoint
 	QJSValue result = toolFunction.call( list );
 	if( result.isError() )
 	{
-		qDebug() << "Error!";
-		qDebug() << result.property( "name" ).toString() << ", " << result.property( "message" ).toString();
-		qDebug() << result.property( "lineNumber" ).toInt();
+		debugPrint( "Call " + functionName + "failed!" );
+		debugPrint( result.property( "name" ).toString() + ", " + result.property( "message" ).toString() + 
+			" in line " + result.property( "lineNumber" ).toInt() );
 		return emptyList;
 	}
 
@@ -750,13 +752,15 @@ QJSEngine* BrushParser::createJSEngine( const QString& filePath )
 		QJSValue objectvalue = jsEngine->newQObject( brushHelper );
 		jsEngine->globalObject().setProperty( "helper", objectvalue );
 
+		QJSValue consoleObj =  jsEngine->newQObject( new JSConsole );
+		jsEngine->globalObject().setProperty( "console", consoleObj );
+
 		QJSValue errorValue = jsEngine->evaluate( jsStr );
 		if( errorValue.isError() )
 		{
-			qDebug() << "Error!";
-			qDebug() << errorValue.property( "name" ).toString() << ", " \
-				<< errorValue.property( "message" ).toString();
-			qDebug() << errorValue.property( "lineNumber" ).toInt();
+			debugPrint( "Creating js engine failed!" );
+			debugPrint( errorValue.property( "name" ).toString() + ", " + errorValue.property( "message" ).toString() +
+				" in line " + errorValue.property( "lineNumber" ).toInt() );
 			delete jsEngine;
 			return nullptr;
 		}

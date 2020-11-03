@@ -153,6 +153,12 @@
     <ClCompile Include="Core\TileGridListContainer.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Widget\ConsoleWidget.cpp">
+      <Filter>Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="Brush\Jsconsole.cpp">
+      <Filter>Brush</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Core\MainWindow.h">
@@ -210,6 +216,12 @@
       <Filter>Core</Filter>
     </QtMoc>
     <QtMoc Include="Brush\BrushHelper.h">
+      <Filter>Brush</Filter>
+    </QtMoc>
+    <QtMoc Include="Widget\ConsoleWidget.h">
+      <Filter>Widget</Filter>
+    </QtMoc>
+    <QtMoc Include="Brush\Jsconsole.h">
       <Filter>Brush</Filter>
     </QtMoc>
   </ItemGroup>

@@ -14,6 +14,7 @@
 #include "Widget/PropertiesWidget.h"
 #include "Widget/MinimapWidget.h"
 #include "Widget/BrushWidget.h"
+#include "Widget/ConsoleWidget.h"
 
 class MainWindow : public QMainWindow
 {
@@ -90,4 +91,5 @@ private:
 	PropertiesWidget*	m_propertiesWidget;
 	MinimapWidget*		m_minimapWidget;
 	BrushWidget*		m_brushWidget;
+	ConsoleWidget*		m_consoleWidget;
 };

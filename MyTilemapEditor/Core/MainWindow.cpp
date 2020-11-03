@@ -187,8 +187,12 @@ void MainWindow::initialDockWidgets()
 	addDockWidget( Qt::RightDockWidgetArea, m_layerWidget );
 
 	m_brushWidget = new BrushWidget( tr( "Brush" ), this );
-	m_brushWidget->setObjectName( tr( "Layer" ) );
+	m_brushWidget->setObjectName( tr( "Brush" ) );
 	addDockWidget( Qt::RightDockWidgetArea, m_brushWidget );
+
+	m_consoleWidget = new ConsoleWidget( tr( "Console" ), this );
+	m_consoleWidget->setObjectName( tr( "Console" ) );
+	addDockWidget( Qt::BottomDockWidgetArea, m_consoleWidget );
 
 	resizeDocks( { m_projectWidget }, { 250 }, Qt::Horizontal);
 	resizeDocks( { m_tilesetWidget }, { 250 }, Qt::Vertical );
@@ -196,6 +200,7 @@ void MainWindow::initialDockWidgets()
 	resizeDocks( { m_propertiesWidget }, { 250 }, Qt::Vertical );
 	resizeDocks( { m_layerWidget }, { 250 }, Qt::Vertical );
 	resizeDocks( { m_brushWidget }, { 250 }, Qt::Vertical );
+	resizeDocks( { m_consoleWidget }, { 250 }, Qt::Vertical );
 
 	m_windowsMenu->addAction( m_projectWidget->toggleViewAction() );
 	m_windowsMenu->addAction( m_tilesetWidget->toggleViewAction() );
@@ -203,6 +208,7 @@ void MainWindow::initialDockWidgets()
 	m_windowsMenu->addAction( m_propertiesWidget->toggleViewAction() );
 	m_windowsMenu->addAction( m_minimapWidget->toggleViewAction() );
 	m_windowsMenu->addAction( m_brushWidget->toggleViewAction() );
+	m_windowsMenu->addAction( m_consoleWidget->toggleViewAction() );
 }
 
 void MainWindow::initialConnections()
