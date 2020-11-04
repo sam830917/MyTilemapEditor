@@ -1,6 +1,5 @@
 #include "ProjectWidget.h"
 #include "Core/MapInfo.h"
-#include "Brush/Brush.h"
 #include "Utils/XmlUtils.h"
 #include "Utils/ProjectCommon.h"
 #include <QFileSystemModel>

@@ -27,3 +27,8 @@ MapInfo::~MapInfo()
 {
 
 }
+
+bool MapInfo::isOutOfBound( const QPoint& coord )
+{
+	return coord.x() >= m_mapWidth || coord.y() >= m_mapHeight || coord.x() < 0 || coord.y() < 0 ;
+}

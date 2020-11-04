@@ -10,7 +10,7 @@ class TileInfo : public QObject
 	Q_OBJECT
 public:
 	Q_INVOKABLE TileInfo();
-	TileInfo( const TileInfo& copyFrom );
+	Q_INVOKABLE TileInfo( const TileInfo& copyFrom );
 	TileInfo( const Tileset* tileset, int index );
 	~TileInfo();
 

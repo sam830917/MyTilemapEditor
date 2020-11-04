@@ -43,9 +43,6 @@ public slots:
 	void disableShortcut( bool isDisable );
 	void closeCurrentProject( bool& isSuccess );
 
-signals:
-	void quit();
-
 private:
 	Config* m_config;
 	QMenuBar* m_mainMenuBar;

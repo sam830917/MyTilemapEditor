@@ -38,14 +38,17 @@ void BrushParser::initialBrushFile( const QString& filePath )
 	QFileInfo jsFileInfo( filePath );
 	QJSEngine* jsEngine = createJSEngine( filePath );
 
+	if ( !jsEngine )
+		return;
+
 	// Run Startup
 	QJSValue startupFun = jsEngine->globalObject().property( "Startup" );
 	QJSValue result = startupFun.call();
 	if( result.isError() )
 	{
-		debugPrint( "Call Startup failed in file \"" + filePath + "\"" );
+		debugPrint( "Call Startup function failed in file \"" + filePath + "\"" );
 		debugPrint( result.property( "name" ).toString() + ", " + result.property( "message" ).toString() +
-			" in line " + result.property( "lineNumber" ).toInt() );
+			" in line " + result.property( "lineNumber" ).toString() );
 	}
 
 	QJSValue exposeVariables = jsEngine->globalObject().property( "exposeVariables" );
@@ -257,6 +260,9 @@ bool BrushParser::loadBrushFile( const QString& filePath )
 
 		BrushFile brushFile = m_brushItemMap[brushName];
 		QJSEngine* jsEngine = createJSEngine( brushFile.m_filePath );
+		if ( !jsEngine )
+			return false;
+
 		jsEngine->globalObject().setProperty( "BrushFilePath", brushFile.m_filePath );
 		XmlElement* brushItem = root->FirstChildElement( "BrushItem" );
 		int index = 0;
@@ -371,8 +377,19 @@ bool BrushParser::loadBrushFile( const QString& filePath )
 		}
 
 		jsEngine->globalObject().setProperty( "FilePath", filePath );
-		m_brushes.push_back(jsEngine);
+		m_brushes.push_back( jsEngine );
+
+		// call update function
+		QJSValue updateFun = jsEngine->globalObject().property( "Update" );
+		QJSValue result = updateFun.call();
+		if( result.isError() )
+		{
+			debugPrint( "Call Update function failed in file \"" + filePath + "\"" );
+			debugPrint( result.property( "name" ).toString() + ", " + result.property( "message" ).toString() +
+				" in line " + result.property( "lineNumber" ).toString() );
+		}
 	}
+
 	return true;
 }
 
@@ -509,6 +526,16 @@ bool BrushParser::saveBrushAsFile( QList<AddBrushItem*> items, const QString& sa
 	m_brushes.push_back( jsEngine );
  	saveXmlFile( *xmlDocument, saveFilePath );
 
+	// call update function
+	QJSValue updateFun = jsEngine->globalObject().property( "Update" );
+	QJSValue result = updateFun.call();
+	if( result.isError() )
+	{
+		debugPrint( "Call Update function failed in file \"" + saveFilePath + "\"" );
+		debugPrint( result.property( "name" ).toString() + ", " + result.property( "message" ).toString() +
+			" in line " + result.property( "lineNumber" ).toString() );
+	}
+
 	return true;
 }
 
@@ -581,9 +608,9 @@ QList<TileModified> BrushParser::getPaintMapResult( int brushIndex, const QPoint
 	QJSValue result = toolFunction.call( list );
 	if( result.isError() )
 	{
-		debugPrint( "Call " + functionName + "failed!" );
+		debugPrint( "Call " + functionName + " function failed!" );
 		debugPrint( result.property( "name" ).toString() + ", " + result.property( "message" ).toString() + 
-			" in line " + result.property( "lineNumber" ).toInt() );
+			" in line " + result.property( "lineNumber" ).toString() );
 		return emptyList;
 	}
 
@@ -760,7 +787,7 @@ QJSEngine* BrushParser::createJSEngine( const QString& filePath )
 		{
 			debugPrint( "Creating js engine failed!" );
 			debugPrint( errorValue.property( "name" ).toString() + ", " + errorValue.property( "message" ).toString() +
-				" in line " + errorValue.property( "lineNumber" ).toInt() );
+				" in line " + errorValue.property( "lineNumber" ).toString() );
 			delete jsEngine;
 			return nullptr;
 		}

@@ -75,7 +75,7 @@ void MainWindow::initialMenuBar()
 	m_fileMenu->addAction( m_saveAction );
 	m_fileMenu->addAction( m_saveAllAction );
 	m_fileMenu->addSeparator();
-	m_fileMenu->addAction( tr( "&Quit" ), this, &MainWindow::quit );
+	m_fileMenu->addAction( tr( "&Quit" ), this, &QCoreApplication::quit() );
 
 	m_editMenu = m_mainMenuBar->addMenu( "Edit" );
 	m_undoAction = new QAction( QIcon( ":/MainWindow/Icon/undo.png" ), tr( "&Undo" ) );
@@ -162,6 +162,10 @@ void MainWindow::initialStatusBar()
 
 void MainWindow::initialDockWidgets()
 {
+	m_consoleWidget = new ConsoleWidget( tr( "Console" ), this );
+	m_consoleWidget->setObjectName( tr( "Console" ) );
+	addDockWidget( Qt::BottomDockWidgetArea, m_consoleWidget );
+
 	m_centralWidget = new WorkspaceWidget( this );
 	m_centralWidget->setObjectName( tr( "centralWidget" ) );
 	setCentralWidget( m_centralWidget );
@@ -189,10 +193,6 @@ void MainWindow::initialDockWidgets()
 	m_brushWidget = new BrushWidget( tr( "Brush" ), this );
 	m_brushWidget->setObjectName( tr( "Brush" ) );
 	addDockWidget( Qt::RightDockWidgetArea, m_brushWidget );
-
-	m_consoleWidget = new ConsoleWidget( tr( "Console" ), this );
-	m_consoleWidget->setObjectName( tr( "Console" ) );
-	addDockWidget( Qt::BottomDockWidgetArea, m_consoleWidget );
 
 	resizeDocks( { m_projectWidget }, { 250 }, Qt::Horizontal);
 	resizeDocks( { m_tilesetWidget }, { 250 }, Qt::Vertical );

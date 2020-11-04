@@ -1,5 +1,6 @@
 #include "Brush/BrushHelper.h"
 #include "Core/MapScene.h"
+#include "Utils/ProjectCommon.h"
 #include <QDebug>
 #include <QTime>
 #include <QPoint>
@@ -21,6 +22,10 @@ BrushHelper::~BrushHelper()
 
 void BrushHelper::setTile( int coordX, int coordY, TileInfo* tileInfo )
 {
+	if ( !tileInfo )
+	{
+		debugPrint( "setTile error : Tile is null!" );
+	}
 	TileInfo tile(*tileInfo);
 	TileModified tileModified( QPoint( coordX, coordY ), tile );
 	m_readyToPaintCoordList.push_back( tileModified );
@@ -36,6 +41,7 @@ bool BrushHelper::isSameTile( int coordX, int coordY, TileInfo* tileInfo )
 {
 	if( !g_currentMapScene || !tileInfo )
 	{
+		debugPrint( "setTile error : Tile is null!" );
 		return false;
 	}
 	int layerIndex = g_currentMapScene->getCurrentLayerIndex();
@@ -56,6 +62,10 @@ bool BrushHelper::isConatainTile( int coordX, int coordY, const QJSValue& value 
 	}
 	int layerIndex = g_currentMapScene->getCurrentLayerIndex();
 	if( layerIndex == -1 )
+	{
+		return false;
+	}
+	if ( g_currentMapScene->m_mapInfo.isOutOfBound( QPoint( coordX, coordY ) ) )
 	{
 		return false;
 	}
