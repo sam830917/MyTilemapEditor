@@ -1,5 +1,5 @@
-#include "Core/TileInfoListContainer.h"
-#include "Core/TileSelector.h"
+#include "BrushUI/TileInfoListContainer.h"
+#include "BrushUI/TileSelector.h"
 
 TileInfoListContainer::TileInfoListContainer()
 	:ListContainerBase()

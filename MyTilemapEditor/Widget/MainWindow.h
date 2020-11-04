@@ -6,7 +6,7 @@
 #include "Core/Config.h"
 #include <QCloseEvent>
 #include <QShortcut>
-#include "Toolbar.h"
+#include "Core/Toolbar.h"
 #include "Widget/ProjectWidget.h"
 #include "Widget/WorkspaceWidget.h"
 #include "Widget/TilesetWidget.h"

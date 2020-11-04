@@ -1,4 +1,4 @@
-#include "Core//IntInput.h"
+#include "BrushUI/IntInput.h"
 
 IntInput::IntInput()
 	:QSpinBox()

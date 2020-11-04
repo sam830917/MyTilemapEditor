@@ -1,4 +1,4 @@
-#include "Core/TileGridSelector.h"
+#include "BrushUI/TileGridSelector.h"
 #include <QGraphicsItem>
 
 class TileGridSelectorScene : public QGraphicsScene

@@ -37,12 +37,12 @@
     <Filter Include="Brush">
       <UniqueIdentifier>{c3c81aee-41d1-467f-8731-a0790b01f6ed}</UniqueIdentifier>
     </Filter>
+    <Filter Include="BrushUI">
+      <UniqueIdentifier>{4d38a5f7-0a74-4f86-98d5-953f25a6e402}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\main.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\MainWindow.cpp">
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="Core\Toolbar.cpp">
@@ -123,23 +123,11 @@
     <ClCompile Include="Widget\AddBrushDialog.cpp">
       <Filter>Widget</Filter>
     </ClCompile>
-    <ClCompile Include="Core\TileSelector.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
     <ClCompile Include="Widget\SelectTileDialog.cpp">
       <Filter>Widget</Filter>
     </ClCompile>
     <ClCompile Include="Brush\BrushCommon.cpp">
       <Filter>Brush</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\TileinfoListContainer.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\ListContainerBase.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\IntInput.cpp">
-      <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="Brush\BrushParser.cpp">
       <Filter>Brush</Filter>
@@ -147,23 +135,35 @@
     <ClCompile Include="Brush\BrushHelper.cpp">
       <Filter>Brush</Filter>
     </ClCompile>
-    <ClCompile Include="Core\TileGridSelector.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\TileGridListContainer.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
     <ClCompile Include="Widget\ConsoleWidget.cpp">
       <Filter>Widget</Filter>
     </ClCompile>
     <ClCompile Include="Brush\Jsconsole.cpp">
       <Filter>Brush</Filter>
     </ClCompile>
+    <ClCompile Include="Widget\MainWindow.cpp">
+      <Filter>Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="BrushUI\IntInput.cpp">
+      <Filter>BrushUI</Filter>
+    </ClCompile>
+    <ClCompile Include="BrushUI\ListContainerBase.cpp">
+      <Filter>BrushUI</Filter>
+    </ClCompile>
+    <ClCompile Include="BrushUI\TileGridListContainer.cpp">
+      <Filter>BrushUI</Filter>
+    </ClCompile>
+    <ClCompile Include="BrushUI\TileGridSelector.cpp">
+      <Filter>BrushUI</Filter>
+    </ClCompile>
+    <ClCompile Include="BrushUI\TileinfoListContainer.cpp">
+      <Filter>BrushUI</Filter>
+    </ClCompile>
+    <ClCompile Include="BrushUI\TileSelector.cpp">
+      <Filter>BrushUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="Core\MainWindow.h">
-      <Filter>Core</Filter>
-    </QtMoc>
     <QtMoc Include="Core\Toolbar.h">
       <Filter>Core</Filter>
     </QtMoc>
@@ -209,9 +209,6 @@
     <QtMoc Include="Widget\SelectTileDialog.h">
       <Filter>Widget</Filter>
     </QtMoc>
-    <QtMoc Include="Core\TileSelector.h">
-      <Filter>Core</Filter>
-    </QtMoc>
     <QtMoc Include="Core\TileInfo.h">
       <Filter>Core</Filter>
     </QtMoc>
@@ -223,6 +220,12 @@
     </QtMoc>
     <QtMoc Include="Brush\Jsconsole.h">
       <Filter>Brush</Filter>
+    </QtMoc>
+    <QtMoc Include="Widget\MainWindow.h">
+      <Filter>Widget</Filter>
+    </QtMoc>
+    <QtMoc Include="BrushUI\TileSelector.h">
+      <Filter>BrushUI</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
@@ -293,23 +296,23 @@
     <ClInclude Include="Brush\BrushCommon.h">
       <Filter>Brush</Filter>
     </ClInclude>
-    <ClInclude Include="Core\TileInfoListContainer.h">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\ListContainerBase.h">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\IntInput.h">
-      <Filter>Core</Filter>
-    </ClInclude>
     <ClInclude Include="Brush\BrushParser.h">
       <Filter>Brush</Filter>
     </ClInclude>
-    <ClInclude Include="Core\TileGridSelector.h">
-      <Filter>Core</Filter>
+    <ClInclude Include="BrushUI\IntInput.h">
+      <Filter>BrushUI</Filter>
     </ClInclude>
-    <ClInclude Include="Core\TileGridListContainer.h">
-      <Filter>Core</Filter>
+    <ClInclude Include="BrushUI\ListContainerBase.h">
+      <Filter>BrushUI</Filter>
+    </ClInclude>
+    <ClInclude Include="BrushUI\TileGridListContainer.h">
+      <Filter>BrushUI</Filter>
+    </ClInclude>
+    <ClInclude Include="BrushUI\TileGridSelector.h">
+      <Filter>BrushUI</Filter>
+    </ClInclude>
+    <ClInclude Include="BrushUI\TileInfoListContainer.h">
+      <Filter>BrushUI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

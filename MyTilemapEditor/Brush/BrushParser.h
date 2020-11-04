@@ -3,11 +3,11 @@
 #include <QList>
 #include <QMap>
 #include "Utils/ProjectCommon.h"
-#include "Core/TileGridSelector.h"
 #include "Brush/BrushCommon.h"
 #include "Brush/BrushHelper.h"
 
 QT_FORWARD_DECLARE_CLASS( QJSEngine );
+enum class eTileGridType;
 
 struct BrushItemInfo
 {

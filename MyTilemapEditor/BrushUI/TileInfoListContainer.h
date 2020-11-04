@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/ListContainerBase.h"
+#include "BrushUI/ListContainerBase.h"
 #include "Core/TileInfo.h"
 
 class TileSelector;

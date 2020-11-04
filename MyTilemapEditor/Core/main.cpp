@@ -1,4 +1,4 @@
-#include "MainWindow.h"
+#include "Widget/MainWindow.h"
 #include <QtWidgets/QApplication>
 #include <QObject>
 #include "ThirdParty/framelesswindowDarkStyle/framelesswindow/framelesswindow.h"

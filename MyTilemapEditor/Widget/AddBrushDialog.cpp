@@ -1,7 +1,7 @@
 #include "Widget/AddBrushDialog.h"
 #include "Brush/BrushParser.h"
 #include "Utils/ProjectCommon.h"
-#include "Core/ListContainerBase.h"
+#include "BrushUI/ListContainerBase.h"
 #include <QSpacerItem>
 #include <QMessageBox>
 #include <QFileInfo>

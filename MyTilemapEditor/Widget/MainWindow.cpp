@@ -75,7 +75,7 @@ void MainWindow::initialMenuBar()
 	m_fileMenu->addAction( m_saveAction );
 	m_fileMenu->addAction( m_saveAllAction );
 	m_fileMenu->addSeparator();
-	m_fileMenu->addAction( tr( "&Quit" ), this, &QCoreApplication::quit() );
+	m_fileMenu->addAction( tr( "&Quit" ), this, &QWidget::close );
 
 	m_editMenu = m_mainMenuBar->addMenu( "Edit" );
 	m_undoAction = new QAction( QIcon( ":/MainWindow/Icon/undo.png" ), tr( "&Undo" ) );
@@ -209,6 +209,8 @@ void MainWindow::initialDockWidgets()
 	m_windowsMenu->addAction( m_minimapWidget->toggleViewAction() );
 	m_windowsMenu->addAction( m_brushWidget->toggleViewAction() );
 	m_windowsMenu->addAction( m_consoleWidget->toggleViewAction() );
+
+	m_consoleWidget->toggleViewAction()->triggered();
 }
 
 void MainWindow::initialConnections()

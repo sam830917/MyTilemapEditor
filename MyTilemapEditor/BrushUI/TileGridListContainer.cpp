@@ -1,5 +1,5 @@
-#include "Core/TileGridListContainer.h"
-#include "Core/TileSelector.h"
+#include "BrushUI/TileGridListContainer.h"
+#include "BrushUI/TileSelector.h"
 #include <QBoxLayout>
 
 TileGridListContainer::TileGridListContainer()

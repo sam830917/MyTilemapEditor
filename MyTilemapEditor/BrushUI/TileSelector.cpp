@@ -1,4 +1,4 @@
-#include "Core/TileSelector.h"
+#include "BrushUI/TileSelector.h"
 #include "Widget/SelectTileDialog.h"
 #include <QGraphicsRectItem>
 

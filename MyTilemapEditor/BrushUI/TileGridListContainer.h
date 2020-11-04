@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Core/ListContainerBase.h"
-#include "Core/TileGridSelector.h"
+#include "BrushUI/ListContainerBase.h"
+#include "BrushUI/TileGridSelector.h"
 #include "Core/TileInfo.h"
 
 class TileSelector;

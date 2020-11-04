@@ -1,4 +1,4 @@
-#include "Core/ListContainerBase.h"
+#include "BrushUI/ListContainerBase.h"
 #include <QString>
 
 ListContainerBase::ListContainerBase( bool needInitial )

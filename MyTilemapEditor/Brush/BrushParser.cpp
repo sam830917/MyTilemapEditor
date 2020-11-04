@@ -3,11 +3,11 @@
 #include "Brush/Jsconsole.h"
 #include "Core/TileInfo.h"
 #include "Core/Tileset.h"
-#include "Core/TileSelector.h"
-#include "Core/TileInfoListContainer.h"
-#include "Core/TileGridListContainer.h"
-#include "Core/TileGridSelector.h"
-#include "Core//IntInput.h"
+#include "BrushUI/TileSelector.h"
+#include "BrushUI/TileInfoListContainer.h"
+#include "BrushUI/TileGridListContainer.h"
+#include "BrushUI/TileGridSelector.h"
+#include "BrushUI//IntInput.h"
 #include "Utils/XmlUtils.h"
 #include <QJSEngine>
 #include <QFile>
