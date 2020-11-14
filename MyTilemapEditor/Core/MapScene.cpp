@@ -11,6 +11,7 @@
 #include <QGraphicsView>
 #include <QScrollBar>
 #include <qDebug>
+#include <QWheelEvent>
 
 class SelectMask : public QGraphicsRectItem
 {

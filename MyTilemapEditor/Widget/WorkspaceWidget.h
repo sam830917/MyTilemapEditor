@@ -10,7 +10,7 @@
 #include <QList>
 #include <QMap>
 
-QT_FORWARD_DECLARE_CLASS( QPushButton )
+QT_FORWARD_DECLARE_CLASS( QPushButton );
 
 class WorkspaceWidget : public QWidget
 {
@@ -27,6 +27,10 @@ public:
 
 protected:
 	virtual bool eventFilter( QObject* obj, QEvent* event );
+
+private:
+	void saveLayerToFile( QList<LayerInfo>& layerInfoList, int tabIndex, XmlElement& mapLayersEle, XmlDocument& mapDoc );
+	void saveTileToFile( QList<const Tileset*>& tilesetList, int tabIndex, XmlElement& mapRoot, XmlDocument& mapDoc );
 
 public slots:
 	void markCurrentSceneForModified();
@@ -55,6 +59,7 @@ public slots:
 	void eraseSelectedTilesInCurrentLayer();
 	void selecteAllTilesInCurrentLayer();
 	void closeAllTab();
+	void exportXMLFile();
 
 signals:
 	void updateRedo( QAction* action );

@@ -11,6 +11,8 @@
 #include <QSignalMapper>
 #include <QDebug>
 #include <QShortcut>
+#include <QKeyEvent>
+#include <QFileDialog>
 
 MapScene* g_currentMapScene = nullptr;
 
@@ -62,7 +64,7 @@ bool WorkspaceWidget::eventFilter( QObject* obj, QEvent* event )
 	{
 		if ( event->type() == QEvent::KeyPress )
 		{
-			QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+			QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
 			if ( keyEvent->key() == Qt::Key::Key_Tab )
 			{
 				return true;
@@ -70,6 +72,58 @@ bool WorkspaceWidget::eventFilter( QObject* obj, QEvent* event )
 		}
 	}
 	return QWidget::eventFilter( obj, event );
+}
+
+void WorkspaceWidget::saveLayerToFile( QList<LayerInfo>& layerInfoList, int tabIndex, XmlElement& mapLayersEle, XmlDocument& mapDoc )
+{
+	getLayerGroupInfoList( tabIndex, layerInfoList );
+	for( int i = 0; i < layerInfoList.size(); ++i )
+	{
+		XmlElement* mapLayerEle = mapDoc.NewElement( "Layer" );
+		mapLayerEle->SetAttribute( "name", layerInfoList[i].getNmae().toStdString().c_str() );
+		mapLayerEle->SetAttribute( "isLock", layerInfoList[i].isLock() );
+		mapLayerEle->SetAttribute( "isVisible", layerInfoList[i].isVisible() );
+		mapLayersEle.LinkEndChild( mapLayerEle );
+	}
+}
+
+void WorkspaceWidget::saveTileToFile( QList<const Tileset*>& tilesetList, int tabIndex, XmlElement& mapRoot, XmlDocument& mapDoc )
+{
+	int count = 0;
+	MapScene* mapScene = m_mapSceneList[tabIndex];
+	for( int layerIndex = 0; layerIndex < mapScene->m_layers.size(); ++layerIndex )
+	{
+		XmlElement* mapTiles = mapDoc.NewElement( "Tiles" );
+		mapRoot.LinkEndChild( mapTiles );
+		Layer* layer = mapScene->m_layers[layerIndex];
+		for( int i = 0; i < layer->m_tileList.size(); ++i )
+		{
+			Tile* tile = layer->m_tileList[i];
+			TileInfo tileInfo = tile->getTileInfo();
+			if( !tileInfo.isValid() )
+				continue;
+
+			int tilesetNumber = tilesetList.size();
+			bool isNewTileset = true;
+			for ( int tileIndex = 0; tileIndex < tilesetList.size(); ++tileIndex )
+			{
+				if ( tilesetList[tileIndex] == tileInfo.getTileset() )
+				{
+					isNewTileset = false;
+					tilesetNumber = tileIndex;
+				}
+			}
+			if ( isNewTileset )
+			{
+				tilesetList.push_back( tileInfo.getTileset() );
+			}
+			XmlElement* mapTileEle = mapDoc.NewElement( "Tile" );
+			mapTileEle->SetAttribute( "index", i );
+			mapTileEle->SetAttribute( "tileset", tilesetNumber );
+			mapTileEle->SetAttribute( "tilesetIndex", tileInfo.getIndex() );
+			mapTiles->LinkEndChild( mapTileEle );
+		}
+	}
 }
 
 void WorkspaceWidget::markCurrentSceneForModified()
@@ -356,55 +410,21 @@ void WorkspaceWidget::saveMap( int tabIndex )
 
 	// Save Layer
 	QList<LayerInfo> layerInfoList;
-	getLayerGroupInfoList( tabIndex, layerInfoList );
-	for ( int i = 0; i < layerInfoList.size(); ++i )
-	{
-		XmlElement* mapLayerEle = mapDoc->NewElement( "Layer" );
-		mapLayerEle->SetAttribute( "name", layerInfoList[i].getNmae().toStdString().c_str() );
-		mapLayerEle->SetAttribute( "isLock", layerInfoList[i].isLock() );
-		mapLayerEle->SetAttribute( "isVisible", layerInfoList[i].isVisible() );
-		mapLayersEle->LinkEndChild( mapLayerEle );
-	}
+	saveLayerToFile( layerInfoList, tabIndex, *mapLayersEle, *mapDoc );
 
-	QMap<QString, int> tilesetsMap;
 	// Save map info
-	int count = 0;
-	MapScene* mapScene = m_mapSceneList[tabIndex];
-	for ( int layerIndex = 0; layerIndex < mapScene->m_layers.size(); ++layerIndex )
-	{
-		XmlElement* mapTiles = mapDoc->NewElement( "Tiles" );
-		mapRoot->LinkEndChild( mapTiles );
-		Layer* layer = mapScene->m_layers[layerIndex];
-		for( int i = 0; i < layer->m_tileList.size(); ++i )
-		{
-			Tile* tile = layer->m_tileList[i];
-			TileInfo tileInfo = tile->getTileInfo();
-			if( !tileInfo.isValid() )
-				continue;
-
-			if( !tilesetsMap.contains( tileInfo.getTileset()->getRelativeFilePath() ) )
-			{
-				tilesetsMap.insert( tileInfo.getTileset()->getRelativeFilePath(), count++ );
-			}
-			int tilesetNumber = tilesetsMap.value( tileInfo.getTileset()->getRelativeFilePath() );
-			XmlElement* mapTileEle = mapDoc->NewElement( "Tile" );
-			mapTileEle->SetAttribute( "index", i );
-			mapTileEle->SetAttribute( "tileset", tilesetNumber );
-			mapTileEle->SetAttribute( "tilesetIndex", tileInfo.getIndex() );
-			mapTiles->LinkEndChild( mapTileEle );
-		}
-	}
+	QList<const Tileset*> tilesetList;
+	saveTileToFile( tilesetList, tabIndex, *mapRoot, *mapDoc );
 
 	// Save tileset
-	QMap<QString, int>::const_iterator mapIterator = tilesetsMap.constBegin();
-	while( mapIterator != tilesetsMap.constEnd() )
+	for ( int i = 0; i < tilesetList.size(); ++i )
 	{
 		XmlElement* mapTilesetEle = mapDoc->NewElement( "Tileset" );
-		QString path = mapIterator.key();
-		mapTilesetEle->SetAttribute( "index", mapIterator.value() );
+		const Tileset* tileset = tilesetList[i];
+		QString path = tileset->getRelativeFilePath();
+		mapTilesetEle->SetAttribute( "index", i );
 		mapTilesetEle->SetAttribute( "path", path.toStdString().c_str() );
 		mapTilesetsEle->LinkEndChild( mapTilesetEle );
-		++mapIterator;
 	}
 
 	saveXmlFile( *mapDoc, currentMapScene->getMapInfo().getFilePath() );
@@ -497,4 +517,81 @@ void WorkspaceWidget::closeAllTab()
 		delete m_mapSceneList[i];
 	}
 	m_mapSceneList.clear();
+}
+
+void WorkspaceWidget::exportXMLFile()
+{
+	if ( !getProject() )
+	{
+		// warning
+		return;
+	}
+	if ( m_mapSceneList.empty() )
+	{
+		// warning
+		return;
+	}
+	int tabIndex = m_mapTabWidget->currentIndex();
+	QString mapName = m_mapSceneList[tabIndex]->m_mapInfo.getName();
+	QFileDialog dialog( this, "Export", mapName );
+	dialog.setFileMode( QFileDialog::AnyFile );
+	dialog.setAcceptMode( QFileDialog::AcceptMode::AcceptSave );
+	dialog.setDefaultSuffix( ".xml" );
+	QStringList filePathList;
+	if( dialog.exec() == QDialog::Accepted )
+	{
+		filePathList = dialog.selectedFiles();
+		if( filePathList.empty() )
+		{
+			// warning
+			return;
+		}
+		QString filePath = filePathList[0];
+		if( QFileInfo( filePath ).suffix() != "xml" )
+		{
+			// warning
+// 			QMessageBox::critical( this, tr( "Error" ), tr( "Failed to New Project File." ) );
+			return;
+		}
+
+		MapScene* currentMapScene = m_mapSceneList[tabIndex];
+		XmlDocument* mapDoc = new XmlDocument;
+		mapDoc->LoadFile( currentMapScene->getMapInfo().getFilePath().toStdString().c_str() );
+		if( mapDoc->Error() )
+			return;
+
+		XmlElement* mapRoot = mapDoc->RootElement();
+		mapRoot->DeleteChildren();
+		XmlElement* mapTilesetsEle = mapDoc->NewElement( "Tilesets" );
+		mapRoot->LinkEndChild( mapTilesetsEle );
+		XmlElement* mapLayersEle = mapDoc->NewElement( "Layers" );
+		mapRoot->LinkEndChild( mapLayersEle );
+
+		// Save Layer
+		QList<LayerInfo> layerInfoList;
+		saveLayerToFile( layerInfoList, tabIndex, *mapLayersEle, *mapDoc );
+
+		// Save map info
+		QList<const Tileset*> tilesetList;
+		saveTileToFile( tilesetList, tabIndex, *mapRoot, *mapDoc );
+
+		// Save tileset
+		for( int i = 0; i < tilesetList.size(); ++i )
+		{
+			const Tileset* tileset = tilesetList[i];
+			XmlElement* mapTilesetEle = mapDoc->NewElement( "Tileset" );
+			XmlElement* mapTilesetImageEle = mapDoc->NewElement( "Image" );
+			mapTilesetEle->SetAttribute( "index", i );
+			mapTilesetImageEle->SetAttribute( "path", tileset->getImagePath().toStdString().c_str() );
+			QString size = QString("%1,%2").arg( tileset->getTileSize().width() ).arg( tileset->getTileSize().height() );
+			mapTilesetImageEle->SetAttribute( "size", size.toStdString().c_str() );
+			mapTilesetEle->LinkEndChild( mapTilesetImageEle );
+			mapTilesetsEle->LinkEndChild( mapTilesetEle );
+		}
+
+		saveXmlFile( *mapDoc, filePath );
+		QMessageBox msgBox;
+		msgBox.setText( "Map has exported successfully." );
+		msgBox.exec();
+	}
 }

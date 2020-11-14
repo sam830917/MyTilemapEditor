@@ -75,6 +75,12 @@ void MainWindow::initialMenuBar()
 	m_fileMenu->addAction( m_saveAction );
 	m_fileMenu->addAction( m_saveAllAction );
 	m_fileMenu->addSeparator();
+
+	QMenu* exportMenu = m_fileMenu->addMenu( "Export" );
+	m_exportXMLAction = new QAction( tr( "XML" ), this );
+	exportMenu->addAction( m_exportXMLAction );
+
+	m_fileMenu->addSeparator();
 	m_fileMenu->addAction( tr( "&Quit" ), this, &QWidget::close );
 
 	m_editMenu = m_mainMenuBar->addMenu( "Edit" );
@@ -226,6 +232,7 @@ void MainWindow::initialConnections()
 	connect( m_saveAction, &QAction::triggered, m_centralWidget, &WorkspaceWidget::saveCurrentMap );
 	connect( m_saveAllAction, &QAction::triggered, m_centralWidget, &WorkspaceWidget::saveAllMaps );
 	connect( m_mapAction, &QAction::triggered, m_centralWidget, &WorkspaceWidget::addMap );
+	connect( m_exportXMLAction, &QAction::triggered, m_centralWidget, &WorkspaceWidget::exportXMLFile );
 	connect( m_projectNewAction, &QAction::triggered, m_projectWidget, &ProjectWidget::newProject );
 	connect( m_projectOpenAction, SIGNAL( triggered(bool) ), m_projectWidget, SLOT( openProject() ) );
 	connect( m_tilesetAction, &QAction::triggered, m_tilesetWidget, &TilesetWidget::addTileset );

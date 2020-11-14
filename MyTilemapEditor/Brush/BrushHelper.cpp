@@ -6,6 +6,7 @@
 #include <QPoint>
 #include <QJSEngine>
 #include <QJSValueIterator>
+#include <QRandomGenerator>
 
 extern MapScene* g_currentMapScene;
 extern QJSEngine* g_currentJsEngine;
@@ -91,14 +92,7 @@ bool BrushHelper::isConatainTile( int coordX, int coordY, const QJSValue& value 
 
 int BrushHelper::getRandomInRange( int low, int high )
 {
-	QTime time = QTime::currentTime();
-	qsrand((uint)time.msec());
-	int range = ( ( high ) - low ) + low;
-	if ( range == 0 )
-	{
-		return 0;
-	}
-	return qrand() % range;
+	return QRandomGenerator::global()->bounded(low, high);
 }
 
 QList<TileModified> BrushHelper::popReadyToPaintCoordList()

@@ -56,12 +56,12 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
-    <QtInstall>msvc2017_64</QtInstall>
+    <QtInstall>msvc2019_64</QtInstall>
     <QtModules>core;gui;qml;widgets</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
-    <QtInstall>msvc2017_64</QtInstall>
+    <QtInstall>msvc2019_64</QtInstall>
     <QtModules>core;gui;qml;widgets</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>

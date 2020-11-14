@@ -52,6 +52,7 @@ private:
 
 	// Actions
 	QAction* m_tilesetAction;
+	QAction* m_exportXMLAction;
 	QAction* m_mapAction;
 	QAction* m_saveAction;
 	QAction* m_saveAllAction;
