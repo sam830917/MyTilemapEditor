@@ -90,6 +90,10 @@ void BrushParser::initialBrushFile( const QString& filePath )
 			{
 				item.m_itemType = eItemType::TILE_GRID_BOOL_LIST_EDGE;
 			}
+			else if( "TileGridBoolListCorner" == type )
+			{
+				item.m_itemType = eItemType::TILE_GRID_BOOL_LIST_CORNER;
+			}
 			QString id = object.property( "id" ).toString();
 			item.m_id = id;
 			item.m_labelName = labelName;
@@ -141,6 +145,12 @@ QList<AddBrushItem*> BrushParser::createBrushUI( const QString& brushName )
 			QList<TileInfo> tileList;
 			QList<QList<bool>> statesList;
 			createTileGridListUI( brushItem.m_labelName, itemList, eTileGridType::EDGE, tileList, statesList );
+		}
+		else if( eItemType::TILE_GRID_BOOL_LIST_CORNER == brushItem.m_itemType )
+		{
+			QList<TileInfo> tileList;
+			QList<QList<bool>> statesList;
+			createTileGridListUI( brushItem.m_labelName, itemList, eTileGridType::CORNER, tileList, statesList );
 		}
 	}
 
@@ -225,6 +235,29 @@ QList<AddBrushItem*> BrushParser::createBrushUIByCurrentBrush( int index )
 					statesList.push_back( states );
 				}
 				createTileGridListUI( brushItem.m_labelName, itemList, eTileGridType::EDGE, tileList, statesList );
+			}
+		}
+		else if( eItemType::TILE_GRID_BOOL_LIST_CORNER == brushItem.m_itemType )
+		{
+			QJSValue valueArray = jsEngine->globalObject().property( brushItem.m_id );
+			if ( valueArray.isArray() )
+			{
+				const int length = valueArray.property("length").toInt();
+				QList<TileInfo> tileList;
+				QList<QList<bool>> statesList;
+				for (int i = 0; i < length; ++i)
+				{
+					QList<bool> states;
+					QJSValue val = valueArray.property( i );
+					TileInfo* value = qobject_cast<TileInfo*>(val.property( "tile" ).toQObject());
+					states.push_back(val.property( "leftTop" ).toBool());
+					states.push_back(val.property( "rightTop" ).toBool());
+					states.push_back(val.property( "leftBottom" ).toBool());
+					states.push_back(val.property( "rightBottom" ).toBool());
+					tileList.push_back( TileInfo( *value ) );
+					statesList.push_back( states );
+				}
+				createTileGridListUI( brushItem.m_labelName, itemList, eTileGridType::CORNER, tileList, statesList );
 			}
 		}
 	}
@@ -371,6 +404,44 @@ bool BrushParser::loadBrushFile( const QString& filePath )
 				}
 				jsEngine->globalObject().setProperty( itemInfo.m_id, objectvalueArray );
 			}
+			else if( "TILE_GRID_BOOL_LIST_CORNER" == type )
+			{
+				QJSValue objectvalueArray = jsEngine->newArray();
+				int i = 0;
+				for( XmlElement* tileEle = brushItem->FirstChildElement( "TileGridList" ); tileEle; tileEle = tileEle->NextSiblingElement( "TileGridList" ) )
+				{
+					QString tilesetFilePath = parseXmlAttribute( *tileEle, "tileset", QString() );
+					int tileIndex = parseXmlAttribute( *tileEle, "index", 0 );
+					QJSValue val = jsEngine->newObject();
+
+					if( !tilesetFilePath.isEmpty() )
+					{
+						tilesetFilePath = getProjectRootPath() + "/" + tilesetFilePath;
+						TileInfo* tileinfo = new TileInfo( convertToTileset( tilesetFilePath ), tileIndex );
+						QJSValue objectvalue = jsEngine->newQObject( tileinfo );
+						val.setProperty( "tile", objectvalue );
+					}
+					else
+					{
+						TileInfo* tileinfo = new TileInfo();
+						QJSValue objectvalue = jsEngine->newQObject( tileinfo );
+						val.setProperty( "tile", objectvalue );
+					}
+					QString gridStateStr = parseXmlAttribute( *tileEle, "gridState", QString() );
+					QStringList state = gridStateStr.split(QLatin1Char(','));
+					if ( state.size() < 4 )
+					{
+						continue;
+					}
+					val.setProperty( "leftTop", state[0] == "1" ? true : false );
+					val.setProperty( "rightTop", state[1] == "1" ? true : false );
+					val.setProperty( "leftBottom", state[2] == "1" ? true : false );
+					val.setProperty( "rightBottom", state[3] == "1" ? true : false );
+					objectvalueArray.setProperty( i, val );
+					i++;
+				}
+				jsEngine->globalObject().setProperty( itemInfo.m_id, objectvalueArray );
+			}
 
 			index++;
 			brushItem = brushItem->NextSiblingElement( "BrushItem" );
@@ -510,6 +581,44 @@ bool BrushParser::saveBrushAsFile( QList<AddBrushItem*> items, const QString& sa
 				objectvalue.setProperty( "left", states[1] );
 				objectvalue.setProperty( "right", states[2] );
 				objectvalue.setProperty( "bottom", states[3] );
+
+				objectvalueArray.setProperty( i, objectvalue );
+			}
+			jsEngine->globalObject().setProperty( brushItem.m_id, objectvalueArray );
+			break;
+		}
+		case eItemType::TILE_GRID_BOOL_LIST_CORNER:
+		{
+			TileGridListContainer* tileGridListContainer = dynamic_cast<TileGridListContainer*>(item->m_treeItem);
+			itemEle->SetAttribute( "type", "TILE_GRID_BOOL_LIST_CORNER" );
+			QJSValue objectvalueArray = jsEngine->newArray( tileGridListContainer->getTileSelectorList().size() );
+			for( int i = 0; i < tileGridListContainer->getTileSelectorList().size(); ++i )
+			{
+				TileGridSelector* grid = tileGridListContainer->getTileGridSelectorList()[i];
+				TileSelector* tileSelector = tileGridListContainer->getTileSelectorList()[i];
+				XmlElement* childEle = xmlDocument->NewElement( "TileGridList" );
+				TileInfo* tileinfo = new TileInfo( tileSelector->getTileinfo() );
+				if( tileinfo->isValid() )
+				{
+					childEle->SetAttribute( "tileset", tileinfo->getTileset()->getRelativeFilePath().toStdString().c_str() );
+				}
+				else
+				{
+					childEle->SetAttribute( "tileset", "" );
+				}
+				childEle->SetAttribute( "index", tileinfo->getIndex() );
+
+				QList<bool> states = grid->getGridState();
+				QString gridState = QString( "%1,%2,%3,%4" ).arg(states[0]).arg(states[1]).arg(states[2]).arg(states[3]);
+				childEle->SetAttribute( "gridState", gridState.toStdString().c_str() );
+				itemEle->LinkEndChild( childEle );
+
+				QJSValue objectvalue = jsEngine->newObject();
+				objectvalue.setProperty( "tile", jsEngine->newQObject( tileinfo ) );
+				objectvalue.setProperty( "leftTop", states[0] );
+				objectvalue.setProperty( "rightTop",  states[1] );
+				objectvalue.setProperty( "leftBottom", states[2] );
+				objectvalue.setProperty( "rightBottom", states[3] );
 
 				objectvalueArray.setProperty( i, objectvalue );
 			}
@@ -727,6 +836,8 @@ void BrushParser::createTileGridListUI( const QString& labelName, QList<AddBrush
 		tileListItem->m_type = eItemType::TILE_GRID_BOOL_LIST_EDGE;
 		break;
 	case eTileGridType::CORNER:
+		t->setGridType( type );
+		tileListItem->m_type = eItemType::TILE_GRID_BOOL_LIST_CORNER;
 		break;
 	case eTileGridType::EDGE_AND_CORNER:
 		break;

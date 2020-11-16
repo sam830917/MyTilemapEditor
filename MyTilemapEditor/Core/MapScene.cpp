@@ -186,7 +186,7 @@ void MapScene::editMapOnPoint( const QPointF& point )
 	}
 	case eDrawTool::ERASER:
 	{
-		eraseMap( coord );
+		eraseMap( QPoint( coord.width(), coord.height() ) );
 		break;
 	}
 	default:
@@ -279,10 +279,11 @@ void MapScene::paintMap( const QMap<int, TileInfo>& tileInfoMap, int layerIndex 
 
 void MapScene::paintMap( QPoint coord, TileInfo tileInfo )
 {
-	if ( coord.x() >= m_mapInfo.getMapSize().width() || coord.y() >= m_mapInfo.getMapSize().height() )
+	if ( coord.x() < 0 || coord.y() < 0 || coord.x() >= m_mapInfo.getMapSize().width() || coord.y() >= m_mapInfo.getMapSize().height() )
 	{
 		return;
 	}
+
 	int index = m_mapInfo.getIndex( coord );
 	paintMap( index, tileInfo );
 }
@@ -434,10 +435,15 @@ void MapScene::eraseMap( int index )
 	m_parentWidget->markCurrentSceneForModified();
 }
 
-void MapScene::eraseMap( QSize coord )
+void MapScene::eraseMap( QPoint coord )
 {
+	if( coord.x() < 0 || coord.y() < 0 || coord.x() >= m_mapInfo.getMapSize().width() || coord.y() >= m_mapInfo.getMapSize().height() )
+	{
+		return;
+	}
+
 	QSize mapSize = m_mapInfo.getMapSize();
-	int index = coord.height() * mapSize.width() + coord.width();
+	int index = coord.y() * mapSize.width() + coord.x();
 	eraseMap( index );
 }
 

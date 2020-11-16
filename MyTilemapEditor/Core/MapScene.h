@@ -48,7 +48,7 @@ public:
 	void paintMap( QSize coord );
 	void paintMap( QPoint coord, TileInfo tileInfo );
 	void eraseMap( int index );
-	void eraseMap( QSize coord );
+	void eraseMap( QPoint coord );
 
 	Layer* addNewLayer( int zValue );
 

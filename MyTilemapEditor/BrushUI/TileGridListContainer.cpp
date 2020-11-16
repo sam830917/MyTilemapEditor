@@ -50,7 +50,6 @@ void TileGridListContainer::attachedTreeWidget()
 void TileGridListContainer::addTileSelectorList()
 {
 	QTreeWidgetItem* childItem = new QTreeWidgetItem();
-// 	childItem->setText( 0, QString::number( m_childCount ) );
 	setExpanded( true );
 	addChild( childItem );
 
