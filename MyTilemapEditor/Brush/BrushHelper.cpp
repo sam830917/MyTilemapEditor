@@ -81,7 +81,7 @@ bool BrushHelper::isConatainTile( int coordX, int coordY, const QJSValue& value 
 			it.next();
 
 			TileInfo* value = qobject_cast<TileInfo*>(it.value().toQObject());
-			if ( value && tile == *value )
+			if ( tile.isValid() && value && tile == *value )
 			{
 				return true;
 			}

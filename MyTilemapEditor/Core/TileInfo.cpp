@@ -38,7 +38,7 @@ void TileInfo::operator=( const TileInfo& compare )
 
 bool TileInfo::operator==( const TileInfo& compare ) const
 {
-	return m_tileset == compare.m_tileset && m_index == compare.m_index;
+	return *m_tileset == *compare.m_tileset && m_index == compare.m_index;
 }
 
 bool TileInfo::operator!=( const TileInfo& compare ) const
