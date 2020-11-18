@@ -120,7 +120,7 @@ void MainWindow::initialToolBar()
 	m_cursorToolAction->setData( QVariant::fromValue( eDrawTool::CURSOR ) );
 	m_moveToolAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/move.png" ), tr( "&Move (V)" ) );
 	m_moveToolAction->setData( QVariant::fromValue( eDrawTool::MOVE ) );
-	m_brushAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/pencil.png" ), tr( "&Brush (B)" ) );
+	m_brushAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/brush.png" ), tr( "&Brush (B)" ) );
 	m_eraserAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/eraser.png" ), tr( "&Eraser (E)" ) );
 	m_bucketAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/bucket.png" ), tr( "&Bucket (G)" ) );
 	m_magicWandAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/magic-wand.png" ), tr( "&Magic Wand (W)" ) );

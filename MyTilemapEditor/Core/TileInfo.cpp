@@ -30,6 +30,11 @@ QPixmap TileInfo::getTileImage()
 	return m_tileset->getImage()->copy( point.x(), point.y(), m_tileset->getTileSize().width(), m_tileset->getTileSize().height() );
 }
 
+bool TileInfo::operator==( const TileInfo* compare ) const
+{
+	return *this == *compare;
+}
+
 void TileInfo::operator=( const TileInfo& compare )
 {
 	this->m_tileset = compare.m_tileset;
@@ -38,6 +43,10 @@ void TileInfo::operator=( const TileInfo& compare )
 
 bool TileInfo::operator==( const TileInfo& compare ) const
 {
+	if ( !m_tileset || !compare.getTileset() )
+	{
+		return m_tileset == compare.m_tileset;
+	}
 	return *m_tileset == *compare.m_tileset && m_index == compare.m_index;
 }
 

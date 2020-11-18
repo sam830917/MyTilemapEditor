@@ -121,7 +121,7 @@ void deleteBrushInProject( const QString& filePath )
 		QString path = parseXmlAttribute( *brushEle, "path", QString() );
 		if( !path.isEmpty() )
 		{
-			if( oldRelativePath == oldRelativePath )
+			if( path == oldRelativePath )
 			{
 				brushesEle->DeleteChild( brushEle );
 				saveXmlFile( *doc, getProjectFilePath() );

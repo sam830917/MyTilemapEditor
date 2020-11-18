@@ -14,6 +14,38 @@
 #include <QMenu>
 #include <QMessageBox>
 
+class MyFileSystemModel : public QFileSystemModel
+{
+public:
+	MyFileSystemModel(QObject *parent = Q_NULLPTR);
+protected:
+	QVariant data( const QModelIndex& index, int role = Qt::DisplayRole ) const;
+};
+
+MyFileSystemModel::MyFileSystemModel( QObject* parent /*= Q_NULLPTR*/ )
+	:QFileSystemModel(parent)
+{
+}
+
+QVariant MyFileSystemModel::data( const QModelIndex& index, int role ) const
+{
+	if( role == Qt::DecorationRole )
+	{
+		QFileInfo info = MyFileSystemModel::fileInfo( index );
+		if( info.isFile() )
+		{
+			if( info.suffix() == "map" )
+				return QIcon( ":/MainWindow/Icon/map_icon.png" );
+			else if( info.suffix() == "tileset" )
+				return QIcon( ":/MainWindow/Icon/tileset_icon.png" );
+			else if( info.suffix() == "brush" )
+				return QIcon( ":/MainWindow/Icon/brush_icon.png" );
+		}
+	}
+	return QFileSystemModel::data( index, role );
+}
+
+//----------------------------------------------------------------------------------
 ProjectWidget::ProjectWidget( const QString& title, QWidget* parent )
 	:QDockWidget( title, parent )
 {
@@ -118,7 +150,7 @@ void ProjectWidget::openFile( const QString& filePath )
 
 void ProjectWidget::initialTreeView()
 {
-	m_fileModel = new QFileSystemModel( this );
+	m_fileModel = new MyFileSystemModel( this );
 	QStringList nameFilter;
 	nameFilter << "*.tileset" << "*.map" << "*.brush";
 	m_fileModel->setNameFilters( nameFilter );
@@ -186,6 +218,8 @@ void ProjectWidget::newProject()
 			}
 			m_treeView->setHeaderHidden( true );
 			m_treeView->setRootIndex( m_fileModel->index( fileInfo.path() ) );
+			m_treeView->setSortingEnabled( true );
+			m_treeView->sortByColumn( 2, Qt::AscendingOrder );
 			loadProjectSuccessfully();
 		}
 	}
@@ -256,6 +290,8 @@ void ProjectWidget::openProject( const QString& filePath )
 	}
 	m_treeView->setHeaderHidden( true );
 	m_treeView->setRootIndex( m_fileModel->index( fileInfo.path() ) );
+	m_treeView->setSortingEnabled( true );
+	m_treeView->sortByColumn( 2, Qt::AscendingOrder );
 
 	// Load Project
 	XmlElement* root = xmlDocument->RootElement();

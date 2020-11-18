@@ -107,7 +107,7 @@ void WorkspaceWidget::saveTileToFile( QList<const Tileset*>& tilesetList, int ta
 			bool isNewTileset = true;
 			for ( int tileIndex = 0; tileIndex < tilesetList.size(); ++tileIndex )
 			{
-				if ( tilesetList[tileIndex] == tileInfo.getTileset() )
+				if ( *tilesetList[tileIndex] == *tileInfo.getTileset() )
 				{
 					isNewTileset = false;
 					tilesetNumber = tileIndex;

@@ -24,5 +24,9 @@
         <file>Icon/same-tile.png</file>
         <file>Icon/circle.png</file>
         <file>Icon/cross.png</file>
+        <file>Icon/brush.png</file>
+        <file>Icon/map_icon.png</file>
+        <file>Icon/brush_icon.png</file>
+        <file>Icon/tileset_icon.png</file>
     </qresource>
 </RCC>

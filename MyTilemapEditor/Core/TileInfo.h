@@ -24,6 +24,7 @@ public:
 
 	Q_INVOKABLE void        operator=( const TileInfo& compare );
 	Q_INVOKABLE bool        operator==( const TileInfo& compare ) const;
+	Q_INVOKABLE bool        operator==( const TileInfo* compare ) const;
 	Q_INVOKABLE bool        operator!=( const TileInfo& compare ) const;
 
 private:
