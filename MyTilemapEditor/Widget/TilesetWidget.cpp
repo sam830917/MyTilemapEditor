@@ -113,7 +113,8 @@ void TilesetWidget::addTilesetIntoProject( Tileset* tileset )
 	QGraphicsView* tilesetView = new QGraphicsView();
 	tilesetView->setScene( tilePalette );
 
-	m_tilesetTabWidget->addTab( tilesetView, tileset->getName() ); 
+	int tabIndex = m_tilesetTabWidget->addTab( tilesetView, tileset->getName() );
+	m_tilesetTabWidget->setTabIcon( tabIndex, QIcon( ":/MainWindow/Icon/tileset_icon.png" ) );
 	tilesetView->horizontalScrollBar()->setSliderPosition( tilesetView->horizontalScrollBar()->minimum() );
 	tilesetView->verticalScrollBar()->setSliderPosition( tilesetView->verticalScrollBar()->minimum() );
 }

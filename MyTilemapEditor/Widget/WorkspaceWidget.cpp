@@ -164,7 +164,9 @@ void WorkspaceWidget::insertMap( MapInfo mapInfo, QList<LayerInfo> layerInfoList
 
 	MapScene* mapScene = new MapScene( mapInfo, this );
 	m_mapSceneList.push_back( mapScene );
-	m_mapTabWidget->setCurrentIndex( m_mapTabWidget->addTab( mapScene->m_view, mapInfo.getName() ) );
+	int tabIndex = m_mapTabWidget->addTab( mapScene->m_view, mapInfo.getName() );
+	m_mapTabWidget->setCurrentIndex( tabIndex );
+	m_mapTabWidget->setTabIcon( tabIndex, QIcon( ":/MainWindow/Icon/map_icon.png" ) );
 
 	// Set tiles
 	XmlDocument* mapDoc = new XmlDocument;
@@ -237,7 +239,6 @@ void WorkspaceWidget::insertMap( MapInfo mapInfo, QList<LayerInfo> layerInfoList
 	} while ( tilesEle );
 
 	mapScene->update();
-	int currentIndex = 0;
 }
 
 void WorkspaceWidget::closeTab( int index )

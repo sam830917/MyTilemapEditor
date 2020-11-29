@@ -142,7 +142,7 @@ void MainWindow::initialToolBar()
 	m_magicWandAction->setCheckable(true);
 	m_selectSameTileAction->setCheckable(true);
 
-	m_cursorToolAction->setChecked(true);
+	m_brushAction->setChecked(true);
 
 	m_brushAction->setData( QVariant::fromValue( eDrawTool::BRUSH ) );
 	m_eraserAction->setData( QVariant::fromValue( eDrawTool::ERASER ) );

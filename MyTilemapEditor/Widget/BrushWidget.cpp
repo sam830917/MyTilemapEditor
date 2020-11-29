@@ -22,7 +22,8 @@ BrushWidget::BrushWidget( const QString& title, QWidget* parent /*= Q_NULLPTR */
 	m_layout->addWidget( m_listWidget );
 	setWidget( placeholder );
 
-	m_listWidget->addItem( "Default" );
+	QListWidgetItem* item = new QListWidgetItem( QIcon( ":/MainWindow/Icon/brush_icon.png" ), "Default" );
+	m_listWidget->addItem( item );
 	m_listWidget->setCurrentRow(0);
 
 	connect( m_listWidget, &QListWidget::itemDoubleClicked, this, &BrushWidget::editBrush );
@@ -41,7 +42,8 @@ void BrushWidget::addBrush( const QString& filePath )
 	if ( m_brushParser->loadBrushFile( filePath ) )
 	{
 		QFileInfo fileInfo( filePath );
-		m_listWidget->addItem( fileInfo.completeBaseName() );
+		QListWidgetItem* item = new QListWidgetItem( QIcon( ":/MainWindow/Icon/brush_icon.png" ), fileInfo.completeBaseName() );
+		m_listWidget->addItem( item );
 	}
 }
 
@@ -105,7 +107,8 @@ void BrushWidget::createNewBrush()
 
 	if( dialog.exec() == QDialog::Accepted )
 	{
-		m_listWidget->addItem( dialog.m_name );
+		QListWidgetItem* item = new QListWidgetItem( QIcon( ":/MainWindow/Icon/brush_icon.png" ), dialog.m_name );
+		m_listWidget->addItem( item );
  		saveBrushIntoProject( dialog.m_brushFilePath );
 	}
 }
@@ -155,8 +158,12 @@ void BrushWidget::closeAllBrush()
 	int brushCount = m_listWidget->count();
 	for ( int i = 1; i < brushCount; ++i )
 	{
-		m_listWidget->takeItem(i);
+		delete m_listWidget->takeItem(i);
 	}
+	m_listWidget->clear();
+	QListWidgetItem* item = new QListWidgetItem( QIcon( ":/MainWindow/Icon/brush_icon.png" ), "Default" );
+	m_listWidget->addItem( item );
+	m_listWidget->setCurrentRow( 0 );
 	m_brushParser->deleteAllBrush();
 }
 

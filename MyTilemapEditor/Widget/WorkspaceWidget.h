@@ -85,5 +85,5 @@ public:
 	QPushButton* m_openProjectButton;
 	QTabWidget* m_mapTabWidget;
 	QList<MapScene*> m_mapSceneList;
-	eDrawTool m_drawTool = eDrawTool::CURSOR;
+	eDrawTool m_drawTool = eDrawTool::BRUSH;
 };
