@@ -41,6 +41,7 @@ public:
 	QString getFileName( int index );
 	QString getBrushFilePathByIndex( int index );
 	QString getBrushFileName( int index );
+	int getBrushCount() const { return m_brushes.size(); }
 
 private:
 	void initialBrushFile( const QString& filePath );

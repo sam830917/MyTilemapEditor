@@ -78,6 +78,8 @@ void MainWindow::initialMenuBar()
 
 	QMenu* exportMenu = m_fileMenu->addMenu( "Export" );
 	m_exportXMLAction = new QAction( tr( "XML" ), this );
+	m_exportImageAction = new QAction( tr( "PNG" ), this );
+	exportMenu->addAction( m_exportImageAction );
 	exportMenu->addAction( m_exportXMLAction );
 
 	m_fileMenu->addSeparator();
@@ -184,9 +186,9 @@ void MainWindow::initialDockWidgets()
 	m_tilesetWidget->setObjectName( tr( "Tileset" ) );
 	addDockWidget( Qt::LeftDockWidgetArea, m_tilesetWidget );
 
-	m_minimapWidget = new MinimapWidget( tr( "Minimap" ), this );
-	m_minimapWidget->setObjectName( tr( "Minimap" ) );
-	addDockWidget( Qt::RightDockWidgetArea, m_minimapWidget );
+// 	m_minimapWidget = new MinimapWidget( tr( "Minimap" ), this );
+// 	m_minimapWidget->setObjectName( tr( "Minimap" ) );
+// 	addDockWidget( Qt::RightDockWidgetArea, m_minimapWidget );
 
 	m_propertiesWidget = new PropertiesWidget( tr( "Properties" ), this );
 	m_propertiesWidget->setObjectName( tr( "Properties" ) );
@@ -202,7 +204,7 @@ void MainWindow::initialDockWidgets()
 
 	resizeDocks( { m_projectWidget }, { 250 }, Qt::Horizontal);
 	resizeDocks( { m_tilesetWidget }, { 250 }, Qt::Vertical );
-	resizeDocks( { m_minimapWidget }, { 250 }, Qt::Horizontal );
+// 	resizeDocks( { m_minimapWidget }, { 250 }, Qt::Horizontal );
 	resizeDocks( { m_propertiesWidget }, { 250 }, Qt::Vertical );
 	resizeDocks( { m_layerWidget }, { 250 }, Qt::Vertical );
 	resizeDocks( { m_brushWidget }, { 250 }, Qt::Vertical );
@@ -212,7 +214,7 @@ void MainWindow::initialDockWidgets()
 	m_windowsMenu->addAction( m_tilesetWidget->toggleViewAction() );
 	m_windowsMenu->addAction( m_layerWidget->toggleViewAction() );
 	m_windowsMenu->addAction( m_propertiesWidget->toggleViewAction() );
-	m_windowsMenu->addAction( m_minimapWidget->toggleViewAction() );
+// 	m_windowsMenu->addAction( m_minimapWidget->toggleViewAction() );
 	m_windowsMenu->addAction( m_brushWidget->toggleViewAction() );
 	m_windowsMenu->addAction( m_consoleWidget->toggleViewAction() );
 
@@ -233,6 +235,7 @@ void MainWindow::initialConnections()
 	connect( m_saveAllAction, &QAction::triggered, m_centralWidget, &WorkspaceWidget::saveAllMaps );
 	connect( m_mapAction, &QAction::triggered, m_centralWidget, &WorkspaceWidget::addMap );
 	connect( m_exportXMLAction, &QAction::triggered, m_centralWidget, &WorkspaceWidget::exportXMLFile );
+	connect( m_exportImageAction, &QAction::triggered, m_centralWidget, &WorkspaceWidget::exportPNGFile );
 	connect( m_projectNewAction, &QAction::triggered, m_projectWidget, &ProjectWidget::newProject );
 	connect( m_projectOpenAction, SIGNAL( triggered(bool) ), m_projectWidget, SLOT( openProject() ) );
 	connect( m_tilesetAction, &QAction::triggered, m_tilesetWidget, &TilesetWidget::addTileset );

@@ -54,6 +54,6 @@ signals:
 	void tilesetRenamed( const QString& path, const QString& oldName, const QString& newName );
 
 private:
-	QTreeView* m_treeView;
-	MyFileSystemModel* m_fileModel;
+	QTreeView* m_treeView = Q_NULLPTR;
+	MyFileSystemModel* m_fileModel = Q_NULLPTR;
 };

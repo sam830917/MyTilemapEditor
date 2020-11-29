@@ -60,6 +60,7 @@ public slots:
 	void selecteAllTilesInCurrentLayer();
 	void closeAllTab();
 	void exportXMLFile();
+	void exportPNGFile();
 
 signals:
 	void updateRedo( QAction* action );
@@ -81,9 +82,9 @@ signals:
 	void getPaintMapModified( QList<TileModified>& modifiredList, const QPoint& point, eDrawTool tool );
 
 public:
-	QPushButton* m_newProjectButton;
-	QPushButton* m_openProjectButton;
-	QTabWidget* m_mapTabWidget;
+	QPushButton* m_newProjectButton = Q_NULLPTR;
+	QPushButton* m_openProjectButton = Q_NULLPTR;
+	QTabWidget* m_mapTabWidget = Q_NULLPTR;
 	QList<MapScene*> m_mapSceneList;
 	eDrawTool m_drawTool = eDrawTool::BRUSH;
 };

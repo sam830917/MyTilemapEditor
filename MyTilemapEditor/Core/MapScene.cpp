@@ -97,7 +97,7 @@ void MapView::wheelEvent( QWheelEvent* event )
 	}
 }
 
-MapScene::MapScene( MapInfo mapInfo, WorkspaceWidget* parent /*= Q_NULLPTR*/ )
+MapScene::MapScene( MapInfo mapInfo, WorkspaceWidget* parent )
 	:QGraphicsScene( parent ), 
 	m_mapInfo(mapInfo),
 	m_parentWidget( parent )
@@ -147,6 +147,33 @@ MapScene::MapScene( MapInfo mapInfo, WorkspaceWidget* parent /*= Q_NULLPTR*/ )
 			addItem( mask );
 			m_selectedTileItemList.push_back( mask );
 		}
+	}
+}
+
+MapScene::MapScene( MapInfo mapInfo )
+	:QGraphicsScene(),
+	m_mapInfo( mapInfo )
+{
+	m_view = new MapView( this );
+}
+
+MapScene::~MapScene()
+{
+	delete m_view;
+	for ( int i = 0; i < m_layers.size(); ++i )
+	{
+		delete m_layers[i];
+		m_layers[i] = Q_NULLPTR;
+	}
+	for ( int i = 0; i < m_selectedTileItemList.size(); ++i )
+	{
+		delete m_selectedTileItemList[i];
+		m_selectedTileItemList[i] = Q_NULLPTR;
+	}
+	if ( m_undoStack )
+	{
+		delete m_undoStack;
+		m_undoStack = nullptr;
 	}
 }
 

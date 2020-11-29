@@ -9,7 +9,6 @@ QT_FORWARD_DECLARE_CLASS( QToolBar )
 QT_FORWARD_DECLARE_CLASS( QBoxLayout )
 QT_FORWARD_DECLARE_CLASS( QComboBox )
 QT_FORWARD_DECLARE_CLASS( QPoint )
-class Brush;
 class BrushParser;
 
 class BrushWidget : public QDockWidget

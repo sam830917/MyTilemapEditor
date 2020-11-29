@@ -3,7 +3,8 @@
 #include "Core/Tileset.h"
 
 Layer::Layer( MapScene* mapScene, int zValue )
-	:m_mapScene(mapScene)
+	:m_mapScene(mapScene),
+	m_zValue(zValue)
 {
 	QSize mapSize = m_mapScene->m_mapInfo.getMapSize();
 	QSize tileSize = m_mapScene->m_mapInfo.getTileSize();
@@ -37,6 +38,7 @@ void Layer::setOrder( int value )
 	{
 		tile->setZValue( -value );
 	}
+	m_zValue = value;
 }
 
 Tile::Tile( MapScene* scene, Layer* layer, QGraphicsItem* parent /*= Q_NULLPTR */ )

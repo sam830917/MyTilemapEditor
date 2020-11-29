@@ -525,11 +525,13 @@ void WorkspaceWidget::exportXMLFile()
 	if ( !getProject() )
 	{
 		// warning
+		QMessageBox::critical( this, tr( "Error" ), tr( "Failed to create a XML File." ) );
 		return;
 	}
 	if ( m_mapSceneList.empty() )
 	{
 		// warning
+		QMessageBox::critical( this, tr( "Error" ), tr( "Failed to create a XML File." ) );
 		return;
 	}
 	int tabIndex = m_mapTabWidget->currentIndex();
@@ -545,13 +547,14 @@ void WorkspaceWidget::exportXMLFile()
 		if( filePathList.empty() )
 		{
 			// warning
+			QMessageBox::critical( this, tr( "Error" ), tr( "Failed to create a XML File." ) );
 			return;
 		}
 		QString filePath = filePathList[0];
 		if( QFileInfo( filePath ).suffix() != "xml" )
 		{
 			// warning
-// 			QMessageBox::critical( this, tr( "Error" ), tr( "Failed to New Project File." ) );
+ 			QMessageBox::critical( this, tr( "Error" ), tr( "Failed to create a XML File." ) );
 			return;
 		}
 
@@ -593,6 +596,73 @@ void WorkspaceWidget::exportXMLFile()
 		saveXmlFile( *mapDoc, filePath );
 		QMessageBox msgBox;
 		msgBox.setText( "Map has exported successfully." );
+		msgBox.exec();
+	}
+}
+
+void WorkspaceWidget::exportPNGFile()
+{
+	if( !getProject() )
+	{
+		// warning
+		QMessageBox::critical( this, tr( "Error" ), tr( "Failed to create a PNG File." ) );
+		return;
+	}
+	if( m_mapSceneList.empty() )
+	{
+		// warning
+		QMessageBox::critical( this, tr( "Error" ), tr( "Failed to create a PNG File." ) );
+		return;
+	}
+	int tabIndex = m_mapTabWidget->currentIndex();
+	QString mapName = m_mapSceneList[tabIndex]->m_mapInfo.getName();
+	QFileDialog dialog( this, "Export", mapName );
+	dialog.setFileMode( QFileDialog::AnyFile );
+	dialog.setAcceptMode( QFileDialog::AcceptMode::AcceptSave );
+	dialog.setDefaultSuffix( ".png" );
+	QStringList filePathList;
+	if( dialog.exec() == QDialog::Accepted )
+	{
+		filePathList = dialog.selectedFiles();
+		if( filePathList.empty() )
+		{
+			// warning
+			QMessageBox::critical( this, tr( "Error" ), tr( "Failed to create a PNG File." ) );
+			return;
+		}
+		QString filePath = filePathList[0];
+		if( QFileInfo( filePath ).suffix() != "png" )
+		{
+			// warning
+			QMessageBox::critical( this, tr( "Error" ), tr( "Failed to create a PNG File." ) );
+			return;
+		}
+
+		MapScene* currentMapScene = m_mapSceneList[tabIndex];
+		MapScene* cloneScene = new MapScene( currentMapScene->m_mapInfo );
+		QSize& mapTileSize = currentMapScene->getMapInfo().getTileSize();
+		QStyleOptionGraphicsItem opt;
+		for ( int i = 0; i < currentMapScene->m_layers.size(); ++i )
+		{
+			Layer* layer = currentMapScene->m_layers[i];
+			Layer* cloneLayer = cloneScene->addNewLayer( layer->getOrder() );
+			
+			for ( int tileIndex = 0; tileIndex < layer->m_tileList.size(); ++tileIndex )
+			{
+				cloneLayer->m_tileList[tileIndex]->m_tileInfo = layer->m_tileList[tileIndex]->m_tileInfo;
+				cloneLayer->m_tileList[tileIndex]->update();
+			}
+		}
+		QImage image( cloneScene->sceneRect().size().toSize(), QImage::Format_ARGB32 );
+		image.fill( Qt::transparent );
+
+		QPainter painter( &image );
+		cloneScene->render( &painter );
+		image.save( filePath );
+		delete cloneScene;
+		cloneScene = Q_NULLPTR;
+		QMessageBox msgBox;
+		msgBox.setText( "Image has exported successfully." );
 		msgBox.exec();
 	}
 }

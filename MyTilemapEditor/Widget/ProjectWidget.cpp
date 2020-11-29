@@ -146,6 +146,10 @@ void ProjectWidget::openFile( const QString& filePath )
 		}
 		loadTilesetSuccessfully( tileset );
 	}
+	else if( "brush" == fileInfo.suffix() )
+	{
+		loadBrushFile( filePath );
+	}
 }
 
 void ProjectWidget::initialTreeView()

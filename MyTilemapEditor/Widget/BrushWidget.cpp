@@ -39,6 +39,17 @@ BrushWidget::~BrushWidget()
 
 void BrushWidget::addBrush( const QString& filePath )
 {
+	// check is exist
+	for ( int i = 0; i < m_brushParser->getBrushCount(); ++i )
+	{
+		QString file = m_brushParser->getFilePathByIndex(i);
+		if ( file == filePath )
+		{
+			m_listWidget->setCurrentRow( i+1 );
+			return;
+		}
+	}
+
 	if ( m_brushParser->loadBrushFile( filePath ) )
 	{
 		QFileInfo fileInfo( filePath );

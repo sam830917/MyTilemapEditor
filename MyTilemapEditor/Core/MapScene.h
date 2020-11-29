@@ -34,7 +34,9 @@ class MapScene : public QGraphicsScene
 	friend class BrushHelper;
 
 public:
-	MapScene( MapInfo mapInfo, WorkspaceWidget* parent = Q_NULLPTR );
+	MapScene( MapInfo mapInfo, WorkspaceWidget* parent );
+	MapScene( MapInfo mapInfo );
+	~MapScene();
 
 	MapInfo getMapInfo() { return m_mapInfo; }
 
@@ -72,13 +74,13 @@ protected:
 
 private:
 	bool m_isSaved = true;
-	MapView* m_view;
+	MapView* m_view = Q_NULLPTR;
 	WorkspaceWidget* m_parentWidget;
 	MapInfo m_mapInfo;
 	QList<Layer*> m_layers;
 
 	QList<TileInfo> m_beforeDrawTileInfo;
-	QUndoStack* m_undoStack;
+	QUndoStack* m_undoStack = Q_NULLPTR;
 
 	// Select tool
 	bool m_showSelection = false;

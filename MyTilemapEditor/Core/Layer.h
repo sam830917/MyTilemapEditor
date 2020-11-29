@@ -21,6 +21,7 @@ public:
 	~Layer();
 
 	void setOrder( int value );
+	int getOrder() const { return m_zValue; }
 
 	void setLayerInfo( const LayerInfo& layerInfo ) { m_layerInfo = layerInfo; }
 	void setName( const QString& name ) { m_layerInfo.setName( name ); }
@@ -30,6 +31,7 @@ public:
 	LayerInfo getLayerInfo() const { return m_layerInfo; }
 
 private:
+	int m_zValue = 0;
 	MapScene* m_mapScene;
 	QList<Tile*> m_tileList;
 	LayerInfo m_layerInfo;
@@ -37,6 +39,7 @@ private:
 
 class Tile : public QGraphicsRectItem
 {
+	friend class WorkspaceWidget;
 	friend class MapScene;
 	friend class DrawCommand;
 	friend class LayerDeleteCommand;
