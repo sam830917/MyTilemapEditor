@@ -16,6 +16,6 @@ public:
 	virtual QWidget* getTopItemWidget() { return m_plusButton; }
 
 protected:
-	QPushButton* m_plusButton;
+	QPushButton* m_plusButton = Q_NULLPTR;
 	int m_childCount = 0;
 };

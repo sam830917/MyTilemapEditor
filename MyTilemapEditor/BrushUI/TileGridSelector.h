@@ -25,6 +25,6 @@ public:
 
 private:
 	QSize m_size;
-	TileGridSelectorScene* m_scene;
+	TileGridSelectorScene* m_scene = Q_NULLPTR;
 	eTileGridType m_type = eTileGridType::EDGE_AND_CORNER;
 };

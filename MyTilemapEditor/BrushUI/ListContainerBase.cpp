@@ -37,7 +37,6 @@ ListContainerBase::ListContainerBase( bool needInitial )
 
 ListContainerBase::~ListContainerBase()
 {
-
 }
 
 QWidget* ListContainerBase::createChildWidget()

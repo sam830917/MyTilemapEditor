@@ -168,6 +168,8 @@ TileGridSelector::TileGridSelector( eTileGridType type, const QSize& size )
 
 TileGridSelector::~TileGridSelector()
 {
+	delete m_scene;
+	m_scene = Q_NULLPTR;
 }
 
 QList<bool> TileGridSelector::getGridState() const
