@@ -12,6 +12,8 @@
 #include <QScrollBar>
 
 QList<Tileset*> g_tilesetList;
+extern QList<TileInfo> g_currentTileInfos;
+extern QSize g_selectedTilesRegionSize;
 
 TilePalette::TilePalette( Tileset* tileset, bool isMainPalette, QObject* parent /*= Q_NULLPTR*/ )
 	:QGraphicsScene( parent ),
@@ -66,14 +68,65 @@ void TilePalette::mousePressEvent( QGraphicsSceneMouseEvent* event )
 		}
 		QSize size = m_tileset->getTileSize();
 		QPoint coord = QPoint( qFloor( mousePos.x() / size.width() ), qFloor( mousePos.y() / size.height() ) );
-		//qDebug() << index.x() << "," << index.y();
+		m_startPos = mousePos;
+// 		qDebug() << m_startPos.x() << "," << m_startPos.y();
 		
 		QPoint startPos = QPoint( coord.x() * size.width(), coord.y() * size.height() );
 		m_selectFrame->setRect( startPos.x(), startPos.y(), size.width(), size.height() );
-		m_currentIndex = m_tileset->getCoordTileSize().width() * coord.y() + coord.x();
+		m_selectedRegionSize = QSize( 1, 1 );
+// 		m_selectedIndexes.clear();
+// 		m_selectedIndexes.insert( m_tileset->getTileIndex( coord ) );
+// 		m_currentIndex = m_tileset->getTileIndex( coord );
 		if ( m_isMainPalette )
 		{
-			updateTile( m_tileset, m_currentIndex );
+			g_selectedTilesRegionSize = m_selectedRegionSize;
+			g_currentTileInfos.clear();
+			g_currentTileInfos.push_back( TileInfo( m_tileset, m_tileset->getTileIndex( coord ) ) );
+			m_selectedIndexes.clear();
+			m_selectedIndexes.push_back( TileInfo( m_tileset, m_tileset->getTileIndex( coord ) ) );
+// 			updateTile( m_tileset, m_currentIndex );
+		}
+	}
+	update();
+}
+
+void TilePalette::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
+{
+	QGraphicsScene::mouseMoveEvent( event );
+	if( event->buttons() & Qt::LeftButton )
+	{
+		QPointF mousePos = event->scenePos();
+		if( mousePos == QPointF() )
+		{
+			return;
+		}
+		QSize size = m_tileset->getTileSize();
+		QPointF minPoint = QPointF( qMin( m_startPos.x(), mousePos.x() ), qMin( m_startPos.y(), mousePos.y() ) );
+		QPointF maxPoint = QPointF( qMax( m_startPos.x(), mousePos.x() ), qMax( m_startPos.y(), mousePos.y() ) );
+		QPoint selectedMinCoord = QPoint( qFloor( minPoint.x() / size.width() ), qFloor( minPoint.y() / size.height() ) );
+		QPoint selectedMaxCoord = QPoint( qCeil( maxPoint.x() / size.width() ), qCeil( maxPoint.y() / size.height() ) );
+		QPoint startPos = QPoint( selectedMinCoord.x() * size.width(), selectedMinCoord.y() * size.height() );
+		QPoint endPos = QPoint( selectedMaxCoord.x() * size.width(), selectedMaxCoord.y() * size.height() );
+
+		QSize regionSize = QSize( endPos.x() - startPos.x(), endPos.y() - startPos.y() );
+		m_selectFrame->setRect( startPos.x(), startPos.y(), regionSize.width(), regionSize.height() );
+
+		if( m_isMainPalette )
+		{
+			g_currentTileInfos.clear();
+			m_selectedIndexes.clear();
+			QSize regionSizeInCoord = QSize( selectedMaxCoord.x() - selectedMinCoord.x(), selectedMaxCoord.y() - selectedMinCoord.y() );
+			m_selectedRegionSize = regionSizeInCoord;
+			g_selectedTilesRegionSize = m_selectedRegionSize;
+			
+			for( int y = 0; y < regionSizeInCoord.height(); ++y )
+			{
+				for( int x = 0; x < regionSizeInCoord.width(); ++x )
+				{
+					g_currentTileInfos.push_back( TileInfo( m_tileset, m_tileset->getTileIndex( selectedMinCoord + QPoint( x, y ) ) ) );
+					m_selectedIndexes.push_back( TileInfo( m_tileset, m_tileset->getTileIndex( selectedMinCoord + QPoint( x, y ) ) ) );
+				}
+			}
 		}
 	}
 	update();
@@ -126,7 +179,11 @@ void TilesetWidget::tabCurrentChanged( int index )
 		return;
 	}
 	TilePalette* p = m_tilePaletteList[index];
-	updateTile( p->m_tileset, p->m_currentIndex );
+	g_currentTileInfos.clear();
+	for ( TileInfo t : p->m_selectedIndexes )
+	{
+		g_currentTileInfos.push_back( t );
+	}
 }
 
 void TilesetWidget::addTileset()
@@ -175,5 +232,5 @@ void TilesetWidget::closeAllTab()
 	}
 	m_tilePaletteList.clear();
 	g_tilesetList.clear();
-	updateTile( nullptr, 0 );
+	g_currentTileInfos.clear();
 }

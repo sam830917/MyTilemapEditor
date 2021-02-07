@@ -22,6 +22,7 @@ public:
 	QSize		getSizeFromIndex( int index ) const;
 	QSize		getCoordTileSize() const;
 	QPoint		getPoint( int index ) const;
+	int			getTileIndex( const QPoint& coord ) const;
 
 	bool        operator==( const Tileset* compare ) const;
 	bool        operator==( const Tileset& compare ) const;

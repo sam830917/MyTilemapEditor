@@ -77,6 +77,11 @@ QPoint Tileset::getPoint( int index ) const
 	return QPoint( tileSize.width() * m_tileSize.width(), tileSize.height() * m_tileSize.height() );
 }
 
+int Tileset::getTileIndex( const QPoint& coord ) const
+{
+	return getCoordTileSize().width() * coord.y() + coord.x();
+}
+
 bool Tileset::operator==( const Tileset* compare ) const
 {
 	return *this == *compare;

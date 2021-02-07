@@ -78,8 +78,8 @@ signals:
 
 	void showProperties( const QMap<QString, QString>& informationMap );
 	void addNewLayerGroup( MapInfo mapInfo, QList<LayerInfo> layerInfoList );
-	void getCurrentBrush( Brush*& brush ) const;
 	void getPaintMapModified( QList<TileModified>& modifiredList, const QPoint& point, eDrawTool tool );
+	void isDefalutBrush( bool& isDefalut );
 
 public:
 	QPushButton* m_newProjectButton = Q_NULLPTR;

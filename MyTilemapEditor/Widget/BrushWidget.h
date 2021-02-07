@@ -30,6 +30,7 @@ public slots:
 	void closeAllBrush();
 	void editBrush( QListWidgetItem* item );
 	void addBrush( const QString& filePath );
+	void isDefalutBrush( bool& isDefalut );
 
 private:
 	QToolBar* m_toolbar;

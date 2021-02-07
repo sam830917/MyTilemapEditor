@@ -7,6 +7,10 @@
 
 static Project* g_project = nullptr;
 static TileInfo g_currentTileInfo;
+
+QList<TileInfo> g_currentTileInfos;
+QSize g_selectedTilesRegionSize = QSize( 1, 1 );
+
 extern ConsoleWidget* g_consoleWidget;
 
 QString getProjectFilePath()
@@ -40,14 +44,19 @@ TileInfo getCurrentTile()
 	return g_currentTileInfo;
 }
 
+QList<TileInfo> getCurrentTiles()
+{
+	return g_currentTileInfos;
+}
+
+QSize getSelectedTilesRegionSize()
+{
+	return g_selectedTilesRegionSize;
+}
+
 void updateProject( Project* newProject )
 {
 	g_project = newProject;
-}
-
-void updateTile( const Tileset* tileset, int index )
-{
-	g_currentTileInfo = TileInfo( tileset, index );
 }
 
 void saveTilesetIntoProject( Tileset* tileset )

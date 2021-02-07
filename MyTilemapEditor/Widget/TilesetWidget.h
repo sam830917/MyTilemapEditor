@@ -5,6 +5,8 @@
 #include <QDockWidget>
 #include <QTabWidget>
 #include <QGraphicsScene>
+#include <QPoint>
+#include <QSize>
 
 class TilePalette : public QGraphicsScene
 {
@@ -15,12 +17,16 @@ public:
 
 private:
 	virtual void mousePressEvent( QGraphicsSceneMouseEvent* event ) override;
+	virtual void mouseMoveEvent( QGraphicsSceneMouseEvent* event ) override;
 
 public:
 	Tileset* m_tileset;
 	int m_currentIndex = 0;
+	QSize m_selectedRegionSize = QSize( 1, 1 );
+	QList<TileInfo> m_selectedIndexes;
 	QGraphicsRectItem* m_selectFrame;
 	bool m_isMainPalette = false;
+	QPointF m_startPos;
 };
 
 class TilesetWidget : public QDockWidget
@@ -42,5 +48,4 @@ public slots:
 private:
 	QList<TilePalette*> m_tilePaletteList;
 	QTabWidget* m_tilesetTabWidget;
-
 };

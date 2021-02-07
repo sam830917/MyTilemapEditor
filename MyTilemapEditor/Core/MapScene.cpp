@@ -203,11 +203,31 @@ void MapScene::editMapOnPoint( const QPointF& point )
 	{
 	case eDrawTool::BRUSH:
 	{
-		QList<TileModified> modifiedList;
-		m_parentWidget->getPaintMapModified( modifiedList, QPoint( coord.width(), coord.height() ), m_parentWidget->getCurrentDrawTool() );
-		for( TileModified m : modifiedList )
+		bool isDefault = true;
+		m_parentWidget->isDefalutBrush( isDefault );
+		if ( isDefault )
 		{
-			paintMap( m.m_coordinate, m.m_tileInfo );
+			QList<TileInfo> selectedTileList = getCurrentTiles();
+			QSize regionSize = getSelectedTilesRegionSize();
+			QSize mapSize = m_mapInfo.getMapSize();
+			for( int h = 0; h < regionSize.height(); ++h )
+			{
+				for( int w = 0; w < regionSize.width(); ++w )
+				{
+					TileInfo t = selectedTileList[h * regionSize.width() + w];
+					paintMap( QPoint( coord.width() + w, coord.height() + h ), t );
+				}
+			}
+		}
+		else
+		{
+			QList<TileModified> modifiedList;
+			m_parentWidget->getPaintMapModified( modifiedList, QPoint( coord.width(), coord.height() ), m_parentWidget->getCurrentDrawTool() );
+			for( TileModified m : modifiedList )
+			{
+				paintMap( m.m_coordinate, m.m_tileInfo );
+			}
+
 		}
 		break;
 	}
@@ -249,7 +269,19 @@ int MapScene::getCurrentLayerIndex()
 
 void MapScene::paintMap( int index )
 {
-	paintMap( index, getCurrentTile() );
+	QList<TileInfo> selectedTileList = getCurrentTiles();
+	QSize regionSize = getSelectedTilesRegionSize();
+	QSize mapSize = m_mapInfo.getMapSize();
+	for ( int h = 0; h < regionSize.height(); ++h )
+	{
+		for( int w = 0; w < regionSize.width(); ++w )
+		{
+			int displacementIndex = h * mapSize.height() + w;
+			TileInfo t = selectedTileList[h * regionSize.width() + w];
+
+			paintMap( index + displacementIndex, t );
+		}
+	}
 }
 
 void MapScene::paintMap( QSize coord )

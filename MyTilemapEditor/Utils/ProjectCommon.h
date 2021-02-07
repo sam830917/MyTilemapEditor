@@ -3,6 +3,8 @@
 #include "Core/Project.h"
 #include "Core/TileInfo.h"
 #include <QString>
+#include <QSize>
+#include <QList>
 
 #define UNUSED(x) (void)(x);
 #define STATIC  ;
@@ -26,9 +28,10 @@ QString			getProjectFilePath();
 QString			getProjectRootPath();
 Project* const	getProject();
 TileInfo		getCurrentTile();
+QList<TileInfo>	getCurrentTiles();
+QSize			getSelectedTilesRegionSize();
 
 void updateProject( Project* newProject );
-void updateTile( const Tileset* tileset, int index );
 
 void saveTilesetIntoProject( Tileset* tileset );
 void saveBrushIntoProject( const QString& filePath );

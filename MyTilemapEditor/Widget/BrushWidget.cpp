@@ -58,6 +58,11 @@ void BrushWidget::addBrush( const QString& filePath )
 	}
 }
 
+void BrushWidget::isDefalutBrush( bool& isDefalut )
+{
+	isDefalut = m_listWidget->currentRow() == 0;
+}
+
 void BrushWidget::initialToolbar()
 {
 	m_toolbar = new QToolBar;
@@ -94,10 +99,6 @@ void BrushWidget::getPaintMapModified( QList<TileModified>& modifiredList, const
 	if ( m_listWidget->currentRow() > 0 )
 	{
 		modifiredList = m_brushParser->getPaintMapResult( m_listWidget->currentRow() - 1, point, tool );
-	}
-	else
-	{
-		modifiredList.push_back( TileModified( point, getCurrentTile() ) );
 	}
 }
 

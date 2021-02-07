@@ -269,6 +269,7 @@ void MainWindow::initialConnections()
 	connect( m_centralWidget, &WorkspaceWidget::addNewLayerGroup, m_layerWidget, &LayerWidget::addNewLayerGroup );
 	connect( m_centralWidget, &WorkspaceWidget::showProperties, m_propertiesWidget, &PropertiesWidget::showProperties );
 	connect( m_centralWidget, &WorkspaceWidget::getPaintMapModified, m_brushWidget, &BrushWidget::getPaintMapModified );
+	connect( m_centralWidget, &WorkspaceWidget::isDefalutBrush, m_brushWidget, &BrushWidget::isDefalutBrush );
 
 	connect( m_layerWidget, &LayerWidget::addedNewLayerFromIndex,  m_centralWidget, &WorkspaceWidget::addNewLayerIntoMap );
 	connect( m_layerWidget, &LayerWidget::modifiedCurrentScene, m_centralWidget, &WorkspaceWidget::markCurrentSceneForModified );
