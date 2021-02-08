@@ -103,8 +103,8 @@ void TilePalette::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
 		QSize size = m_tileset->getTileSize();
 		QPointF minPoint = QPointF( qMin( m_startPos.x(), mousePos.x() ), qMin( m_startPos.y(), mousePos.y() ) );
 		QPointF maxPoint = QPointF( qMax( m_startPos.x(), mousePos.x() ), qMax( m_startPos.y(), mousePos.y() ) );
-		QPoint selectedMinCoord = QPoint( qFloor( minPoint.x() / size.width() ), qFloor( minPoint.y() / size.height() ) );
-		QPoint selectedMaxCoord = QPoint( qCeil( maxPoint.x() / size.width() ), qCeil( maxPoint.y() / size.height() ) );
+		QPoint selectedMinCoord = QPoint( qMax( 0, qFloor( minPoint.x() / size.width() )), qMax( 0, qFloor( minPoint.y() / size.height() ) ) );
+		QPoint selectedMaxCoord = QPoint( qMin( size.width(), qCeil( maxPoint.x() / size.width() ) ), qMin( size.height(), qCeil( maxPoint.y() / size.height() ) ) );
 		QPoint startPos = QPoint( selectedMinCoord.x() * size.width(), selectedMinCoord.y() * size.height() );
 		QPoint endPos = QPoint( selectedMaxCoord.x() * size.width(), selectedMaxCoord.y() * size.height() );
 

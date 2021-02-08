@@ -245,7 +245,7 @@ QList<QPoint> MapScene::editMapByFloodFill( int layerIndex, const QPoint& coord 
 {
 	QList<QPoint> readyToPaintTileIndexes;
 	TileInfo currentTileInfo = m_layers[layerIndex]->m_tileList[m_mapInfo.getIndex( coord )]->m_tileInfo;
-	paintTileByFloodFill( layerIndex, coord, currentTileInfo, getCurrentTile(), readyToPaintTileIndexes );
+	paintTileByFloodFill( layerIndex, coord, currentTileInfo, readyToPaintTileIndexes );
 
 	return readyToPaintTileIndexes;
 }
@@ -427,16 +427,13 @@ void MapScene::showSelectedTileProperties()
 	m_parentWidget->showProperties( informationMap );
 }
 
-void MapScene::paintTileByFloodFill( int layerIndex, const QPoint& coord, const TileInfo& currentTileInfo, const TileInfo& newTileInfo, QList<QPoint>& readyToPaintTileIndexes )
+void MapScene::paintTileByFloodFill( int layerIndex, const QPoint& coord, const TileInfo& currentTileInfo, QList<QPoint>& readyToPaintTileIndexes )
 {
 	if( coord.x() < 0 || coord.x() >= m_mapInfo.getMapSize().width() || coord.y() < 0 || coord.y() >= m_mapInfo.getMapSize().height() )
 		return;
 
 	int tileIndex = m_mapInfo.getIndex( coord );
 	if ( m_layers[layerIndex]->m_tileList[tileIndex]->m_tileInfo != currentTileInfo )
-		return;
-
-	if( m_layers[layerIndex]->m_tileList[tileIndex]->m_tileInfo == newTileInfo )
 		return;
 
 	for ( int i = 0; i < readyToPaintTileIndexes.size(); ++i )
@@ -448,10 +445,10 @@ void MapScene::paintTileByFloodFill( int layerIndex, const QPoint& coord, const 
 	}
 	readyToPaintTileIndexes.push_back( coord );
 
-	paintTileByFloodFill( layerIndex, QPoint( coord.x() + 1, coord.y() ), currentTileInfo, newTileInfo, readyToPaintTileIndexes );
-	paintTileByFloodFill( layerIndex, QPoint( coord.x() - 1, coord.y() ), currentTileInfo, newTileInfo, readyToPaintTileIndexes );
-	paintTileByFloodFill( layerIndex, QPoint( coord.x(), coord.y() + 1 ), currentTileInfo, newTileInfo, readyToPaintTileIndexes );
-	paintTileByFloodFill( layerIndex, QPoint( coord.x(), coord.y() - 1 ), currentTileInfo, newTileInfo, readyToPaintTileIndexes );
+	paintTileByFloodFill( layerIndex, QPoint( coord.x() + 1, coord.y() ), currentTileInfo, readyToPaintTileIndexes );
+	paintTileByFloodFill( layerIndex, QPoint( coord.x() - 1, coord.y() ), currentTileInfo, readyToPaintTileIndexes );
+	paintTileByFloodFill( layerIndex, QPoint( coord.x(), coord.y() + 1 ), currentTileInfo, readyToPaintTileIndexes );
+	paintTileByFloodFill( layerIndex, QPoint( coord.x(), coord.y() - 1 ), currentTileInfo, readyToPaintTileIndexes );
 }
 
 void MapScene::selectTilesByFloodFill( int layerIndex, const QPoint& coord, const TileInfo& currentTileInfo, const TileInfo& newTileInfo )
@@ -653,14 +650,43 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 			}
 
 			// Implement Flood fill and Paint tiles
-			QList<QPoint> readyToPaintTileIndexes = editMapByFloodFill( currentIndex, coord );
-			for( int i = 0; i < readyToPaintTileIndexes.size(); ++i )
+			QList<QPoint> readyToPaintTileCoords = editMapByFloodFill( currentIndex, coord );
+			if ( readyToPaintTileCoords.isEmpty() )
 			{
-				QList<TileModified> modifiedList;
-				m_parentWidget->getPaintMapModified( modifiedList, readyToPaintTileIndexes[i], eDrawTool::BRUSH );
-				for( TileModified m : modifiedList )
+				return;
+			}
+			QPoint smallestPoint = readyToPaintTileCoords[0];
+			for ( QPoint p : readyToPaintTileCoords )
+			{
+				smallestPoint.setX( qMin( smallestPoint.x(), p.x() ) );
+				smallestPoint.setY( qMin( smallestPoint.y(), p.y() ) );
+			}
+
+			bool isDefault = true;
+			m_parentWidget->isDefalutBrush( isDefault );
+			if ( isDefault )
+			{
+				QList<TileInfo> selectedTileList = getCurrentTiles();
+				QSize regionSize = getSelectedTilesRegionSize();
+
+				for( int i = 0; i < readyToPaintTileCoords.size(); ++i )
 				{
-					paintMap( m.m_coordinate, m.m_tileInfo );
+					QPoint tartgetPoint = readyToPaintTileCoords[i];
+					QPoint coord = QPoint( (tartgetPoint.x() - smallestPoint.x()) % regionSize.width(), (tartgetPoint.y() - smallestPoint.y()) % regionSize.height() );
+					int index = coord.x() + coord.y() * regionSize.width();
+					paintMap( tartgetPoint, selectedTileList[index] );
+				}
+			}
+			else
+			{
+				for( int i = 0; i < readyToPaintTileCoords.size(); ++i )
+				{
+					QList<TileModified> modifiedList;
+					m_parentWidget->getPaintMapModified( modifiedList, readyToPaintTileCoords[i], eDrawTool::BRUSH );
+					for( TileModified m : modifiedList )
+					{
+						paintMap( m.m_coordinate, m.m_tileInfo );
+					}
 				}
 			}
 			QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, m_layers[currentIndex]->m_tileList );

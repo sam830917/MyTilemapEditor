@@ -64,7 +64,7 @@ private:
 	void paintMap( const QMap<int, TileInfo>& tileInfoMap, int layerIndex );
 	void showTileProperties( const QPointF& mousePos );
 	void showSelectedTileProperties();
-	void paintTileByFloodFill( int layerIndex, const QPoint& coord, const TileInfo& currentTileInfo, const TileInfo& newTileInfo, QList<QPoint>& readyToPaintTileIndexes );
+	void paintTileByFloodFill( int layerIndex, const QPoint& coord, const TileInfo& currentTileInfo, QList<QPoint>& readyToPaintTileIndexes );
 	void selectTilesByFloodFill( int layerIndex, const QPoint& coord, const TileInfo& currentTileInfo, const TileInfo& newTileInfo );
 
 protected:
