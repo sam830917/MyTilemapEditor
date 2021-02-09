@@ -293,7 +293,8 @@ void MapScene::paintMap( QSize coord )
 
 void MapScene::paintMap( int index, TileInfo tileInfo, int layerIndex )
 {
-	if( index < 0 )
+	int currentIndex = getCurrentLayerIndex();
+	if( index < 0 || m_layers[currentIndex]->getLayerInfo().isLock() )
 	{
 		return;
 	}
@@ -308,9 +309,8 @@ void MapScene::paintMap( int index, TileInfo tileInfo )
 	{
 		return;
 	}
-	int currentIndex = -1;
-	m_parentWidget->getLayerIndex( currentIndex );
-	if( currentIndex == -1 )
+	int currentIndex = getCurrentLayerIndex();
+	if( currentIndex == -1  || m_layers[currentIndex]->getLayerInfo().isLock() )
 	{
 		return;
 	}
@@ -360,8 +360,7 @@ void MapScene::showTileProperties( const QPointF& mousePos )
 	{
 		return;
 	}
-	int currentIndex = -1;
-	m_parentWidget->getLayerIndex( currentIndex );
+	int currentIndex = getCurrentLayerIndex();
 	if( currentIndex == -1 )
 	{
 		return;
@@ -402,8 +401,7 @@ void MapScene::showSelectedTileProperties()
 	{
 		return;
 	}
-	int currentIndex = -1;
-	m_parentWidget->getLayerIndex( currentIndex );
+	int currentIndex = getCurrentLayerIndex();
 	if( currentIndex == -1 )
 	{
 		return;
@@ -479,8 +477,7 @@ void MapScene::eraseMap( int index )
 	{
 		return;
 	}
-	int currentIndex = -1;
-	m_parentWidget->getLayerIndex( currentIndex );
+	int currentIndex = getCurrentLayerIndex();
 	if( currentIndex == -1 )
 	{
 		return;
@@ -547,8 +544,7 @@ void MapScene::eraseSelectedTiles()
 		return;
 	}
 	m_beforeDrawTileInfo.clear();
-	int currentIndex = -1;
-	m_parentWidget->getLayerIndex( currentIndex );
+	int currentIndex = getCurrentLayerIndex();
 	if( currentIndex == -1 || m_layers[currentIndex]->getLayerInfo().isLock() || !m_layers[currentIndex]->getLayerInfo().isVisible() )
 	{
 		return;
@@ -755,8 +751,7 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 				eDrawTool::ERASER == m_parentWidget->m_drawTool )
 		{
 			m_beforeDrawTileInfo.clear();
-			int currentIndex = -1;
-			m_parentWidget->getLayerIndex( currentIndex );
+			int currentIndex = getCurrentLayerIndex();
 			if( currentIndex == -1 || m_layers[currentIndex]->getLayerInfo().isLock() || !m_layers[currentIndex]->getLayerInfo().isVisible() )
 			{
 				return;
@@ -836,8 +831,7 @@ void MapScene::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
 		else if( eDrawTool::BRUSH == m_parentWidget->m_drawTool ||
 			eDrawTool::ERASER == m_parentWidget->m_drawTool )
 		{
-			int currentIndex = -1;
-			m_parentWidget->getLayerIndex( currentIndex );
+			int currentIndex = getCurrentLayerIndex();
 			if( currentIndex == -1 || m_layers[currentIndex]->getLayerInfo().isLock() || !m_layers[currentIndex]->getLayerInfo().isVisible() )
 			{
 				return;
@@ -871,8 +865,7 @@ void MapScene::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 		else if( eDrawTool::BRUSH == m_parentWidget->m_drawTool ||
 			eDrawTool::ERASER == m_parentWidget->m_drawTool )
 		{
-			int currentIndex = -1;
-			m_parentWidget->getLayerIndex( currentIndex );
+			int currentIndex = getCurrentLayerIndex();
 			if( currentIndex == -1 || m_layers[currentIndex]->getLayerInfo().isLock() || !m_layers[currentIndex]->getLayerInfo().isVisible() )
 			{
 				return;

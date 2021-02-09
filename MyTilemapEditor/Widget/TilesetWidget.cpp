@@ -74,9 +74,6 @@ void TilePalette::mousePressEvent( QGraphicsSceneMouseEvent* event )
 		QPoint startPos = QPoint( coord.x() * size.width(), coord.y() * size.height() );
 		m_selectFrame->setRect( startPos.x(), startPos.y(), size.width(), size.height() );
 		m_selectedRegionSize = QSize( 1, 1 );
-// 		m_selectedIndexes.clear();
-// 		m_selectedIndexes.insert( m_tileset->getTileIndex( coord ) );
-// 		m_currentIndex = m_tileset->getTileIndex( coord );
 		if ( m_isMainPalette )
 		{
 			g_selectedTilesRegionSize = m_selectedRegionSize;
@@ -84,7 +81,6 @@ void TilePalette::mousePressEvent( QGraphicsSceneMouseEvent* event )
 			g_currentTileInfos.push_back( TileInfo( m_tileset, m_tileset->getTileIndex( coord ) ) );
 			m_selectedIndexes.clear();
 			m_selectedIndexes.push_back( TileInfo( m_tileset, m_tileset->getTileIndex( coord ) ) );
-// 			updateTile( m_tileset, m_currentIndex );
 		}
 	}
 	update();
@@ -101,10 +97,11 @@ void TilePalette::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
 			return;
 		}
 		QSize size = m_tileset->getTileSize();
+		QSize coordTileSize = m_tileset->getCoordTileSize();
 		QPointF minPoint = QPointF( qMin( m_startPos.x(), mousePos.x() ), qMin( m_startPos.y(), mousePos.y() ) );
 		QPointF maxPoint = QPointF( qMax( m_startPos.x(), mousePos.x() ), qMax( m_startPos.y(), mousePos.y() ) );
 		QPoint selectedMinCoord = QPoint( qMax( 0, qFloor( minPoint.x() / size.width() )), qMax( 0, qFloor( minPoint.y() / size.height() ) ) );
-		QPoint selectedMaxCoord = QPoint( qMin( size.width(), qCeil( maxPoint.x() / size.width() ) ), qMin( size.height(), qCeil( maxPoint.y() / size.height() ) ) );
+		QPoint selectedMaxCoord = QPoint( qMin( coordTileSize.width(), qCeil( maxPoint.x() / size.width() ) ), qMin( coordTileSize.height(), qCeil( maxPoint.y() / size.height() ) ) );
 		QPoint startPos = QPoint( selectedMinCoord.x() * size.width(), selectedMinCoord.y() * size.height() );
 		QPoint endPos = QPoint( selectedMaxCoord.x() * size.width(), selectedMaxCoord.y() * size.height() );
 
