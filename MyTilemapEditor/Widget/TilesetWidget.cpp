@@ -15,9 +15,9 @@ QList<Tileset*> g_tilesetList;
 extern QList<TileInfo> g_currentTileInfos;
 extern QSize g_selectedTilesRegionSize;
 
-TilePalette::TilePalette( Tileset* tileset, bool isMainPalette, QObject* parent /*= Q_NULLPTR*/ )
+TilePalette::TilePalette( Tileset* tileset, QObject* parent /*= Q_NULLPTR*/ )
 	:QGraphicsScene( parent ),
-	m_isMainPalette(isMainPalette)
+	m_tileset(tileset)
 {
 	QGraphicsRectItem* bg = new QGraphicsRectItem();
 	QColor bgColor( 0, 0, 0, 50 );
@@ -54,6 +54,7 @@ TilePalette::TilePalette( Tileset* tileset, bool isMainPalette, QObject* parent 
 	m_selectFrame->setBrush( brush );
 	m_selectFrame->setPen( redPen );
 	addItem( m_selectFrame );
+	m_selectedIndexes.push_back( TileInfo( m_tileset, 0 ) );
 }
 
 void TilePalette::mousePressEvent( QGraphicsSceneMouseEvent* event )
@@ -74,14 +75,16 @@ void TilePalette::mousePressEvent( QGraphicsSceneMouseEvent* event )
 		QPoint startPos = QPoint( coord.x() * size.width(), coord.y() * size.height() );
 		m_selectFrame->setRect( startPos.x(), startPos.y(), size.width(), size.height() );
 		m_selectedRegionSize = QSize( 1, 1 );
-		if ( m_isMainPalette )
+
+		if( ePaletteSelectMode::PALETTE_SINGLE_SELECT == m_selectMode )
 		{
-			g_selectedTilesRegionSize = m_selectedRegionSize;
-			g_currentTileInfos.clear();
-			g_currentTileInfos.push_back( TileInfo( m_tileset, m_tileset->getTileIndex( coord ) ) );
-			m_selectedIndexes.clear();
-			m_selectedIndexes.push_back( TileInfo( m_tileset, m_tileset->getTileIndex( coord ) ) );
+			m_currentIndex = m_tileset->getTileIndex( coord );
 		}
+		g_selectedTilesRegionSize = m_selectedRegionSize;
+		g_currentTileInfos.clear();
+		g_currentTileInfos.push_back( TileInfo( m_tileset, m_tileset->getTileIndex( coord ) ) );
+		m_selectedIndexes.clear();
+		m_selectedIndexes.push_back( TileInfo( m_tileset, m_tileset->getTileIndex( coord ) ) );
 	}
 	update();
 }
@@ -91,6 +94,10 @@ void TilePalette::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
 	QGraphicsScene::mouseMoveEvent( event );
 	if( event->buttons() & Qt::LeftButton )
 	{
+		if ( ePaletteSelectMode::PALETTE_SINGLE_SELECT == m_selectMode )
+		{
+			return;
+		}
 		QPointF mousePos = event->scenePos();
 		if( mousePos == QPointF() )
 		{
@@ -108,21 +115,18 @@ void TilePalette::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
 		QSize regionSize = QSize( endPos.x() - startPos.x(), endPos.y() - startPos.y() );
 		m_selectFrame->setRect( startPos.x(), startPos.y(), regionSize.width(), regionSize.height() );
 
-		if( m_isMainPalette )
+		g_currentTileInfos.clear();
+		m_selectedIndexes.clear();
+		QSize regionSizeInCoord = QSize( selectedMaxCoord.x() - selectedMinCoord.x(), selectedMaxCoord.y() - selectedMinCoord.y() );
+		m_selectedRegionSize = regionSizeInCoord;
+		g_selectedTilesRegionSize = m_selectedRegionSize;
+
+		for( int y = 0; y < regionSizeInCoord.height(); ++y )
 		{
-			g_currentTileInfos.clear();
-			m_selectedIndexes.clear();
-			QSize regionSizeInCoord = QSize( selectedMaxCoord.x() - selectedMinCoord.x(), selectedMaxCoord.y() - selectedMinCoord.y() );
-			m_selectedRegionSize = regionSizeInCoord;
-			g_selectedTilesRegionSize = m_selectedRegionSize;
-			
-			for( int y = 0; y < regionSizeInCoord.height(); ++y )
+			for( int x = 0; x < regionSizeInCoord.width(); ++x )
 			{
-				for( int x = 0; x < regionSizeInCoord.width(); ++x )
-				{
-					g_currentTileInfos.push_back( TileInfo( m_tileset, m_tileset->getTileIndex( selectedMinCoord + QPoint( x, y ) ) ) );
-					m_selectedIndexes.push_back( TileInfo( m_tileset, m_tileset->getTileIndex( selectedMinCoord + QPoint( x, y ) ) ) );
-				}
+				g_currentTileInfos.push_back( TileInfo( m_tileset, m_tileset->getTileIndex( selectedMinCoord + QPoint( x, y ) ) ) );
+				m_selectedIndexes.push_back( TileInfo( m_tileset, m_tileset->getTileIndex( selectedMinCoord + QPoint( x, y ) ) ) );
 			}
 		}
 	}
@@ -154,8 +158,7 @@ void TilesetWidget::addTilesetIntoProject( Tileset* tileset )
 		}
 	}
 
-	TilePalette* tilePalette = new TilePalette( tileset, true, this);
-	tilePalette->m_tileset = tileset;
+	TilePalette* tilePalette = new TilePalette( tileset, this);
 
 	m_tilePaletteList.append( tilePalette );
 	g_tilesetList.append( tileset );

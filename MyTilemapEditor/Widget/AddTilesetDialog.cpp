@@ -15,6 +15,8 @@ AddTilesetDialog::AddTilesetDialog( QWidget* parent /*= Q_NULLPTR */ )
 	:QDialog( parent )
 {
 	m_ui.setupUi( this );
+	setWindowIcon( getApplicationIcon() );
+	setWindowFlags( Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint );
 
 	connect( m_ui.m_getImageButton, SIGNAL( clicked() ), this, SLOT( addImageFile() ) );
 	connect( m_ui.m_okBtn, SIGNAL( clicked() ), this, SLOT( saveTileset() ) );
@@ -82,6 +84,7 @@ void AddTilesetDialog::saveTileset()
 	{
 		QMessageBox msgBox;
 		msgBox.setWindowTitle( "Confirm Save As" );
+		msgBox.setWindowIcon( getApplicationIcon() );
 		msgBox.setText( "Tileset name \"" + m_ui.m_nameBox->text() + "\" already exists.\n\nDo you want to replace it?" );
 		msgBox.setIcon( QMessageBox::Warning );
 		msgBox.setStandardButtons( QMessageBox::Yes | QMessageBox::No );

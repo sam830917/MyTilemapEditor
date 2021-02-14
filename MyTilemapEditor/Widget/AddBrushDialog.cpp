@@ -10,6 +10,8 @@
 AddBrushDialog::AddBrushDialog( QWidget* parent /*= Q_NULLPTR */ )
 {
 	m_ui.setupUi( this );
+	setWindowIcon( getApplicationIcon() );
+	setWindowFlags( Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint );
 	m_ui.m_treeWidget->setColumnCount( 2 );
 	m_ui.m_treeWidget->headerItem()->setText( 0, "Name" );
 	m_ui.m_treeWidget->headerItem()->setText( 1, "Value" );

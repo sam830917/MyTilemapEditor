@@ -140,6 +140,7 @@ void BrushWidget::deleteNewBrush()
 	}
 	QMessageBox msgBox;
 	msgBox.setWindowTitle( "Confirm Delete Brush" );
+	msgBox.setWindowIcon( getApplicationIcon() );
 	msgBox.setText( "Do you want to delete selected brush?" );
 	msgBox.setIcon( QMessageBox::Warning );
 	msgBox.setStandardButtons( QMessageBox::Yes | QMessageBox::No );

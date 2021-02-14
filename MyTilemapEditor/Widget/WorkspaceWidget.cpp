@@ -247,6 +247,7 @@ void WorkspaceWidget::closeTab( int index )
 	{
 		QMessageBox msgBox;
 		msgBox.setText( "The map has been modified." );
+		msgBox.setWindowIcon( getApplicationIcon() );
 		msgBox.setInformativeText( "Do you want to save your changes?" );
 		msgBox.setIcon( QMessageBox::Warning );
 		msgBox.setStandardButtons( QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel );
@@ -340,6 +341,7 @@ bool WorkspaceWidget::isReadyToClose()
 		{
 			QMessageBox msgBox;
 			msgBox.setText( "The maps has been modified." );
+			msgBox.setWindowIcon( getApplicationIcon() );
 			msgBox.setInformativeText( "Do you want to save your changes?" );
 			msgBox.setIcon( QMessageBox::Warning );
 			msgBox.setStandardButtons( QMessageBox::SaveAll | QMessageBox::Discard | QMessageBox::Cancel );
@@ -595,6 +597,7 @@ void WorkspaceWidget::exportXMLFile()
 
 		saveXmlFile( *mapDoc, filePath );
 		QMessageBox msgBox;
+		msgBox.setWindowIcon( getApplicationIcon() );
 		msgBox.setText( "Map has exported successfully." );
 		msgBox.exec();
 	}
@@ -662,6 +665,7 @@ void WorkspaceWidget::exportPNGFile()
 		delete cloneScene;
 		cloneScene = Q_NULLPTR;
 		QMessageBox msgBox;
+		msgBox.setWindowIcon( getApplicationIcon() );
 		msgBox.setText( "Image has exported successfully." );
 		msgBox.exec();
 	}

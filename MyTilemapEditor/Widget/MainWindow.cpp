@@ -12,7 +12,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
 	m_config = new Config();
-	setWindowIcon( QIcon( ":/MainWindow/app-icon.ico" ) );
+	setWindowIcon( getApplicationIcon() );
 
 	initialMenuBar();
 	initialToolBar();

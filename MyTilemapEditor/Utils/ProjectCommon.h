@@ -11,6 +11,7 @@
 #define VIRTUAL  ;
 
 class Tileset;
+QT_FORWARD_DECLARE_CLASS( QIcon )
 
 enum class eDrawTool
 {
@@ -30,6 +31,7 @@ Project* const	getProject();
 TileInfo		getCurrentTile();
 QList<TileInfo>	getCurrentTiles();
 QSize			getSelectedTilesRegionSize();
+QIcon			getApplicationIcon();
 
 void updateProject( Project* newProject );
 

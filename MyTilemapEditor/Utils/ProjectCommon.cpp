@@ -4,6 +4,7 @@
 #include "XmlUtils.h"
 #include <QFileInfo>
 #include <QDir>
+#include <QIcon>
 
 static Project* g_project = nullptr;
 static TileInfo g_currentTileInfo;
@@ -52,6 +53,11 @@ QList<TileInfo> getCurrentTiles()
 QSize getSelectedTilesRegionSize()
 {
 	return g_selectedTilesRegionSize;
+}
+
+QIcon getApplicationIcon()
+{
+	return QIcon( ":/MainWindow/app-icon.ico" );
 }
 
 void updateProject( Project* newProject )
