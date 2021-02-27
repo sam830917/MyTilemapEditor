@@ -7,6 +7,7 @@
 #include <QEvent>
 #include <QStatusBar>
 #include <QComboBox>
+#include <QToolButton>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -106,10 +107,13 @@ void MainWindow::initialToolBar()
 	addToolBar( m_basicToolbar );
 
 	QMenu* basicMenu = new QMenu("New", m_basicToolbar);
-	basicMenu->setIcon( QIcon(":/MainWindow/Icon/new-file.png") );
-	m_basicToolbar->addAction( basicMenu->menuAction() );
 	basicMenu->addAction( m_tilesetAction );
 	basicMenu->addAction( m_mapAction );
+	QToolButton* newFileBtn = new QToolButton( this );
+	newFileBtn->setPopupMode( QToolButton::InstantPopup );
+	newFileBtn->setIcon( QIcon(":/MainWindow/Icon/new-file.png") );
+	newFileBtn->setMenu(basicMenu);
+	m_basicToolbar->addWidget( newFileBtn );
 	m_basicToolbar->addAction( m_saveAction );
 	m_basicToolbar->addAction( m_saveAllAction );
 	m_basicToolbar->addAction( m_undoAction );
@@ -125,6 +129,7 @@ void MainWindow::initialToolBar()
 	m_brushAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/brush.png" ), tr( "&Brush (B)" ) );
 	m_eraserAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/eraser.png" ), tr( "&Eraser (E)" ) );
 	m_bucketAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/bucket.png" ), tr( "&Bucket (G)" ) );
+	m_shapeToolAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/shape.png" ), tr( "&Shape (U)" ) );
 	m_magicWandAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/magic-wand.png" ), tr( "&Magic Wand (W)" ) );
 	m_selectSameTileAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/same-tile.png" ), tr( "&Select Same Tile (S)" ) );
 
@@ -132,6 +137,7 @@ void MainWindow::initialToolBar()
 	alignmentGroup->addAction( m_brushAction );
 	alignmentGroup->addAction( m_eraserAction );
 	alignmentGroup->addAction( m_bucketAction );
+	alignmentGroup->addAction( m_shapeToolAction );
 	alignmentGroup->addAction( m_magicWandAction );
 	alignmentGroup->addAction( m_selectSameTileAction );
 	alignmentGroup->addAction( m_moveToolAction );
@@ -141,6 +147,7 @@ void MainWindow::initialToolBar()
 	m_moveToolAction->setCheckable(true);
 	m_cursorToolAction->setCheckable(true);
 	m_bucketAction->setCheckable(true);
+	m_shapeToolAction->setCheckable(true);
 	m_magicWandAction->setCheckable(true);
 	m_selectSameTileAction->setCheckable(true);
 
@@ -149,6 +156,7 @@ void MainWindow::initialToolBar()
 	m_brushAction->setData( QVariant::fromValue( eDrawTool::BRUSH ) );
 	m_eraserAction->setData( QVariant::fromValue( eDrawTool::ERASER ) );
 	m_bucketAction->setData( QVariant::fromValue( eDrawTool::BUCKET ) );
+	m_shapeToolAction->setData( QVariant::fromValue( eDrawTool::SHAPE ) );
 	m_magicWandAction->setData( QVariant::fromValue( eDrawTool::MAGIC_WAND ) );
 	m_selectSameTileAction->setData( QVariant::fromValue( eDrawTool::SELECT_SAME_TILE ) );
 	connect( alignmentGroup, &QActionGroup::triggered, this, &MainWindow::changeDrawTool );
@@ -156,6 +164,8 @@ void MainWindow::initialToolBar()
 
 void MainWindow::initialStatusBar()
 {
+	// TODO
+
 	//QList<QString> scaleTextList;
 	//scaleTextList<< "50 %" << "100 %" << "200 %";
 	//QComboBox* mapScaleBox = new QComboBox;
@@ -242,8 +252,10 @@ void MainWindow::initialConnections()
 
 	connect( m_centralWidget->m_openProjectButton, SIGNAL( clicked(bool) ), m_projectWidget, SLOT( openProject() ) );
 	connect( m_centralWidget->m_newProjectButton, &QPushButton::clicked, m_projectWidget, &ProjectWidget::newProject );
+	connect( m_centralWidget->m_newTilesetButton, &QPushButton::clicked, m_tilesetWidget, &TilesetWidget::addTileset );
 
 	connect( m_projectWidget, &ProjectWidget::loadProjectSuccessfully, this, &MainWindow::updateToolBar );
+	connect( m_projectWidget, &ProjectWidget::loadProjectSuccessfully, m_centralWidget, &WorkspaceWidget::resetTabWidgetVisibility );
 	connect( m_projectWidget, &ProjectWidget::loadTilesetSuccessfully, m_tilesetWidget, &TilesetWidget::addTilesetIntoProject );
 	connect( m_projectWidget, &ProjectWidget::loadMapSuccessfully, m_centralWidget, &WorkspaceWidget::insertMap );
 	connect( m_projectWidget, &ProjectWidget::loadMapSuccessfully, m_layerWidget, &LayerWidget::addNewLayerGroup );
@@ -291,6 +303,7 @@ void MainWindow::initialShortcut()
 	m_cursorToolAction->		setShortcut( tr( "C" ) );
 	m_moveToolAction->			setShortcut( tr( "V" ) );
 	m_brushAction->				setShortcut( tr( "B" ) );
+	m_shapeToolAction->			setShortcut( tr( "U" ) );
 	m_eraserAction->			setShortcut( tr( "E" ) );
 	m_bucketAction->			setShortcut( tr( "G" ) );
 	m_magicWandAction->			setShortcut( tr( "W" ) );

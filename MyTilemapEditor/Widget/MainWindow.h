@@ -68,6 +68,7 @@ private:
 	QAction* m_brushAction;
 	QAction* m_eraserAction;
 	QAction* m_bucketAction;
+	QAction* m_shapeToolAction;
 	QAction* m_magicWandAction;
 	QAction* m_selectSameTileAction;
 

@@ -70,7 +70,7 @@ void BrushWidget::initialToolbar()
 	m_layout->addWidget( m_toolbar );
 
 	m_newBrushAction = new QAction( QIcon( ":/MainWindow/Icon/plus.png" ), tr( "&New Brush" ), this );
-	m_deleteBrushAction = new QAction( QIcon( ":/MainWindow/Icon/minus.png" ), tr( "&Delete Brush" ), this );
+	m_deleteBrushAction = new QAction( QIcon( ":/MainWindow/Icon/delete.png" ), tr( "&Delete Brush" ), this );
 	m_newBrushAction->setToolTip( tr( "New Brush" ) );
 	m_deleteBrushAction->setToolTip( tr( "Delete Brush" ) );
 	m_brushListBox = new QComboBox( this );

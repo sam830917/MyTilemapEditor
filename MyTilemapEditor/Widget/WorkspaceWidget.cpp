@@ -26,9 +26,19 @@ WorkspaceWidget::WorkspaceWidget( QWidget* parent /*= Q_NULLPTR */ )
 	m_newProjectButton->setText(tr("New Project"));
 	m_openProjectButton = new QPushButton( this );
 	m_openProjectButton->setText( tr( "Open Project" ) );
+	m_newMapButton = new QPushButton( this );
+	m_newMapButton->setText(tr("New Map"));
+	m_newTilesetButton = new QPushButton( this );
+	m_newTilesetButton->setText( tr( "New Tileset" ) );
+	m_newMapButton->setIcon( QIcon( ":/MainWindow/Icon/map_icon.png" ) );
+	m_newTilesetButton->setIcon( QIcon( ":/MainWindow/Icon/tileset_icon.png" ) );
+
 	layout->addWidget( m_newProjectButton, 0, Qt::AlignLeft | Qt::AlignTop );
 	layout->addWidget( m_openProjectButton, 0, Qt::AlignLeft | Qt::AlignTop );
+	layout->addWidget( m_newMapButton, 0, Qt::AlignLeft | Qt::AlignTop );
+	layout->addWidget( m_newTilesetButton, 0, Qt::AlignLeft | Qt::AlignTop );
 	layout->addStretch();
+
 	layoutv->addLayout(layout);
 	setLayout( layoutv );
 
@@ -40,18 +50,33 @@ WorkspaceWidget::WorkspaceWidget( QWidget* parent /*= Q_NULLPTR */ )
 	disableTabWidget( true );
 	connect( m_mapTabWidget, SIGNAL( tabCloseRequested(int) ), this, SLOT( closeTab( int ) ) );
 	connect( m_mapTabWidget, SIGNAL( currentChanged( int ) ), this, SLOT( changeTab( int ) ) );
+	connect( m_newMapButton, &QPushButton::clicked, this, &WorkspaceWidget::addMap );
 }
 
 void WorkspaceWidget::disableTabWidget( bool disable ) const
 {
 	if ( disable )
 	{
-		m_openProjectButton->setVisible( true );
-		m_newProjectButton->setVisible( true );
+		if ( getProject() )
+		{
+			m_newMapButton->setVisible( true );
+			m_newTilesetButton->setVisible( true );
+			m_openProjectButton->setVisible( false );
+			m_newProjectButton->setVisible( false );
+		}
+		else
+		{
+			m_newMapButton->setVisible( false );
+			m_newTilesetButton->setVisible( false );
+			m_openProjectButton->setVisible( true );
+			m_newProjectButton->setVisible( true );
+		}
 		m_mapTabWidget->setVisible( false );
 	}
 	else
 	{
+		m_newMapButton->setVisible( false );
+		m_newTilesetButton->setVisible( false );
 		m_openProjectButton->setVisible( false );
 		m_newProjectButton->setVisible( false );
 		m_mapTabWidget->setVisible( true );
@@ -123,6 +148,18 @@ void WorkspaceWidget::saveTileToFile( QList<const Tileset*>& tilesetList, int ta
 			mapTileEle->SetAttribute( "tilesetIndex", tileInfo.getIndex() );
 			mapTiles->LinkEndChild( mapTileEle );
 		}
+	}
+}
+
+void WorkspaceWidget::resetTabWidgetVisibility()
+{
+	if ( m_mapTabWidget->count() == 0 )
+	{
+		disableTabWidget( true );
+	}
+	else
+	{
+		disableTabWidget( false );
 	}
 }
 

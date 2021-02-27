@@ -210,6 +210,10 @@ void MapScene::editMapOnPoint( const QPointF& point )
 			QList<TileInfo> selectedTileList = getCurrentTiles();
 			QSize regionSize = getSelectedTilesRegionSize();
 			QSize mapSize = m_mapInfo.getMapSize();
+			if ( selectedTileList.empty() )
+			{
+				return;
+			}
 			for( int h = 0; h < regionSize.height(); ++h )
 			{
 				for( int w = 0; w < regionSize.width(); ++w )
@@ -227,7 +231,6 @@ void MapScene::editMapOnPoint( const QPointF& point )
 			{
 				paintMap( m.m_coordinate, m.m_tileInfo );
 			}
-
 		}
 		break;
 	}
@@ -667,10 +670,10 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 
 				for( int i = 0; i < readyToPaintTileCoords.size(); ++i )
 				{
-					QPoint tartgetPoint = readyToPaintTileCoords[i];
-					QPoint coord = QPoint( (tartgetPoint.x() - smallestPoint.x()) % regionSize.width(), (tartgetPoint.y() - smallestPoint.y()) % regionSize.height() );
+					QPoint targetCoord = readyToPaintTileCoords[i];
+					QPoint coord = QPoint( (targetCoord.x() - smallestPoint.x()) % regionSize.width(), (targetCoord.y() - smallestPoint.y()) % regionSize.height() );
 					int index = coord.x() + coord.y() * regionSize.width();
-					paintMap( tartgetPoint, selectedTileList[index] );
+					paintMap( targetCoord, selectedTileList[index] );
 				}
 			}
 			else
@@ -687,6 +690,59 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 			}
 			QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, m_layers[currentIndex]->m_tileList );
 			m_undoStack->push( command );
+		}
+		else if ( eDrawTool::SHAPE == m_parentWidget->m_drawTool )
+		{
+			QPointF mousePos = event->scenePos();
+			if( mousePos == QPointF() )
+			{
+				return;
+			}
+			QSizeF bound = QSizeF( m_mapInfo.getTileSize().width() * m_mapInfo.getMapSize().width(), m_mapInfo.getTileSize().height() * m_mapInfo.getMapSize().height() );
+			if( mousePos.x() >= bound.width() || mousePos.y() >= bound.height() || mousePos.x() <= 0 || mousePos.y() <= 0 )
+			{
+				return;
+			}
+			QPoint coord = QPoint( qFloor( mousePos.x() / m_mapInfo.getTileSize().width() ), qFloor( mousePos.y() / m_mapInfo.getTileSize().height() ) );
+			m_lastPaintCoord = coord;
+			m_startPos = mousePos;
+
+			int currentIndex = getCurrentLayerIndex();
+			if( currentIndex == -1 )
+			{
+				return;
+			}
+			m_beforeDrawTileInfo.clear();
+			m_beforeDrawTileInfo.reserve( m_layers[currentIndex]->m_tileList.size() );
+			for( Tile* tile : m_layers[currentIndex]->m_tileList )
+			{
+				TileInfo& info = tile->getTileInfo();
+				m_beforeDrawTileInfo.push_back( info );
+			}
+			m_parentWidget->disableShortcut( true );
+
+			bool isDefault = true;
+			m_parentWidget->isDefalutBrush( isDefault );
+			if ( isDefault )
+			{
+				QList<TileInfo> selectedTileList = getCurrentTiles();
+
+				if ( selectedTileList.empty() )
+				{
+					return;
+				}
+				TileInfo t = selectedTileList[0];
+				paintMap( coord, t );
+			}
+			else
+			{
+				QList<TileModified> modifiedList;
+				m_parentWidget->getPaintMapModified( modifiedList, QPoint( coord.x(), coord.y() ), m_parentWidget->getCurrentDrawTool() );
+				for( TileModified m : modifiedList )
+				{
+					paintMap( m.m_coordinate, m.m_tileInfo );
+				}
+			}
 		}
 		else if ( eDrawTool::MAGIC_WAND == m_parentWidget->m_drawTool )
 		{
@@ -827,6 +883,54 @@ void MapScene::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
 			
 			return;
 		}
+		else if ( eDrawTool::SHAPE == m_parentWidget->m_drawTool )
+		{
+			QPointF mousePos = event->scenePos();
+			if( mousePos == QPointF() || m_selectedTileItemList.isEmpty() )
+			{
+				return;
+			}
+			QSizeF bound = QSizeF( m_mapInfo.getTileSize().width() * m_mapInfo.getMapSize().width(), m_mapInfo.getTileSize().height() * m_mapInfo.getMapSize().height() );
+			if( mousePos.x() >= bound.width() || mousePos.y() >= bound.height() || mousePos.x() <= 0 || mousePos.y() <= 0 )
+			{
+				return;
+			}
+			QPoint coord = QPoint( qFloor( mousePos.x() / m_mapInfo.getTileSize().width() ), qFloor( mousePos.y() / m_mapInfo.getTileSize().height() ) );
+			if ( m_lastPaintCoord.x() == coord.x() && m_lastPaintCoord.y() == coord.y() )
+			{
+				return;
+			}
+
+			m_lastPaintCoord = coord;
+			QSize& tileSize = m_mapInfo.getTileSize();
+			QPointF minPoint = QPointF( qMin( m_startPos.x(), mousePos.x() ), qMin( m_startPos.y(), mousePos.y() ) );
+			QPointF maxPoint = QPointF( qMax( m_startPos.x(), mousePos.x() ), qMax( m_startPos.y(), mousePos.y() ) );
+
+			m_selectedMinCoord = QPoint( qFloor( minPoint.x() / tileSize.width() ), qFloor( minPoint.y() / tileSize.height() ) );
+			m_selectedMaxCoord = QPoint( qCeil( maxPoint.x() / tileSize.width() ), qCeil( maxPoint.y() / tileSize.height() ) );
+
+			QSize regionSize = QSize( m_selectedMaxCoord.x() - m_selectedMinCoord.x(), m_selectedMaxCoord.y() - m_selectedMinCoord.y() );
+
+			for( int i = 0; i < m_beforeDrawTileInfo.size(); ++i )
+			{
+				TileInfo tile = m_beforeDrawTileInfo[i];
+				paintMap( i, tile );
+			}
+
+			QList<TileInfo> selectedTileList = getCurrentTiles();
+			QSize tileRegionSize = getSelectedTilesRegionSize();
+			for( int y = 0; y < regionSize.height(); ++y )
+			{
+				for( int x = 0; x < regionSize.width(); ++x )
+				{
+					QPoint targetCoord = m_selectedMinCoord + QPoint( x, y );
+
+					QPoint tileCoord = QPoint( (targetCoord.x() - m_selectedMinCoord.x()) % tileRegionSize.width(), (targetCoord.y() - m_selectedMinCoord.y()) % tileRegionSize.height() );
+					int index = tileCoord.x() + tileCoord.y() * tileRegionSize.width();
+					paintMap( targetCoord, selectedTileList[index] );
+				}
+			}
+		}
 		// Draw or erase mode
 		else if( eDrawTool::BRUSH == m_parentWidget->m_drawTool ||
 			eDrawTool::ERASER == m_parentWidget->m_drawTool )
@@ -860,6 +964,18 @@ void MapScene::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 		else if( eDrawTool::CURSOR == m_parentWidget->m_drawTool )
 		{
 			return;
+		}
+		else if ( eDrawTool::SHAPE == m_parentWidget->m_drawTool )
+		{
+			int currentIndex = getCurrentLayerIndex();
+			if( currentIndex == -1 || m_layers[currentIndex]->getLayerInfo().isLock() || !m_layers[currentIndex]->getLayerInfo().isVisible() )
+			{
+				return;
+			}
+
+			QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, m_layers[currentIndex]->m_tileList );
+			m_undoStack->push( command );
+			m_parentWidget->disableShortcut( false );
 		}
 		// Draw or erase mode
 		else if( eDrawTool::BRUSH == m_parentWidget->m_drawTool ||

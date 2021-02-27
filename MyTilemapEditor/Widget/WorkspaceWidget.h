@@ -33,6 +33,7 @@ private:
 	void saveTileToFile( QList<const Tileset*>& tilesetList, int tabIndex, XmlElement& mapRoot, XmlDocument& mapDoc );
 
 public slots:
+	void resetTabWidgetVisibility();
 	void markCurrentSceneForModified();
 	void addMap();
 	void insertMap( MapInfo mapInfo, QList<LayerInfo> layerInfoList );
@@ -84,6 +85,8 @@ signals:
 public:
 	QPushButton* m_newProjectButton = Q_NULLPTR;
 	QPushButton* m_openProjectButton = Q_NULLPTR;
+	QPushButton* m_newMapButton = Q_NULLPTR;
+	QPushButton* m_newTilesetButton = Q_NULLPTR;
 	QTabWidget* m_mapTabWidget = Q_NULLPTR;
 	QList<MapScene*> m_mapSceneList;
 	eDrawTool m_drawTool = eDrawTool::BRUSH;

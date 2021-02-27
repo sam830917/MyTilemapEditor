@@ -18,6 +18,7 @@ enum class eDrawTool
 	CURSOR,
 	MOVE,
 	BRUSH,
+	SHAPE,
 	ERASER,
 	BUCKET,
 	MAGIC_WAND,
