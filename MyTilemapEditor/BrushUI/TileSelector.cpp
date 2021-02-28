@@ -11,59 +11,23 @@ public:
 
 	void setTileInfo( TileInfo tileinfo );
 
-protected:
-	virtual void mousePressEvent( QGraphicsSceneMouseEvent* event ) override;
-
 private:
 	TileSelector* m_parentView;
-	QGraphicsItem* m_image;
+	TileItem* m_image;
 };
 
 TileSelectorScene::TileSelectorScene( const QSize& size )
 	:QGraphicsScene()
 {
-	QGraphicsRectItem* image = new QGraphicsRectItem();
-	image->setRect( 0, 0, size.width(), size.height() );
-	image->setBrush( QBrush( QColor( 255, 0, 255, 255 ) ) );
+	TileItem* image = new TileItem( size );
 	addItem( image );
 	m_image = image;
 }
 
 void TileSelectorScene::setTileInfo( TileInfo tileinfo )
 {
-	if ( tileinfo.isValid() )
-	{
-		if ( m_image )
-		{
-			delete m_image;
-			m_image = nullptr;
-		}
-		QPixmap img = tileinfo.getTileImage();
-		m_image = addPixmap( img.scaled( m_parentView->getSize().width(), m_parentView->getSize().height(), Qt::KeepAspectRatio ) );
-		m_parentView->m_selectedTile = tileinfo;
-	}
-	else
-	{
-		QGraphicsRectItem* image = new QGraphicsRectItem();
-		image->setRect( 0, 0, m_parentView->getSize().width(), m_parentView->getSize().height() );
-		image->setBrush( QBrush( QColor( 255, 0, 255, 255 ) ) );
-		addItem( image );
-		m_image = image;
-	}
+	m_image->setTileInfo(tileinfo);
 	m_parentView->tileChanged( tileinfo );
-}
-
-void TileSelectorScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
-{
-	SelectTileDialog dialog;
-
-	if( dialog.exec() == QDialog::Accepted )
-	{
-		TileInfo tileinfo = dialog.getSelectTile();
-		delete m_image;
-		m_image = nullptr;
-		setTileInfo( tileinfo );
-	}
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -83,10 +47,63 @@ TileSelector::TileSelector( const QSize& size )
 
 TileSelector::~TileSelector()
 {
+	delete m_scene;
+	m_scene = nullptr;
+}
+
+TileInfo TileSelector::getTileinfo() const
+{
+	return m_scene->m_image->getTileInfo();
 }
 
 void TileSelector::setTileInfo( TileInfo tileinfo )
 {
-	m_selectedTile = tileinfo;
 	m_scene->setTileInfo( tileinfo );
+}
+
+//----------------------------------------------------------------------------------------------------
+TileItem::TileItem( const QSize& size, const QPointF& position )
+	:QGraphicsRectItem(),
+	m_size( size ),
+	m_position(position)
+{
+	setBrush( QBrush( QColor( 255, 0, 255, 255 ) ) );
+	setRect( position.x(), position.y(), m_size.width(), m_size.height() );
+}
+
+TileItem::~TileItem()
+{
+
+}
+
+void TileItem::setTileInfo( TileInfo tileInfo )
+{
+	m_selectedTile = tileInfo;
+	update();
+}
+
+void TileItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget /*= Q_NULLPTR */ )
+{
+	if ( m_selectedTile.isValid() )
+	{
+		QPixmap img = m_selectedTile.getTileImage();
+		painter->drawPixmap( m_position.x(), m_position.y(), m_size.width(), m_size.height(), img );
+	}
+	else
+	{
+		painter->setBrush( QBrush( QColor( 255, 0, 255, 255 ) ) );
+		painter->drawRect( m_position.x(), m_position.y(), m_size.width(), m_size.height() );
+	}
+}
+
+void TileItem::mousePressEvent( QGraphicsSceneMouseEvent* event )
+{
+	SelectTileDialog dialog;
+	if( dialog.exec() == QDialog::Accepted )
+	{
+		TileInfo tileinfo = dialog.getSelectTile();
+		setTileInfo( tileinfo );
+		update();
+	}
+	QGraphicsItem::mousePressEvent(event);
 }

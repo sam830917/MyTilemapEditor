@@ -5,7 +5,7 @@
 #include <QList>
 
 class TileGridSelectorScene;
-class TileGrid;
+class TileGridItem;
 
 enum class eTileGridType
 {
@@ -22,6 +22,8 @@ public:
 
 	QList<bool> getGridState() const;
 	void setGridState( QList<bool> states ) const;
+	TileInfo getTileinfo() const;
+	void setTileInfo( TileInfo tileinfo );
 
 private:
 	QSize m_size;

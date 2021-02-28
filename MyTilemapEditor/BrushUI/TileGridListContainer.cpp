@@ -27,8 +27,6 @@ TileGridListContainer::~TileGridListContainer()
 
 void TileGridListContainer::deleteChild( int index )
 {
-	delete m_tileSelectorList[index];
-	m_tileSelectorList.removeAt( index );
 	delete m_tileGridSelectorList[index];
 	m_tileGridSelectorList.removeAt( index );
 	delete m_widget[index];
@@ -40,9 +38,8 @@ void TileGridListContainer::attachedTreeWidget()
 	for( int i = 0; i < m_initialTileList.size(); ++i )
 	{
 		addTileSelectorList();
-		TileSelector* tileSelector = m_tileSelectorList[i];
-		tileSelector->setTileInfo( m_initialTileList[i] );
 		TileGridSelector* gridSelector = m_tileGridSelectorList[i];
+		gridSelector->setTileInfo( m_initialTileList[i] );
 		gridSelector->setGridState( m_initialStatesList[i] );
 	}
 	setExpanded( false );
@@ -56,9 +53,7 @@ void TileGridListContainer::addTileSelectorList()
 	setExpanded( true );
 	addChild( childItem );
 
-	TileSelector* tileSelector = new TileSelector( QSize( 50, 50 ) );
-	TileGridSelector* gridSelector = new TileGridSelector( m_gridType, QSize( 50, 50 ) );
-	m_tileSelectorList.push_back( tileSelector );
+	TileGridSelector* gridSelector = new TileGridSelector( m_gridType, QSize( 75, 75 ) );
 	m_tileGridSelectorList.push_back( gridSelector );
 
 	if( treeWidget() )
@@ -77,7 +72,6 @@ void TileGridListContainer::addTileSelectorList()
 		QBoxLayout* layout = new QBoxLayout( QBoxLayout::LeftToRight, placeholder );
 		layout->setContentsMargins( 0, 0, 0, 0 );
 		layout->addWidget( gridSelector );
-		layout->addWidget( tileSelector );
 		treeWidget()->setItemWidget( childItem, 0, widget );
 		treeWidget()->setItemWidget( childItem, 1, placeholder );
 

@@ -553,13 +553,12 @@ bool BrushParser::saveBrushAsFile( QList<AddBrushItem*> items, const QString& sa
 		{
 			TileGridListContainer* tileGridListContainer = dynamic_cast<TileGridListContainer*>(item->m_treeItem);
 			itemEle->SetAttribute( "type", "TILE_GRID_BOOL_LIST_EDGE" );
-			QJSValue objectvalueArray = jsEngine->newArray( tileGridListContainer->getTileSelectorList().size() );
-			for( int i = 0; i < tileGridListContainer->getTileSelectorList().size(); ++i )
+			QJSValue objectvalueArray = jsEngine->newArray( tileGridListContainer->getTileGridSelectorList().size() );
+			for( int i = 0; i < tileGridListContainer->getTileGridSelectorList().size(); ++i )
 			{
 				TileGridSelector* grid = tileGridListContainer->getTileGridSelectorList()[i];
-				TileSelector* tileSelector = tileGridListContainer->getTileSelectorList()[i];
 				XmlElement* childEle = xmlDocument->NewElement( "TileGridList" );
-				TileInfo* tileinfo = new TileInfo( tileSelector->getTileinfo() );
+				TileInfo* tileinfo = new TileInfo( grid->getTileinfo() );
 				if( tileinfo->isValid() )
 				{
 					childEle->SetAttribute( "tileset", tileinfo->getTileset()->getRelativeFilePath().toStdString().c_str() );
@@ -591,13 +590,12 @@ bool BrushParser::saveBrushAsFile( QList<AddBrushItem*> items, const QString& sa
 		{
 			TileGridListContainer* tileGridListContainer = dynamic_cast<TileGridListContainer*>(item->m_treeItem);
 			itemEle->SetAttribute( "type", "TILE_GRID_BOOL_LIST_CORNER" );
-			QJSValue objectvalueArray = jsEngine->newArray( tileGridListContainer->getTileSelectorList().size() );
-			for( int i = 0; i < tileGridListContainer->getTileSelectorList().size(); ++i )
+			QJSValue objectvalueArray = jsEngine->newArray( tileGridListContainer->getTileGridSelectorList().size() );
+			for( int i = 0; i < tileGridListContainer->getTileGridSelectorList().size(); ++i )
 			{
 				TileGridSelector* grid = tileGridListContainer->getTileGridSelectorList()[i];
-				TileSelector* tileSelector = tileGridListContainer->getTileSelectorList()[i];
 				XmlElement* childEle = xmlDocument->NewElement( "TileGridList" );
-				TileInfo* tileinfo = new TileInfo( tileSelector->getTileinfo() );
+				TileInfo* tileinfo = new TileInfo( grid->getTileinfo() );
 				if( tileinfo->isValid() )
 				{
 					childEle->SetAttribute( "tileset", tileinfo->getTileset()->getRelativeFilePath().toStdString().c_str() );

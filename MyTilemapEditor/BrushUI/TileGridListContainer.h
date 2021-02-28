@@ -16,7 +16,6 @@ public:
 	virtual void deleteChild( int index ) override;
 	virtual void attachedTreeWidget() override;
 
-	QList<TileSelector*> getTileSelectorList() const { return m_tileSelectorList; }
 	QList<TileGridSelector*> getTileGridSelectorList() const { return m_tileGridSelectorList; }
 
 	void setGridType( eTileGridType gridType ) { m_gridType = gridType; }
@@ -26,7 +25,6 @@ public:
 
 private:
 	QList<QWidget*> m_widget;
-	QList<TileSelector*> m_tileSelectorList;
 	QList<TileGridSelector*> m_tileGridSelectorList;
 	QList<TileInfo> m_initialTileList;
 	QList<QList<bool>> m_initialStatesList;

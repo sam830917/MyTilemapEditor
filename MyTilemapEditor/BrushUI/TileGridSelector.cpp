@@ -1,4 +1,5 @@
 #include "BrushUI/TileGridSelector.h"
+#include "BrushUI/TileSelector.h"
 #include <QGraphicsItem>
 
 class TileGridSelectorScene : public QGraphicsScene
@@ -10,16 +11,17 @@ public:
 
 private:
 	TileGridSelector* m_parentView;
-	QList<TileGrid*> m_items;
+	QList<TileGridItem*> m_tileGridItems;
+	TileItem* m_tileItem;
 };
 
-class TileGrid : public QGraphicsRectItem
+class TileGridItem : public QGraphicsRectItem
 {
 	friend class TileGridSelector;
 	friend class TileGridSelectorScene;
 
 public:
-	TileGrid( const QSize& size );
+	TileGridItem( const QSize& size );
 	virtual void paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = Q_NULLPTR ) override;
 
 protected:
@@ -30,31 +32,32 @@ private:
 	bool m_state = true;
 };
 
-TileGrid::TileGrid( const QSize& size )
+TileGridItem::TileGridItem( const QSize& size )
 	:QGraphicsRectItem(),
 	m_size(size)
 {
 }
 
-void TileGrid::paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget /*= Q_NULLPTR */ )
+void TileGridItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget /*= Q_NULLPTR */ )
 {
 	if ( m_state )
 	{
-		QPixmap img = QPixmap( ":/MainWindow/Icon/circle.png" );
+		painter->setBrush( QBrush( QColor( 0, 255, 0, 255 ) ) );
 		QRectF rect = boundingRect();
 		QPoint point = QPoint( rect.x() + 0.5f, rect.y() + 0.5f );
-		painter->drawPixmap( point.x(), point.y(), m_size.width(), m_size.height(), img );
+		painter->drawRect( point.x(), point.y(), m_size.width(), m_size.height() );
 	}
 	else
 	{
 		QPixmap img = QPixmap( ":/MainWindow/Icon/cross.png" );
+		painter->setBrush( QBrush( QColor( 255, 0, 0, 255 ) ) );
 		QRectF rect = boundingRect();
 		QPoint point = QPoint( rect.x() + 0.5f, rect.y() + 0.5f );
-		painter->drawPixmap( point.x(), point.y(), m_size.width(), m_size.height(), img );
+		painter->drawRect( point.x(), point.y(), m_size.width(), m_size.height() );
 	}
 }
 
-void TileGrid::mousePressEvent( QGraphicsSceneMouseEvent* event )
+void TileGridItem::mousePressEvent( QGraphicsSceneMouseEvent* event )
 {
 	m_state = !m_state;
 	update();
@@ -100,10 +103,10 @@ TileGridSelectorScene::TileGridSelectorScene( eTileGridType type, const QSize& s
 				}
 				if( x == 1 || y == 1 )
 				{
-					TileGrid* item = new TileGrid( QSize( wSize, hSize ) );
+					TileGridItem* item = new TileGridItem( QSize( wSize, hSize ) );
 					item->setRect( x * wSize, y * hSize, wSize, hSize );
 					addItem( item );
-					m_items.push_back( item );
+					m_tileGridItems.push_back( item );
 				}
 			}
 		}
@@ -119,10 +122,10 @@ TileGridSelectorScene::TileGridSelectorScene( eTileGridType type, const QSize& s
 				{
 					continue;
 				}
-				TileGrid* item = new TileGrid( QSize( wSize, hSize ) );
+				TileGridItem* item = new TileGridItem( QSize( wSize, hSize ) );
 				item->setRect( x * wSize, y * hSize, wSize, hSize );
 				addItem( item );
-				m_items.push_back( item );
+				m_tileGridItems.push_back( item );
 			}
 		}
 		break;
@@ -137,10 +140,10 @@ TileGridSelectorScene::TileGridSelectorScene( eTileGridType type, const QSize& s
 				{
 					continue;
 				}
-				TileGrid* item = new TileGrid( QSize( wSize, hSize ) );
+				TileGridItem* item = new TileGridItem( QSize( wSize, hSize ) );
 				item->setRect( x * wSize, y * hSize, wSize, hSize );
 				addItem( item );
-				m_items.push_back( item );
+				m_tileGridItems.push_back( item );
 			}
 		}
 		break;
@@ -148,6 +151,17 @@ TileGridSelectorScene::TileGridSelectorScene( eTileGridType type, const QSize& s
 	default:
 		break;
 	}
+
+	QPointF pos = QPointF( (float)size.width() * 0.125f, (float)size.height() * 0.125f );
+	QSize tileSize = size * 0.75f;
+	m_tileItem = new TileItem( tileSize, pos );
+	m_tileItem->setZValue( 3 );
+	addItem( m_tileItem );
+	QGraphicsRectItem* rectItem = new QGraphicsRectItem();
+	rectItem->setBrush( QBrush( QColor( 0, 0, 0, 255 ) ) );
+	rectItem->setRect( pos.x(), pos.y(), tileSize.width(), tileSize.height() );
+	rectItem->setZValue( 2 );
+	addItem( rectItem );
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -175,9 +189,9 @@ TileGridSelector::~TileGridSelector()
 QList<bool> TileGridSelector::getGridState() const
 {
 	QList<bool> states;
-	for ( int i = 0; i < m_scene->m_items.size(); ++i )
+	for ( int i = 0; i < m_scene->m_tileGridItems.size(); ++i )
 	{
-		states.push_back( m_scene->m_items[i]->m_state );
+		states.push_back( m_scene->m_tileGridItems[i]->m_state );
 	}
 	return states;
 }
@@ -186,7 +200,17 @@ void TileGridSelector::setGridState( QList<bool> states ) const
 {
 	for( int i = 0; i < states.size(); ++i )
 	{
-		m_scene->m_items[i]->m_state = states[i];
-		m_scene->m_items[i]->update();
+		m_scene->m_tileGridItems[i]->m_state = states[i];
+		m_scene->m_tileGridItems[i]->update();
 	}
+}
+
+TileInfo TileGridSelector::getTileinfo() const
+{
+	return m_scene->m_tileItem->getTileInfo();
+}
+
+void TileGridSelector::setTileInfo( TileInfo tileinfo )
+{
+	m_scene->m_tileItem->setTileInfo(tileinfo);
 }
