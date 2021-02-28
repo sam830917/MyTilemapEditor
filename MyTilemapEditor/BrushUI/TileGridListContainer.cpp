@@ -1,6 +1,8 @@
 #include "BrushUI/TileGridListContainer.h"
 #include "BrushUI/TileSelector.h"
 #include <QBoxLayout>
+#include <QHBoxLayout>
+#include <QLabel>
 
 TileGridListContainer::TileGridListContainer()
 	:ListContainerBase()
@@ -50,6 +52,7 @@ void TileGridListContainer::attachedTreeWidget()
 void TileGridListContainer::addTileSelectorList()
 {
 	QTreeWidgetItem* childItem = new QTreeWidgetItem();
+	childItem->setText( 0, QString::number( m_childCount ) );
 	setExpanded( true );
 	addChild( childItem );
 
@@ -63,14 +66,19 @@ void TileGridListContainer::addTileSelectorList()
 		QPushButton* removeBtn = new QPushButton;
 		removeBtn->setIcon( QIcon( ":/MainWindow/Icon/minus.png" ) );
 		removeBtn->setMaximumSize( QSize( 30, 30 ) );
-		removeBtn->setMinimumSize( QSize( 30, 30 ) ); 
+		removeBtn->setMinimumSize( QSize( 30, 30 ) );
+		QWidget* widget = new QWidget();
+		QHBoxLayout* hLayout = new QHBoxLayout();
+		hLayout->addWidget( removeBtn, 0, Qt::AlignRight );
+		widget->setLayout( hLayout );
+
 		QWidget* placeholder = new QWidget();
 		m_widget.push_back(placeholder);
 		QBoxLayout* layout = new QBoxLayout( QBoxLayout::LeftToRight, placeholder );
 		layout->setContentsMargins( 0, 0, 0, 0 );
 		layout->addWidget( gridSelector );
 		layout->addWidget( tileSelector );
-		treeWidget()->setItemWidget( childItem, 0, removeBtn );
+		treeWidget()->setItemWidget( childItem, 0, widget );
 		treeWidget()->setItemWidget( childItem, 1, placeholder );
 
 		QObject::connect( removeBtn, &QPushButton::clicked, [=]()
@@ -78,6 +86,11 @@ void TileGridListContainer::addTileSelectorList()
 				int index = indexOfChild( childItem );
 				removeChild( childItem );
 				deleteChild( index );
+				for( int i = 0; i < childCount(); ++i )
+				{
+					QTreeWidgetItem* childItem = child( i );
+					childItem->setText( 0, QString::number( i ) );
+				}
 				setExpanded( false );
 				setExpanded( true );
 			} );

@@ -1,5 +1,6 @@
 #include "BrushUI/TileInfoListContainer.h"
 #include "BrushUI/TileSelector.h"
+#include <QHBoxLayout>
 
 TileInfoListContainer::TileInfoListContainer()
 	:ListContainerBase()
@@ -41,7 +42,7 @@ void TileInfoListContainer::attachedTreeWidget()
 
 void TileInfoListContainer::addTileSelectorList()
 {
-	QTreeWidgetItem* childItem = new QTreeWidgetItem();
+	QTreeWidgetItem* childItem = new QTreeWidgetItem(this);
 	childItem->setText( 0, QString::number( m_childCount ) );
 	setExpanded( true );
 	addChild( childItem );
@@ -55,16 +56,26 @@ void TileInfoListContainer::addTileSelectorList()
 		removeBtn->setIcon( QIcon( ":/MainWindow/Icon/minus.png" ) );
 		removeBtn->setMaximumSize( QSize( 30, 30 ) );
 		removeBtn->setMinimumSize( QSize( 30, 30 ) );
-		treeWidget()->setItemWidget( childItem, 0, removeBtn );
-		treeWidget()->setItemWidget( childItem, 1, tileSelector );
+		QWidget* widget = new QWidget();
+		QHBoxLayout* layout = new QHBoxLayout();
+		layout->addWidget( removeBtn, 0, Qt::AlignRight );
+		widget->setLayout( layout );
 
+		treeWidget()->setItemWidget( childItem, 0, widget );
+		treeWidget()->setItemWidget( childItem, 1, tileSelector );
 		QObject::connect( removeBtn, &QPushButton::clicked, [=]()
 			{
 				int index = indexOfChild( childItem );
 				removeChild( childItem );
 				deleteChild( index );
+				for ( int i = 0; i < childCount(); ++i )
+				{
+					QTreeWidgetItem* childItem = child( i );
+					childItem->setText( 0, QString::number( i ) );
+				}
 				setExpanded( false );
 				setExpanded( true );
+				m_childCount--;
 			} );
 	}
 

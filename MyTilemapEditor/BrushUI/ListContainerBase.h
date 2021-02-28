@@ -8,7 +8,7 @@ class ListContainerBase : public QTreeWidgetItem
 {
 public:
 	ListContainerBase( bool needInitial = true );
-	~ListContainerBase();
+	virtual ~ListContainerBase();
 
 	virtual QWidget* createChildWidget();
  	virtual void deleteChild( int index );
