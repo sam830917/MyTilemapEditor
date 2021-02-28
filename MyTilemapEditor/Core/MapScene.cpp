@@ -236,7 +236,21 @@ void MapScene::editMapOnPoint( const QPointF& point )
 	}
 	case eDrawTool::ERASER:
 	{
-		eraseMap( QPoint( coord.width(), coord.height() ) );
+		bool isDefault = true;
+		m_parentWidget->isDefalutBrush( isDefault );
+		if( isDefault )
+		{
+			eraseMap( QPoint( coord.width(), coord.height() ) );
+		}
+		else
+		{
+			QList<TileModified> modifiedList;
+			m_parentWidget->getPaintMapModified( modifiedList, QPoint( coord.width(), coord.height() ), m_parentWidget->getCurrentDrawTool() );
+			for( TileModified m : modifiedList )
+			{
+				paintMap( m.m_coordinate, m.m_tileInfo );
+			}
+		}
 		break;
 	}
 	default:
@@ -917,17 +931,41 @@ void MapScene::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
 				paintMap( i, tile );
 			}
 
-			QList<TileInfo> selectedTileList = getCurrentTiles();
-			QSize tileRegionSize = getSelectedTilesRegionSize();
-			for( int y = 0; y < regionSize.height(); ++y )
+			bool isDefault = true;
+			m_parentWidget->isDefalutBrush( isDefault );
+			if( isDefault )
 			{
-				for( int x = 0; x < regionSize.width(); ++x )
+				QList<TileInfo> selectedTileList = getCurrentTiles();
+				QSize tileRegionSize = getSelectedTilesRegionSize();
+				for( int y = 0; y < regionSize.height(); ++y )
 				{
-					QPoint targetCoord = m_selectedMinCoord + QPoint( x, y );
+					for( int x = 0; x < regionSize.width(); ++x )
+					{
+						QPoint targetCoord = m_selectedMinCoord + QPoint( x, y );
 
-					QPoint tileCoord = QPoint( (targetCoord.x() - m_selectedMinCoord.x()) % tileRegionSize.width(), (targetCoord.y() - m_selectedMinCoord.y()) % tileRegionSize.height() );
-					int index = tileCoord.x() + tileCoord.y() * tileRegionSize.width();
-					paintMap( targetCoord, selectedTileList[index] );
+						QPoint tileCoord = QPoint( (targetCoord.x() - m_selectedMinCoord.x()) % tileRegionSize.width(), (targetCoord.y() - m_selectedMinCoord.y()) % tileRegionSize.height() );
+						int index = tileCoord.x() + tileCoord.y() * tileRegionSize.width();
+						paintMap( targetCoord, selectedTileList[index] );
+					}
+				}
+			}
+			else
+			{
+				QList<TileInfo> selectedTileList = getCurrentTiles();
+				QSize tileRegionSize = getSelectedTilesRegionSize();
+				for( int y = 0; y < regionSize.height(); ++y )
+				{
+					for( int x = 0; x < regionSize.width(); ++x )
+					{
+						QPoint targetCoord = m_selectedMinCoord + QPoint( x, y );
+
+						QList<TileModified> modifiedList;
+						m_parentWidget->getPaintMapModified( modifiedList, QPoint( targetCoord.x(), targetCoord.y() ), eDrawTool::BRUSH );
+						for( TileModified m : modifiedList )
+						{
+							paintMap( m.m_coordinate, m.m_tileInfo );
+						}
+					}
 				}
 			}
 		}
