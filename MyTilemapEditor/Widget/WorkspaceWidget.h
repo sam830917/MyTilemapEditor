@@ -59,6 +59,9 @@ public slots:
 
 	void eraseSelectedTilesInCurrentLayer();
 	void selecteAllTilesInCurrentLayer();
+	void copySelectedTile();
+	void cutSelectedTile();
+	void pasteCopiedTile();
 	void closeAllTab();
 	void exportXMLFile();
 	void exportPNGFile();

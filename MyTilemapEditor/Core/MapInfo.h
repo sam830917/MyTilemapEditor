@@ -17,6 +17,7 @@ public:
 	void setIsValid( bool isValid ) { m_isValid = isValid; }
 	bool isOutOfBound( const QPoint& coord );
 	int  getIndex( const QPoint& coord ) const { return coord.y() * getMapSize().width() + coord.x(); }
+	QPoint getCoord( int index ) const { return QPoint( index % m_mapWidth, index / m_mapWidth ); }
 
 	QString		getFilePath() const { return m_filePath; }
 	QString		getName() const { return m_name; }

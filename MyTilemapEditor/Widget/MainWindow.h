@@ -42,6 +42,7 @@ public slots:
 	void replaceUndoAction( QAction* action );
 	void disableShortcut( bool isDisable );
 	void closeCurrentProject( bool& isSuccess );
+	void resetTitleName();
 
 private:
 	Config* m_config;
@@ -74,6 +75,9 @@ private:
 
 	QShortcut* m_eraseSelectedTilesShortcut;
 	QShortcut* m_selectAllTilesShortcut;
+	QShortcut* m_copyShortcut;
+	QShortcut* m_pasteShortcut;
+	QShortcut* m_cutShortcut;
 	QShortcut* m_workspaceSwitchTabShortcut;
 	QShortcut* m_workspaceCloseTabShortcut;
 	QShortcut* m_newLayerShortcut;

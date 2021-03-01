@@ -42,6 +42,12 @@ QStringList Project::getDirectories()
 	return pathList;
 }
 
+QString Project::getName() const
+{
+	QFileInfo info(m_filePath);
+	return info.baseName();
+}
+
 void Project::renameTilesetFile( const QString& oldNamePath, const QString& newNamePath )
 {
 	XmlElement* root = m_projectXml->RootElement();

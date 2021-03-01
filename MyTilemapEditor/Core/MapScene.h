@@ -10,6 +10,7 @@
 
 class WorkspaceWidget;
 class SelectMask;
+struct TileModified;
 
 class MapView : public QGraphicsView
 {
@@ -38,7 +39,7 @@ public:
 	MapScene( MapInfo mapInfo );
 	~MapScene();
 
-	MapInfo getMapInfo() { return m_mapInfo; }
+	MapInfo getMapInfo() const { return m_mapInfo; }
 
 	void editMapOnPoint( const QPointF& point );
 	QList<QPoint> editMapByFloodFill( int layerIndex, const QPoint& coord );
@@ -58,9 +59,11 @@ public:
 	void updateSelection();
 	void eraseSelectedTiles();
 	void selecteAllTiles();
+	QList<TileModified> getCopiedTiles() const;
+	void pasteTilesOnCoord( const QPoint& coord, const QList<TileModified>& copiedTileList );
 
 private:
-	int getCurrentLayerIndex();
+	int getCurrentLayerIndex() const;
 	void paintMap( const QMap<int, TileInfo>& tileInfoMap, int layerIndex );
 	void showTileProperties( const QPointF& mousePos );
 	void showSelectedTileProperties();

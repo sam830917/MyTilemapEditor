@@ -237,6 +237,9 @@ void MainWindow::initialConnections()
 	connect( m_workspaceSwitchTabShortcut, &QShortcut::activated, m_centralWidget, &WorkspaceWidget::nextTab );
 	connect( m_workspaceCloseTabShortcut, &QShortcut::activated, m_centralWidget, &WorkspaceWidget::closeCurrentTab );
 	connect( m_selectAllTilesShortcut, &QShortcut::activated, m_centralWidget, &WorkspaceWidget::selecteAllTilesInCurrentLayer );
+	connect( m_copyShortcut, &QShortcut::activated, m_centralWidget, &WorkspaceWidget::copySelectedTile );
+	connect( m_pasteShortcut, &QShortcut::activated, m_centralWidget, &WorkspaceWidget::pasteCopiedTile );
+	connect( m_cutShortcut, &QShortcut::activated, m_centralWidget, &WorkspaceWidget::cutSelectedTile );
 	connect( m_newLayerShortcut, SIGNAL( activated() ), m_layerWidget, SLOT( addNewLayer() ) );
 	connect( m_raiseLayerShortcut, &QShortcut::activated, m_layerWidget, &LayerWidget::raiseCurrentLayer );
 	connect( m_lowerLayerShortcut, &QShortcut::activated, m_layerWidget, &LayerWidget::lowerCurrentLayer );
@@ -255,6 +258,7 @@ void MainWindow::initialConnections()
 	connect( m_centralWidget->m_newTilesetButton, &QPushButton::clicked, m_tilesetWidget, &TilesetWidget::addTileset );
 
 	connect( m_projectWidget, &ProjectWidget::loadProjectSuccessfully, this, &MainWindow::updateToolBar );
+	connect( m_projectWidget, &ProjectWidget::loadProjectSuccessfully, this, &MainWindow::resetTitleName );
 	connect( m_projectWidget, &ProjectWidget::loadProjectSuccessfully, m_centralWidget, &WorkspaceWidget::resetTabWidgetVisibility );
 	connect( m_projectWidget, &ProjectWidget::loadTilesetSuccessfully, m_tilesetWidget, &TilesetWidget::addTilesetIntoProject );
 	connect( m_projectWidget, &ProjectWidget::loadMapSuccessfully, m_centralWidget, &WorkspaceWidget::insertMap );
@@ -311,6 +315,9 @@ void MainWindow::initialShortcut()
 
 	m_eraseSelectedTilesShortcut =	new QShortcut( QKeySequence::Delete, this );
 	m_selectAllTilesShortcut =		new QShortcut( QKeySequence::SelectAll, this );
+	m_copyShortcut =				new QShortcut( QKeySequence::Copy, this );
+	m_pasteShortcut =				new QShortcut( QKeySequence::Paste, this );
+	m_cutShortcut =					new QShortcut( QKeySequence::Cut, this );
 	m_workspaceSwitchTabShortcut =	new QShortcut( QKeySequence::NextChild, this );
 	m_workspaceCloseTabShortcut =	new QShortcut( tr( "Ctrl+W" ), this );
 	m_newLayerShortcut =			new QShortcut( tr( "Ctrl+Shift+N" ), this );
@@ -416,4 +423,14 @@ void MainWindow::closeCurrentProject( bool& isSuccess )
 	{
 		isSuccess = false;
 	}
+}
+
+void MainWindow::resetTitleName()
+{
+	Project* project = getProject();
+	if ( !project )
+	{
+		return;
+	}
+	setWindowTitle( QString("MyTilemapEditor - (%1)").arg(project->getName()) );
 }

@@ -13,6 +13,7 @@ public:
 	QStringList		getDirectories();
 	XmlDocument*	getDocument() const { return m_projectXml; }
 	QString			getFilePath() const { return m_filePath; }
+	QString			getName() const;
 
 	void			renameTilesetFile( const QString& oldNamePath, const QString& newNamePath );
 

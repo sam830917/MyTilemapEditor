@@ -13,8 +13,10 @@
 #include <QShortcut>
 #include <QKeyEvent>
 #include <QFileDialog>
+#include <QtMath>
 
 MapScene* g_currentMapScene = nullptr;
+QList<TileModified> g_copiedTileList;
 
 WorkspaceWidget::WorkspaceWidget( QWidget* parent /*= Q_NULLPTR */ )
 	:QWidget(parent)
@@ -557,6 +559,7 @@ void WorkspaceWidget::closeAllTab()
 		delete m_mapSceneList[i];
 	}
 	m_mapSceneList.clear();
+	g_copiedTileList.clear();
 }
 
 void WorkspaceWidget::exportXMLFile()
@@ -706,4 +709,29 @@ void WorkspaceWidget::exportPNGFile()
 		msgBox.setText( "Image has exported successfully." );
 		msgBox.exec();
 	}
+}
+
+void WorkspaceWidget::copySelectedTile()
+{
+	QList<TileModified> tileModifiedList = m_mapSceneList[m_mapTabWidget->currentIndex()]->getCopiedTiles();
+	g_copiedTileList = tileModifiedList;
+}
+
+void WorkspaceWidget::cutSelectedTile()
+{
+	copySelectedTile();
+	eraseSelectedTilesInCurrentLayer();
+}
+
+void WorkspaceWidget::pasteCopiedTile()
+{
+	if ( g_copiedTileList.empty() )
+	{
+		return;
+	}
+	QPoint origin = m_mapSceneList[m_mapTabWidget->currentIndex()]->m_view->mapFromGlobal( QCursor::pos() );
+	QPointF mousePos = m_mapSceneList[m_mapTabWidget->currentIndex()]->m_view->mapToScene(origin);
+	MapScene* mapScene =  m_mapSceneList[m_mapTabWidget->currentIndex()];
+	QPoint coord = QPoint( qFloor( mousePos.x() / mapScene->m_mapInfo.getTileSize().width() ), qFloor( mousePos.y() / mapScene->m_mapInfo.getTileSize().height() ) );
+	mapScene->pasteTilesOnCoord( coord, g_copiedTileList );
 }

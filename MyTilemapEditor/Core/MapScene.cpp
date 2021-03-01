@@ -277,7 +277,7 @@ void MapScene::selectTilesByFloodFill( int layerIndex, const QPoint& coord )
 	selectTilesByFloodFill( layerIndex, coord, currentTileInfo, getCurrentTile() );
 }
 
-int MapScene::getCurrentLayerIndex()
+int MapScene::getCurrentLayerIndex() const
 {
 	int currentIndex = -1;
 	m_parentWidget->getLayerIndex( currentIndex );
@@ -596,6 +596,72 @@ void MapScene::selecteAllTiles()
 		mask->setSelected( true );
 	}
 	updateSelection();
+}
+
+QList<TileModified> MapScene::getCopiedTiles() const
+{
+	QList<TileModified> tileModifiedList;
+	if( !m_showSelection )
+	{
+		return tileModifiedList;
+	}
+	int currentIndex = getCurrentLayerIndex();
+	if( currentIndex == -1 || !m_layers[currentIndex]->getLayerInfo().isVisible() )
+	{
+		return tileModifiedList;
+	}
+
+	QPoint smallestPoint = QPoint( m_mapInfo.getMapSize().width(), m_mapInfo.getMapSize().height() );
+	for( int i = 0; i < m_selectedTileItemList.size(); ++i )
+	{
+		if( m_selectedTileItemList[i]->m_isSelected )
+		{
+			QPoint coord = m_mapInfo.getCoord( i );
+			TileInfo tileinfo = m_layers[currentIndex]->m_tileList[i]->getTileInfo();
+			TileModified tileModified( coord, tileinfo );
+			tileModifiedList.push_back( tileModified );
+			smallestPoint.setX( qMin( smallestPoint.x(), coord.x() ) );
+			smallestPoint.setY( qMin( smallestPoint.y(), coord.y() ) );
+		}
+	}
+	for( int i = 0; i < tileModifiedList.size(); ++i )
+	{
+		tileModifiedList[i].m_coordinate -= smallestPoint;
+	}
+
+	return tileModifiedList;
+}
+
+void MapScene::pasteTilesOnCoord( const QPoint& coord, const QList<TileModified>& copiedTileList )
+{
+	if ( copiedTileList.empty() )
+	{
+		return;
+	}
+	int currentIndex = getCurrentLayerIndex();
+	if( currentIndex == -1 )
+	{
+		return;
+	}
+	m_beforeDrawTileInfo.clear();
+	m_beforeDrawTileInfo.reserve( m_layers[currentIndex]->m_tileList.size() );
+	for( Tile* tile : m_layers[currentIndex]->m_tileList )
+	{
+		TileInfo& info = tile->getTileInfo();
+		m_beforeDrawTileInfo.push_back( info );
+	}
+
+	for( TileModified tileModified : copiedTileList )
+	{
+		QPoint point = tileModified.m_coordinate + coord;
+		if ( tileModified.m_tileInfo.isValid() )
+		{
+			paintMap( point, tileModified.m_tileInfo );
+		}
+	}
+	setIsShowSelection( false );
+	QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, m_layers[currentIndex]->m_tileList );
+	m_undoStack->push( command );
 }
 
 void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
