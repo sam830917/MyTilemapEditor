@@ -42,3 +42,4 @@ void deleteBrushInProject( const QString& filePath );
 void updateBrushFileInProject( const QString& oldFilePath, const QString& newFilePath );
 
 void debugPrint( const QString& text );
+void debugPrintError( const QString& text );

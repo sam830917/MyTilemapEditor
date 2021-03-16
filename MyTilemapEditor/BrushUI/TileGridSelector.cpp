@@ -158,7 +158,7 @@ TileGridSelectorScene::TileGridSelectorScene( eTileGridType type, const QSize& s
 	m_tileItem->setZValue( 3 );
 	addItem( m_tileItem );
 	QGraphicsRectItem* rectItem = new QGraphicsRectItem();
-	rectItem->setBrush( QBrush( QColor( 0, 0, 0, 255 ) ) );
+	rectItem->setBrush( QBrush( QColor( 100, 100, 100, 255 ) ) );
 	rectItem->setRect( pos.x(), pos.y(), tileSize.width(), tileSize.height() );
 	rectItem->setZValue( 2 );
 	addItem( rectItem );

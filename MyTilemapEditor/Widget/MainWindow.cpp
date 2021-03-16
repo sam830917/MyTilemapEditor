@@ -124,14 +124,14 @@ void MainWindow::initialToolBar()
 
 	m_cursorToolAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/cursor.png" ), tr( "&Cursor (C)" ) );
 	m_cursorToolAction->setData( QVariant::fromValue( eDrawTool::CURSOR ) );
+	m_magicWandAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/magic-wand.png" ), tr( "&Magic Wand (W)" ) );
+	m_selectSameTileAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/same-tile.png" ), tr( "&Select Same Tile (S)" ) );
 	m_moveToolAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/move.png" ), tr( "&Move (V)" ) );
 	m_moveToolAction->setData( QVariant::fromValue( eDrawTool::MOVE ) );
 	m_brushAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/brush.png" ), tr( "&Brush (B)" ) );
 	m_eraserAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/eraser.png" ), tr( "&Eraser (E)" ) );
 	m_bucketAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/bucket.png" ), tr( "&Bucket (G)" ) );
 	m_shapeToolAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/shape.png" ), tr( "&Shape (U)" ) );
-	m_magicWandAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/magic-wand.png" ), tr( "&Magic Wand (W)" ) );
-	m_selectSameTileAction = m_paintToolToolbar->addNewAction( QIcon( ":/MainWindow/Icon/same-tile.png" ), tr( "&Select Same Tile (S)" ) );
 
 	QActionGroup* alignmentGroup = new QActionGroup( this );
 	alignmentGroup->addAction( m_brushAction );
@@ -432,5 +432,5 @@ void MainWindow::resetTitleName()
 	{
 		return;
 	}
-	setWindowTitle( QString("MyTilemapEditor - (%1)").arg(project->getName()) );
+	setWindowTitle( QString("%1 - MyTilemapEditor").arg(project->getName()) );
 }

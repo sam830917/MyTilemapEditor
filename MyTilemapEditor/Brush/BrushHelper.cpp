@@ -25,7 +25,7 @@ void BrushHelper::setTile( int coordX, int coordY, TileInfo* tileInfo )
 {
 	if ( !tileInfo )
 	{
-		debugPrint( "setTile error : Tile is null!" );
+		debugPrintError( "setTile error : Tile is null!" );
 	}
 	TileInfo tile(*tileInfo);
 	TileModified tileModified( QPoint( coordX, coordY ), tile );
@@ -42,7 +42,7 @@ bool BrushHelper::isSameTile( int coordX, int coordY, TileInfo* tileInfo )
 {
 	if( !g_currentMapScene || !tileInfo )
 	{
-		debugPrint( "setTile error : Tile is null!" );
+		debugPrintError( "setTile error : Tile is null!" );
 		return false;
 	}
 	int layerIndex = g_currentMapScene->getCurrentLayerIndex();
@@ -55,7 +55,7 @@ bool BrushHelper::isSameTile( int coordX, int coordY, TileInfo* tileInfo )
 	return tile == *tileInfo;
 }
 
-bool BrushHelper::isConatainTile( int coordX, int coordY, const QJSValue& value )
+bool BrushHelper::isContainTile( int coordX, int coordY, const QJSValue& value )
 {
 	if( !g_currentMapScene )
 	{

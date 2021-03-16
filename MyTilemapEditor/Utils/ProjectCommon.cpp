@@ -185,3 +185,8 @@ void debugPrint( const QString& text )
 {
 	g_consoleWidget->print( text );
 }
+
+void debugPrintError( const QString& text )
+{
+	g_consoleWidget->printError( text );
+}

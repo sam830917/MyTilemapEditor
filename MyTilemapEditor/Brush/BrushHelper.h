@@ -15,7 +15,7 @@ public:
 	Q_INVOKABLE void setTile( int coordX, int coordY, TileInfo* tileInfo );
 	Q_INVOKABLE void eraseTile( int coordX, int coordY );
 	Q_INVOKABLE bool isSameTile( int coordX, int coordY, TileInfo* tileInfo );
-	Q_INVOKABLE bool isConatainTile( int coordX, int coordY, const QJSValue& value );
+	Q_INVOKABLE bool isContainTile( int coordX, int coordY, const QJSValue& value );
 	Q_INVOKABLE int getRandomInRange( int low, int high );
 
 	QList<TileModified> popReadyToPaintCoordList();

@@ -1,9 +1,10 @@
 #pragma once
 
-#include <QDialog>
-#include <QBoxLayout>
 #include "ui_TileSelectorUI.h"
 #include "Core/TileInfo.h"
+#include "Core/TilePalette.hpp"
+#include <QDialog>
+#include <QBoxLayout>
 
 QT_FORWARD_DECLARE_CLASS( QTabWidget )
 class TilePalette;
@@ -14,8 +15,13 @@ class SelectTileDialog : public QDialog
 
 public:
 	SelectTileDialog( QWidget* parent = Q_NULLPTR );
+	~SelectTileDialog();
 
-	TileInfo getSelectTile() const;
+	TileInfo getSelectSingleTile() const;
+	QList<TileInfo> getSelectTiles() const;
+	QSize getSelectTileRegion() const;
+
+	void setSelectTileMode( ePaletteSelectMode selectMode );
 
 public:
 	Ui::TileSelectorUI m_ui;

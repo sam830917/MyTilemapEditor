@@ -29,7 +29,6 @@ private:
 
 class TileItem : public QGraphicsRectItem
 {
-
 public:
 	TileItem( const QSize& size, const QPointF& position = QPointF(0.f, 0.f) );
 	~TileItem();

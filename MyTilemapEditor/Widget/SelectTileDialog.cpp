@@ -1,5 +1,4 @@
 #include "Widget/SelectTileDialog.h"
-#include "Widget/TilesetWidget.h"
 #include "Utils/ProjectCommon.h"
 #include <QTabWidget>
 #include <QGraphicsView>
@@ -19,7 +18,7 @@ SelectTileDialog::SelectTileDialog( QWidget* parent /*= Q_NULLPTR */ )
 	for ( Tileset* tileset : g_tilesetList )
 	{
 		TilePalette* tilePalette = new TilePalette( tileset, this );
-		tilePalette->m_selectMode = ePaletteSelectMode::PALETTE_SINGLE_SELECT;
+		tilePalette->m_updateGlobalTilePalette = false;
 		QGraphicsView* tilesetView = new QGraphicsView();
 		tilesetView->setScene( tilePalette );
 		m_tilePaletteList.push_back( tilePalette );
@@ -30,10 +29,40 @@ SelectTileDialog::SelectTileDialog( QWidget* parent /*= Q_NULLPTR */ )
 		tilesetView->horizontalScrollBar()->setSliderPosition( tilesetView->horizontalScrollBar()->minimum() );
 		tilesetView->verticalScrollBar()->setSliderPosition( tilesetView->verticalScrollBar()->minimum() );
 	}
+	setSelectTileMode( ePaletteSelectMode::PALETTE_SINGLE_SELECT );
 }
 
-TileInfo SelectTileDialog::getSelectTile() const
+SelectTileDialog::~SelectTileDialog()
+{
+	for ( int i = 0; i < m_tilePaletteList.size(); ++i )
+	{
+		delete m_tilePaletteList[i];
+		m_tilePaletteList[i] = nullptr;
+	}
+	delete m_tabWidget;
+	m_tabWidget = nullptr;
+}
+
+TileInfo SelectTileDialog::getSelectSingleTile() const
 {
 	int index = m_tilePaletteList[m_tabWidget->currentIndex()]->m_currentIndex;
 	return TileInfo( m_tilePaletteList[m_tabWidget->currentIndex()]->m_tileset, index );
+}
+
+QList<TileInfo> SelectTileDialog::getSelectTiles() const
+{
+	return m_tilePaletteList[m_tabWidget->currentIndex()]->m_selectedTileInfos;
+}
+
+QSize SelectTileDialog::getSelectTileRegion() const
+{
+	return m_tilePaletteList[m_tabWidget->currentIndex()]->m_selectedRegionSize;
+}
+
+void SelectTileDialog::setSelectTileMode( ePaletteSelectMode selectMode )
+{
+	for( int i = 0; i < m_tilePaletteList.size(); ++i )
+	{
+		m_tilePaletteList[i]->m_selectMode = selectMode;
+	}
 }

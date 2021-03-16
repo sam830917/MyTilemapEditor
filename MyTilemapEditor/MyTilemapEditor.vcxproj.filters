@@ -162,6 +162,9 @@
     <ClCompile Include="BrushUI\TileSelector.cpp">
       <Filter>BrushUI</Filter>
     </ClCompile>
+    <ClCompile Include="Core\TilePalette.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Core\Toolbar.h">
@@ -313,6 +316,9 @@
     </ClInclude>
     <ClInclude Include="BrushUI\TileInfoListContainer.h">
       <Filter>BrushUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\TilePalette.hpp">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

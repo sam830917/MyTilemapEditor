@@ -15,6 +15,8 @@ private:
 
 public slots:
 	void print( const QString& text );
+	void printError( const QString& text );
+	void popupMenu( const QPoint& pos );
 
 private:
 	QTextBrowser* m_textBrowser;

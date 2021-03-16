@@ -113,6 +113,7 @@
     <ClCompile Include="Core\MapScene.cpp" />
     <ClCompile Include="Core\Project.cpp" />
     <ClCompile Include="Core\TileInfo.cpp" />
+    <ClCompile Include="Core\TilePalette.cpp" />
     <ClCompile Include="Core\Tileset.cpp" />
     <ClCompile Include="Core\Toolbar.cpp" />
     <ClCompile Include="Core\UndoCommand.cpp" />
@@ -191,6 +192,7 @@
     <ClInclude Include="Core\MapScene.h" />
     <ClInclude Include="Core\Project.h" />
     <QtMoc Include="Core\TileInfo.h" />
+    <ClInclude Include="Core\TilePalette.hpp" />
     <ClInclude Include="Core\Tileset.h" />
     <ClInclude Include="Core\UndoCommand.h" />
     <QtMoc Include="ThirdParty\framelesswindowDarkStyle\DarkStyle.h" />

@@ -101,7 +101,7 @@ void TileItem::mousePressEvent( QGraphicsSceneMouseEvent* event )
 	SelectTileDialog dialog;
 	if( dialog.exec() == QDialog::Accepted )
 	{
-		TileInfo tileinfo = dialog.getSelectTile();
+		TileInfo tileinfo = dialog.getSelectSingleTile();
 		setTileInfo( tileinfo );
 		update();
 	}

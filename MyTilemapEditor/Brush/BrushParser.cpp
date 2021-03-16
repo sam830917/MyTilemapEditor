@@ -46,8 +46,8 @@ void BrushParser::initialBrushFile( const QString& filePath )
 	QJSValue result = startupFun.call();
 	if( result.isError() )
 	{
-		debugPrint( "Call Startup function failed in file \"" + filePath + "\"" );
-		debugPrint( result.property( "name" ).toString() + ", " + result.property( "message" ).toString() +
+		debugPrintError( "Call Startup function failed in file \"" + filePath + "\"" );
+		debugPrintError( result.property( "name" ).toString() + ", " + result.property( "message" ).toString() +
 			" in line " + result.property( "lineNumber" ).toString() );
 	}
 
@@ -455,8 +455,8 @@ bool BrushParser::loadBrushFile( const QString& filePath )
 		QJSValue result = updateFun.call();
 		if( result.isError() )
 		{
-			debugPrint( "Call Update function failed in file \"" + filePath + "\"" );
-			debugPrint( result.property( "name" ).toString() + ", " + result.property( "message" ).toString() +
+			debugPrintError( "Call Update function failed in file \"" + filePath + "\"" );
+			debugPrintError( result.property( "name" ).toString() + ", " + result.property( "message" ).toString() +
 				" in line " + result.property( "lineNumber" ).toString() );
 		}
 	}
@@ -638,8 +638,8 @@ bool BrushParser::saveBrushAsFile( QList<AddBrushItem*> items, const QString& sa
 	QJSValue result = updateFun.call();
 	if( result.isError() )
 	{
-		debugPrint( "Call Update function failed in file \"" + saveFilePath + "\"" );
-		debugPrint( result.property( "name" ).toString() + ", " + result.property( "message" ).toString() +
+		debugPrintError( "Call Update function failed in file \"" + saveFilePath + "\"" );
+		debugPrintError( result.property( "name" ).toString() + ", " + result.property( "message" ).toString() +
 			" in line " + result.property( "lineNumber" ).toString() );
 	}
 
@@ -715,8 +715,8 @@ QList<TileModified> BrushParser::getPaintMapResult( int brushIndex, const QPoint
 	QJSValue result = toolFunction.call( list );
 	if( result.isError() )
 	{
-		debugPrint( "Call " + functionName + " function failed!" );
-		debugPrint( result.property( "name" ).toString() + ", " + result.property( "message" ).toString() + 
+		debugPrintError( "Call " + functionName + " function failed!" );
+		debugPrintError( result.property( "name" ).toString() + ", " + result.property( "message" ).toString() + 
 			" in line " + result.property( "lineNumber" ).toString() );
 		return emptyList;
 	}
@@ -894,8 +894,8 @@ QJSEngine* BrushParser::createJSEngine( const QString& filePath )
 		QJSValue errorValue = jsEngine->evaluate( jsStr );
 		if( errorValue.isError() )
 		{
-			debugPrint( "Creating js engine failed!" );
-			debugPrint( errorValue.property( "name" ).toString() + ", " + errorValue.property( "message" ).toString() +
+			debugPrintError( "Creating js engine failed!" );
+			debugPrintError( errorValue.property( "name" ).toString() + ", " + errorValue.property( "message" ).toString() +
 				" in line " + errorValue.property( "lineNumber" ).toString() );
 			delete jsEngine;
 			return nullptr;

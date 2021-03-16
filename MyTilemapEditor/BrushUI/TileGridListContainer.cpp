@@ -12,12 +12,13 @@ TileGridListContainer::TileGridListContainer()
 	m_plusButton->setMaximumSize( QSize( 30, 30 ) );
 	m_plusButton->setMinimumSize( QSize( 30, 30 ) );
 
-	QObject::connect( m_plusButton, &QPushButton::clicked, [=]()
+	QObject::connect( m_plusButton, &QPushButton::clicked, [&]()
 		{
 			addTileSelectorList();
 			setExpanded( false );
 			setExpanded( true );
-		} );
+		} 
+	);
 }
 
 TileGridListContainer::~TileGridListContainer()
@@ -75,7 +76,7 @@ void TileGridListContainer::addTileSelectorList()
 		treeWidget()->setItemWidget( childItem, 0, widget );
 		treeWidget()->setItemWidget( childItem, 1, placeholder );
 
-		QObject::connect( removeBtn, &QPushButton::clicked, [=]()
+		QObject::connect( removeBtn, &QPushButton::clicked, [&]()
 			{
 				int index = indexOfChild( childItem );
 				removeChild( childItem );
