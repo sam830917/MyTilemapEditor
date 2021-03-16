@@ -142,6 +142,7 @@ void MainWindow::initialToolBar()
 	alignmentGroup->addAction( m_selectSameTileAction );
 	alignmentGroup->addAction( m_moveToolAction );
 	alignmentGroup->addAction( m_cursorToolAction );
+
 	m_brushAction->setCheckable(true);
 	m_eraserAction->setCheckable(true);
 	m_moveToolAction->setCheckable(true);
@@ -153,13 +154,22 @@ void MainWindow::initialToolBar()
 
 	m_brushAction->setChecked(true);
 
+	m_cursorToolAction->setData( QVariant::fromValue( eDrawTool::CURSOR ) );
+	m_moveToolAction->setData( QVariant::fromValue( eDrawTool::MOVE ) );
 	m_brushAction->setData( QVariant::fromValue( eDrawTool::BRUSH ) );
 	m_eraserAction->setData( QVariant::fromValue( eDrawTool::ERASER ) );
 	m_bucketAction->setData( QVariant::fromValue( eDrawTool::BUCKET ) );
 	m_shapeToolAction->setData( QVariant::fromValue( eDrawTool::SHAPE ) );
 	m_magicWandAction->setData( QVariant::fromValue( eDrawTool::MAGIC_WAND ) );
 	m_selectSameTileAction->setData( QVariant::fromValue( eDrawTool::SELECT_SAME_TILE ) );
-	connect( alignmentGroup, &QActionGroup::triggered, this, &MainWindow::changeDrawTool );
+
+	connect( alignmentGroup, &QActionGroup::triggered, [&](QAction* clickedAction) 
+		{
+			QVariant var = clickedAction->data();
+			eDrawTool drawTool = var.value<eDrawTool>();
+			this->changeDrawTool( drawTool );
+		}
+	);
 }
 
 void MainWindow::initialStatusBar()
@@ -273,6 +283,7 @@ void MainWindow::initialConnections()
 	connect( m_centralWidget, &WorkspaceWidget::updateRedo, this, &MainWindow::replaceRedoAction );
 	connect( m_centralWidget, &WorkspaceWidget::updateUndo, this, &MainWindow::replaceUndoAction );
 	connect( m_centralWidget, &WorkspaceWidget::disableShortcut, this, &MainWindow::disableShortcut );
+	connect( m_centralWidget, &WorkspaceWidget::changeDrawTool, this, &MainWindow::changeDrawTool );
 	connect( m_centralWidget, &WorkspaceWidget::addedNewLayerWithInfo, m_layerWidget, &LayerWidget::implementAddNewLayerWithInfo );
 	connect( m_centralWidget, &WorkspaceWidget::getLayerGroupInfoList, m_layerWidget, &LayerWidget::getLayerGroupInfoList );
 	connect( m_centralWidget, &WorkspaceWidget::closeTabSuccessfully, m_layerWidget, &LayerWidget::removeLayerGropu );
@@ -352,11 +363,22 @@ void MainWindow::updateToolBar()
 	m_saveAllAction->setDisabled( false );
 }
 
-void MainWindow::changeDrawTool( QAction* action )
+void MainWindow::changeDrawTool( eDrawTool tool )
 {
-	QVariant var = action->data();
-	eDrawTool drawTool = var.value<eDrawTool>();
-	m_centralWidget->setDrawTool( drawTool );
+	m_centralWidget->setDrawTool( tool );
+
+	switch( tool )
+	{
+	case eDrawTool::CURSOR:				m_cursorToolAction->setChecked( true );		break;
+	case eDrawTool::MOVE:				m_moveToolAction->setChecked( true );		break;
+	case eDrawTool::BRUSH:				m_brushAction->setChecked( true );			break;
+	case eDrawTool::SHAPE:				m_shapeToolAction->setChecked( true );		break;
+	case eDrawTool::ERASER:				m_eraserAction->setChecked( true );			break;
+	case eDrawTool::BUCKET:				m_bucketAction->setChecked( true );			break;
+	case eDrawTool::MAGIC_WAND:			m_magicWandAction->setChecked( true );		break;
+	case eDrawTool::SELECT_SAME_TILE:	m_selectSameTileAction->setChecked( true );	break;
+	default: break;
+	}
 }
 
 void MainWindow::replaceRedoAction( QAction* action )

@@ -14,6 +14,7 @@
 #include <QKeyEvent>
 #include <QFileDialog>
 #include <QtMath>
+#include <QMenu>
 
 MapScene* g_currentMapScene = nullptr;
 QList<TileModified> g_copiedTileList;
@@ -50,6 +51,8 @@ WorkspaceWidget::WorkspaceWidget( QWidget* parent /*= Q_NULLPTR */ )
 	m_mapTabWidget->setTabsClosable(true);
 	m_mapTabWidget->installEventFilter( this );
 	disableTabWidget( true );
+	m_mapTabWidget->setContextMenuPolicy( Qt::CustomContextMenu );
+	connect( m_mapTabWidget, &QTabWidget::customContextMenuRequested, this, &WorkspaceWidget::popupRightClickMenu );
 	connect( m_mapTabWidget, SIGNAL( tabCloseRequested(int) ), this, SLOT( closeTab( int ) ) );
 	connect( m_mapTabWidget, SIGNAL( currentChanged( int ) ), this, SLOT( changeTab( int ) ) );
 	connect( m_newMapButton, &QPushButton::clicked, this, &WorkspaceWidget::addMap );
@@ -151,6 +154,45 @@ void WorkspaceWidget::saveTileToFile( QList<const Tileset*>& tilesetList, int ta
 			mapTiles->LinkEndChild( mapTileEle );
 		}
 	}
+}
+
+void WorkspaceWidget::popupRightClickMenu( const QPoint& pos )
+{
+	QMenu menu;
+
+	// Draw tools
+	menu.addAction( QIcon( ":/MainWindow/Icon/cursor.png" ), tr( "&Cursor (C)" ), [&]() { this->changeDrawTool(eDrawTool::CURSOR); } );
+	menu.addAction( QIcon( ":/MainWindow/Icon/magic-wand.png" ), tr( "&Magic Wand (W)" ), [&]() { this->changeDrawTool(eDrawTool::MAGIC_WAND); } );
+	menu.addAction( QIcon( ":/MainWindow/Icon/same-tile.png" ), tr( "&Select Same Tile (S)" ), [&]() { this->changeDrawTool(eDrawTool::SELECT_SAME_TILE); } );
+	menu.addAction( QIcon( ":/MainWindow/Icon/move.png" ), tr( "&Move (V)" ), [&]() { this->changeDrawTool( eDrawTool::MOVE ); } );
+	menu.addSeparator();
+	menu.addAction( QIcon( ":/MainWindow/Icon/brush.png" ), tr( "&Brush (B)" ), [&]() { this->changeDrawTool(eDrawTool::BRUSH); } );
+	menu.addAction( QIcon( ":/MainWindow/Icon/eraser.png" ), tr( "&Eraser (E)" ), [&]() { this->changeDrawTool(eDrawTool::ERASER); } );
+	menu.addAction( QIcon( ":/MainWindow/Icon/bucket.png" ), tr( "&Bucket (G)" ), [&]() { this->changeDrawTool(eDrawTool::BUCKET); } );
+	menu.addAction( QIcon( ":/MainWindow/Icon/shape.png" ), tr( "&Shape (U)" ), [&]() { this->changeDrawTool(eDrawTool::SHAPE); } );
+
+	// Redo and undo actions
+	int index = m_mapTabWidget->currentIndex();
+	QAction* undoAction = nullptr;
+	QAction* redoAction = nullptr;
+	if ( index != -1 )
+	{
+		MapScene* mapScene = m_mapSceneList[index];
+		if( mapScene )
+		{
+			menu.addSeparator();
+			g_currentMapScene = mapScene;
+			undoAction = mapScene->m_undoStack->createUndoAction( this, tr( "&Undo" ) );
+			redoAction = mapScene->m_undoStack->createRedoAction( this, tr( "&Redo" ) );
+			undoAction->setIcon( QIcon( ":/MainWindow/Icon/undo.png" ) );
+			redoAction->setIcon( QIcon( ":/MainWindow/Icon/redo.png" ) );
+			menu.addAction( undoAction );
+			menu.addAction( redoAction );
+		}
+	}
+	menu.exec( QCursor::pos() );
+	undoAction ? delete undoAction : undoAction = nullptr;
+	redoAction ? delete redoAction : redoAction = nullptr;
 }
 
 void WorkspaceWidget::resetTabWidgetVisibility()

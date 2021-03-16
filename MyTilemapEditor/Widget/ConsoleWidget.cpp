@@ -19,7 +19,7 @@ ConsoleWidget::ConsoleWidget( const QString& title, QWidget* parent /*= Q_NULLPT
 	g_consoleWidget = this;
 
 	m_textBrowser->setContextMenuPolicy( Qt::CustomContextMenu );
-	connect( m_textBrowser, &QTextBrowser::customContextMenuRequested, this, &ConsoleWidget::popupMenu );
+	connect( m_textBrowser, &QTextBrowser::customContextMenuRequested, this, &ConsoleWidget::popupRightClickMenu );
 }
 
 void ConsoleWidget::print( const QString& text )
@@ -34,7 +34,7 @@ void ConsoleWidget::printError( const QString& text )
 	m_textBrowser->append( text );
 }
 
-void ConsoleWidget::popupMenu( const QPoint& pos )
+void ConsoleWidget::popupRightClickMenu( const QPoint& pos )
 {
 	QMenu menu;
 	menu.addAction( "Clear", [&](){ m_textBrowser->clear(); } );

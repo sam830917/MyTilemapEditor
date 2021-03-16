@@ -37,7 +37,7 @@ private:
 
 public slots:
 	void updateToolBar();
-	void changeDrawTool( QAction* action );
+	void changeDrawTool( eDrawTool tool );
 	void replaceRedoAction( QAction* action );
 	void replaceUndoAction( QAction* action );
 	void disableShortcut( bool isDisable );

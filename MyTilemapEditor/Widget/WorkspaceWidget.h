@@ -33,6 +33,7 @@ private:
 	void saveTileToFile( QList<const Tileset*>& tilesetList, int tabIndex, XmlElement& mapRoot, XmlDocument& mapDoc );
 
 public slots:
+	void popupRightClickMenu( const QPoint& pos );
 	void resetTabWidgetVisibility();
 	void markCurrentSceneForModified();
 	void addMap();
@@ -84,6 +85,7 @@ signals:
 	void addNewLayerGroup( MapInfo mapInfo, QList<LayerInfo> layerInfoList );
 	void getPaintMapModified( QList<TileModified>& modifiredList, const QPoint& point, eDrawTool tool );
 	void isDefalutBrush( bool& isDefalut );
+	void changeDrawTool( eDrawTool tool );
 
 public:
 	QPushButton* m_newProjectButton = Q_NULLPTR;
