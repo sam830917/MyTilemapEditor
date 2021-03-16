@@ -155,6 +155,8 @@ MapScene::MapScene( MapInfo mapInfo, WorkspaceWidget* parent )
 			m_selectedTileItemList.push_back( mask );
 		}
 	}
+
+	m_undoStack->setUndoLimit( 30 );
 }
 
 MapScene::MapScene( MapInfo mapInfo )
@@ -180,7 +182,7 @@ MapScene::~MapScene()
 	if ( m_undoStack )
 	{
 		delete m_undoStack;
-		m_undoStack = nullptr;
+		m_undoStack = Q_NULLPTR;
 	}
 }
 

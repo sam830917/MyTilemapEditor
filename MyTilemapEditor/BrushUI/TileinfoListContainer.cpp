@@ -21,16 +21,12 @@ TileInfoListContainer::TileInfoListContainer()
 
 TileInfoListContainer::~TileInfoListContainer()
 {
-	for ( int i = 0; i < m_tileSelectorList.size(); ++i )
-	{
-		delete m_tileSelectorList[i];
-		m_tileSelectorList[i] = nullptr;
-	}
 }
 
 void TileInfoListContainer::deleteChild( int index )
 {
 	delete m_tileSelectorList[index];
+	m_tileSelectorList[index] = nullptr;
 	m_tileSelectorList.removeAt( index );
 }
 

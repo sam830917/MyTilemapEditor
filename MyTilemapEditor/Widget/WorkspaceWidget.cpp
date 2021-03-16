@@ -374,28 +374,28 @@ void WorkspaceWidget::setDrawTool( eDrawTool drawTool )
 	{
 		QPixmap toolPixmap = QPixmap( ":/MainWindow/Icon/magic-wand.png" );
 		toolPixmap.setDevicePixelRatio( 2.0 );
-		m_currentCursor = QCursor( toolPixmap );
+		m_currentCursor = QCursor( toolPixmap, 0, 0 );
 		break;
 	}
 	case eDrawTool::BRUSH:
 	{
 		QPixmap toolPixmap = QPixmap( ":/MainWindow/Icon/brush.png" );
 		toolPixmap.setDevicePixelRatio( 2.0 );
-		m_currentCursor = QCursor( toolPixmap );
+		m_currentCursor = QCursor( toolPixmap, 0, 0 );
 		break;
 	}
 	case eDrawTool::ERASER:
 	{
 		QPixmap toolPixmap = QPixmap( ":/MainWindow/Icon/eraser.png" );
 		toolPixmap.setDevicePixelRatio( 2.0 );
-		m_currentCursor = QCursor( toolPixmap );
+		m_currentCursor = QCursor( toolPixmap, 0, 0 );
 		break;
 	}
 	case eDrawTool::BUCKET:
 	{
 		QPixmap toolPixmap = QPixmap( ":/MainWindow/Icon/bucket.png" );
 		toolPixmap.setDevicePixelRatio( 2.0 );
-		m_currentCursor = QCursor( toolPixmap );
+		m_currentCursor = QCursor( toolPixmap, 0, 0 );
 		break;
 	}
 	default:
