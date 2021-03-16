@@ -63,15 +63,16 @@ void SelectMask::paint( QPainter* painter, const QStyleOptionGraphicsItem* optio
 	}
 }
 
-MapView::MapView( WorkspaceWidget* parent /*= Q_NULLPTR */ )
-	:QGraphicsView( parent )
-{
-}
-
-MapView::MapView( QGraphicsScene* scene, QWidget* parent /*= Q_NULLPTR */ )
-	: QGraphicsView( parent )
+MapView::MapView( MapScene* scene, QWidget* parent /*= Q_NULLPTR */ )
+	: QGraphicsView( parent ),
+	m_mapScene(scene)
 {
 	setScene(scene);
+}
+
+void MapView::updateCursor()
+{
+	viewport()->setCursor( m_mapScene->m_parentWidget->m_currentCursor );
 }
 
 void MapView::wheelEvent( QWheelEvent* event )
@@ -95,6 +96,12 @@ void MapView::wheelEvent( QWheelEvent* event )
 	{
 		QGraphicsView::wheelEvent( event );
 	}
+}
+
+void MapView::enterEvent( QEvent* event )
+{
+	QGraphicsView::enterEvent(event);
+	viewport()->setCursor( m_mapScene->m_parentWidget->m_currentCursor );
 }
 
 MapScene::MapScene( MapInfo mapInfo, WorkspaceWidget* parent )
@@ -672,7 +679,8 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 	{
 		if ( eDrawTool::MOVE == m_parentWidget->m_drawTool )
 		{
-			m_parentWidget->setCursor( Qt::ClosedHandCursor );
+			m_view->viewport()->setCursor( Qt::ClosedHandCursor );
+			m_parentWidget->disableShortcut( true );
 			return;
 		}
 		else if ( eDrawTool::CURSOR == m_parentWidget->m_drawTool )
@@ -1062,7 +1070,8 @@ void MapScene::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 	{
 		if( eDrawTool::MOVE == m_parentWidget->m_drawTool )
 		{
-			m_parentWidget->setCursor( Qt::ArrowCursor );
+			m_view->viewport()->setCursor( m_parentWidget->m_currentCursor );
+			m_parentWidget->disableShortcut( false );
 			return;
 		}
 		else if( eDrawTool::CURSOR == m_parentWidget->m_drawTool )

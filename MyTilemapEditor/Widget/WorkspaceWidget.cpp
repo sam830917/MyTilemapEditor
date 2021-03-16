@@ -361,10 +361,55 @@ void WorkspaceWidget::closeTab( int index )
 void WorkspaceWidget::setDrawTool( eDrawTool drawTool )
 {
 	m_drawTool = drawTool;
+	switch( drawTool )
+	{
+	case eDrawTool::MOVE:
+	{
+		QPixmap toolPixmap = QPixmap( ":/MainWindow/Icon/move.png" );
+		toolPixmap.setDevicePixelRatio( 2.0 );
+		m_currentCursor = QCursor( toolPixmap );
+		break;
+	}
+	case eDrawTool::MAGIC_WAND:
+	{
+		QPixmap toolPixmap = QPixmap( ":/MainWindow/Icon/magic-wand.png" );
+		toolPixmap.setDevicePixelRatio( 2.0 );
+		m_currentCursor = QCursor( toolPixmap );
+		break;
+	}
+	case eDrawTool::BRUSH:
+	{
+		QPixmap toolPixmap = QPixmap( ":/MainWindow/Icon/brush.png" );
+		toolPixmap.setDevicePixelRatio( 2.0 );
+		m_currentCursor = QCursor( toolPixmap );
+		break;
+	}
+	case eDrawTool::ERASER:
+	{
+		QPixmap toolPixmap = QPixmap( ":/MainWindow/Icon/eraser.png" );
+		toolPixmap.setDevicePixelRatio( 2.0 );
+		m_currentCursor = QCursor( toolPixmap );
+		break;
+	}
+	case eDrawTool::BUCKET:
+	{
+		QPixmap toolPixmap = QPixmap( ":/MainWindow/Icon/bucket.png" );
+		toolPixmap.setDevicePixelRatio( 2.0 );
+		m_currentCursor = QCursor( toolPixmap );
+		break;
+	}
+	default:
+	{
+		m_currentCursor = QCursor( Qt::ArrowCursor );
+		break;
+	}
+	}
 	for ( MapScene* scene : m_mapSceneList )
 	{
+		scene->m_view->updateCursor();
 		scene->setIsShowSelection( false );
 	}
+
 }
 
 void WorkspaceWidget::changeTab( int index )

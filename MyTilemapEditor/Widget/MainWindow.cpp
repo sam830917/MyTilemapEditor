@@ -196,6 +196,7 @@ void MainWindow::initialDockWidgets()
 
 	m_centralWidget = new WorkspaceWidget( this );
 	m_centralWidget->setObjectName( tr( "centralWidget" ) );
+	m_centralWidget->setDrawTool( eDrawTool::BRUSH );
 	setCentralWidget( m_centralWidget );
 
 	m_projectWidget = new ProjectWidget( tr("Project"), this );

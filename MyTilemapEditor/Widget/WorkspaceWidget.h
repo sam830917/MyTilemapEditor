@@ -95,4 +95,5 @@ public:
 	QTabWidget* m_mapTabWidget = Q_NULLPTR;
 	QList<MapScene*> m_mapSceneList;
 	eDrawTool m_drawTool = eDrawTool::BRUSH;
+	QCursor m_currentCursor = Qt::ArrowCursor;
 };

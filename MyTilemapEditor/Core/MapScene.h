@@ -15,15 +15,21 @@ struct TileModified;
 class MapView : public QGraphicsView
 {
 public:
-	MapView( WorkspaceWidget* parent = Q_NULLPTR );
-	MapView( QGraphicsScene* scene, QWidget* parent = Q_NULLPTR );
+	MapView( MapScene* scene, QWidget* parent = Q_NULLPTR );
+
+	void updateCursor();
 
 protected:
 	virtual void wheelEvent( QWheelEvent* event );
+	virtual void enterEvent(QEvent* event);
+
+public:
+	MapScene* m_mapScene = nullptr;
 };
 
 class MapScene : public QGraphicsScene
 {
+	friend class MapView;
 	friend class WorkspaceWidget;
 	friend class DrawCommand;
 	friend class LayerMoveCommand;
