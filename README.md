@@ -12,3 +12,6 @@ MyTilemapEditor can export a PNG image or an XML file. There is a plugin for Uni
 
 # About the Qt
 Qt version is 5.15.0
+
+# Unity Plugin
+Once you import the MytilemapEditor Unity plugin, you should intall Editor Coroutines in the Unity Package Manager.
