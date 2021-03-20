@@ -15,3 +15,7 @@ Qt version is 5.15.0
 
 # Unity Plugin
 Once you import the MytilemapEditor Unity plugin, you should intall Editor Coroutines in the Unity Package Manager.
+
+# References
+* [Qt-Frameless-Window-DarkStyle](https://github.com/Jorgen-VikingGod/Qt-Frameless-Window-DarkStyle)
+* [flaticon](https://www.flaticon.com/)
