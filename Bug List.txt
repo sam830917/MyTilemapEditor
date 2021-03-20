@@ -1,1 +1,0 @@
-If a project already opend and try to open another project, tileset and brush will blend together.
