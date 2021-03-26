@@ -55,7 +55,21 @@ void TileGridListContainer::addTileSelectorList()
 	addChild( childItem );
 
 	TileGridSelector* gridSelector = new TileGridSelector( m_gridType, QSize( 75, 75 ) );
+	gridSelector->setIsMutiSelect(true);
 	m_tileGridSelectorList.push_back( gridSelector );
+	QObject::connect( gridSelector->getTileItem(), &TileItem::selectedExtraTiles, [&]( QList<TileInfo>& extraTiles )
+		{
+			if( extraTiles.isEmpty() )
+			{
+				return;
+			}
+			for( int i = 0; i < extraTiles.size(); ++i )
+			{
+				addTileSelectorList();
+				TileGridSelector* selector = m_tileGridSelectorList.back();
+				selector->setTileInfo( extraTiles[i] );
+			}
+		} );
 
 	if( treeWidget() )
 	{
@@ -76,7 +90,7 @@ void TileGridListContainer::addTileSelectorList()
 		treeWidget()->setItemWidget( childItem, 0, widget );
 		treeWidget()->setItemWidget( childItem, 1, placeholder );
 
-		QObject::connect( removeBtn, &QPushButton::clicked, [&]()
+		QObject::connect( removeBtn, &QPushButton::clicked, [=]()
 			{
 				int index = indexOfChild( childItem );
 				removeChild( childItem );
@@ -88,6 +102,7 @@ void TileGridListContainer::addTileSelectorList()
 				}
 				setExpanded( false );
 				setExpanded( true );
+				m_childCount--;
 			} );
 	}
 

@@ -6,6 +6,7 @@
 
 class TileGridSelectorScene;
 class TileGridItem;
+class TileItem;
 
 enum class eTileGridType
 {
@@ -24,9 +25,13 @@ public:
 	void setGridState( QList<bool> states ) const;
 	TileInfo getTileinfo() const;
 	void setTileInfo( TileInfo tileinfo );
+	void setIsMutiSelect( bool isMultiSelect );
+
+	TileItem* getTileItem() const;
 
 private:
 	QSize m_size;
 	TileGridSelectorScene* m_scene = Q_NULLPTR;
 	eTileGridType m_type = eTileGridType::EDGE_AND_CORNER;
+	bool m_isMultiSelect = false;
 };

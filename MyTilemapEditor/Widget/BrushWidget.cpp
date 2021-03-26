@@ -49,7 +49,7 @@ void BrushWidget::addBrush( const QString& filePath )
 			return;
 		}
 	}
-
+	
 	if ( m_brushParser->loadBrushFile( filePath ) )
 	{
 		QFileInfo fileInfo( filePath );

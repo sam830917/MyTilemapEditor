@@ -108,7 +108,7 @@ void TilePalette::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
 	QGraphicsScene::mouseMoveEvent( event );
 	if( event->buttons() & Qt::LeftButton )
 	{
-		if( !m_updateGlobalTilePalette )
+		if( m_selectMode == ePaletteSelectMode::PALETTE_SINGLE_SELECT )
 		{
 			return;
 		}

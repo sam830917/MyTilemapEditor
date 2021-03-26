@@ -267,7 +267,7 @@ QList<AddBrushItem*> BrushParser::createBrushUIByCurrentBrush( int index )
 
 bool BrushParser::loadBrushFile( const QString& filePath )
 {
-	// Check is already exist
+	// Check is it already exist
 	for ( int i = 0; i < m_brushes.size(); ++i )
 	{
 		QString path = getFilePathByIndex(i);
@@ -301,9 +301,13 @@ bool BrushParser::loadBrushFile( const QString& filePath )
 		int index = 0;
 		while( brushItem )
 		{
-			BrushItemInfo itemInfo = brushFile.m_itemList[index];
 			if( index >= brushFile.m_itemList.size() )
+			{
+				debugPrintError( "Variables failed to assign in file \"" + filePath + "\" to brush file \"" + brushFile.m_filePath +"\"" );
 				break;
+			}
+
+			BrushItemInfo itemInfo = brushFile.m_itemList[index];
 
 			QString type = parseXmlAttribute( *brushItem, "type", QString() );
 			if( "STRING" == type )
@@ -669,6 +673,7 @@ bool BrushParser::modifyBrushAsFile( QList<AddBrushItem*> items, const QString& 
 void BrushParser::deleteBrush( int index )
 {
 	delete m_brushes[index];
+	m_brushes[index] = nullptr;
 	m_brushes.removeAt(index);
 }
 
@@ -677,6 +682,7 @@ void BrushParser::deleteAllBrush()
 	for ( int i = 0; i < m_brushes.size(); ++i )
 	{
 		delete m_brushes[i];
+		m_brushes[i] = nullptr;
 	}
 	m_brushes.clear();
 }

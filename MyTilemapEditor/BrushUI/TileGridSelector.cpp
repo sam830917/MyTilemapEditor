@@ -154,7 +154,7 @@ TileGridSelectorScene::TileGridSelectorScene( eTileGridType type, const QSize& s
 
 	QPointF pos = QPointF( (float)size.width() * 0.125f, (float)size.height() * 0.125f );
 	QSize tileSize = size * 0.75f;
-	m_tileItem = new TileItem( tileSize, pos );
+	m_tileItem = new TileItem( tileSize, ePaletteSelectMode::PALETTE_SINGLE_SELECT, pos );
 	m_tileItem->setZValue( 3 );
 	addItem( m_tileItem );
 	QGraphicsRectItem* rectItem = new QGraphicsRectItem();
@@ -213,4 +213,22 @@ TileInfo TileGridSelector::getTileinfo() const
 void TileGridSelector::setTileInfo( TileInfo tileinfo )
 {
 	m_scene->m_tileItem->setTileInfo(tileinfo);
+}
+
+void TileGridSelector::setIsMutiSelect( bool isMultiSelect )
+{
+	m_isMultiSelect = isMultiSelect;
+	if( m_isMultiSelect )
+	{
+		m_scene->m_tileItem->setSelectMode( ePaletteSelectMode::PALETTE_MULTI_SELECT );
+	}
+	else
+	{
+		m_scene->m_tileItem->setSelectMode( ePaletteSelectMode::PALETTE_SINGLE_SELECT );
+	}
+}
+
+TileItem* TileGridSelector::getTileItem() const
+{
+	return m_scene->m_tileItem;
 }

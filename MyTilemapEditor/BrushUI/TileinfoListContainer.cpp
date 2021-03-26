@@ -50,7 +50,21 @@ void TileInfoListContainer::addTileSelectorList()
 	addChild( childItem );
 
 	TileSelector* tileSelector = new TileSelector( QSize( 50, 50 ) );
+	tileSelector->setIsMutiSelect(true);
 	m_tileSelectorList.push_back( tileSelector );
+	QObject::connect( tileSelector->getTileItem(), &TileItem::selectedExtraTiles, [&](QList<TileInfo>& extraTiles) 
+		{
+			if ( extraTiles.isEmpty() )
+			{
+				return;
+			}
+			for ( int i = 0; i < extraTiles.size(); ++i )
+			{
+				addTileSelectorList();
+				TileSelector* selector = m_tileSelectorList.back();
+				selector->setTileInfo( extraTiles[i] );
+			}
+		} );
 
 	if( treeWidget() )
 	{
@@ -65,7 +79,7 @@ void TileInfoListContainer::addTileSelectorList()
 
 		treeWidget()->setItemWidget( childItem, 0, widget );
 		treeWidget()->setItemWidget( childItem, 1, tileSelector );
-		QObject::connect( removeBtn, &QPushButton::clicked, [&]()
+		QObject::connect( removeBtn, &QPushButton::clicked, [=]()
 			{
 				int index = indexOfChild( childItem );
 				removeChild( childItem );

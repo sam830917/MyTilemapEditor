@@ -5,7 +5,6 @@
 #include "ui_AddBrushUI.h"
 #include "Brush/BrushCommon.h"
 
-class Brush;
 class BrushParser;
 
 class AddBrushDialog : public QDialog
