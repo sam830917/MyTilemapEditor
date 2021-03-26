@@ -41,6 +41,12 @@ void Layer::setOrder( int value )
 	m_zValue = value;
 }
 
+TileInfo Layer::getTileInfo( int coordX, int coordY )
+{
+	int tileIndex = m_mapScene->m_mapInfo.getIndex( QPoint( coordX, coordY ) );
+	return m_tileList[tileIndex]->getTileInfo();
+}
+
 Tile::Tile( MapScene* scene, Layer* layer, QGraphicsItem* parent /*= Q_NULLPTR */ )
 	:m_mapScene( scene ),
 	m_layer(layer)

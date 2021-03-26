@@ -14,7 +14,6 @@ class Layer
 	friend class LayerAddCommand;
 	friend class LayerDeleteCommand;
 	friend class Tile;
-	friend class BrushHelper;
 
 public:
 	Layer( MapScene* mapScene, int zValue );
@@ -27,6 +26,8 @@ public:
 	void setName( const QString& name ) { m_layerInfo.setName( name ); }
 	void setIsLock( bool islock ) { m_layerInfo.setIsLock( islock ); }
 	void setIsVisible( bool isVisible ) { m_layerInfo.setIsVisible( isVisible ); }
+
+	TileInfo getTileInfo( int coordX, int coordY );
 
 	LayerInfo getLayerInfo() const { return m_layerInfo; }
 

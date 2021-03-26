@@ -50,9 +50,7 @@ bool BrushHelper::isSameTile( int coordX, int coordY, TileInfo* tileInfo )
 	{
 		return false;
 	}
-	int tileIndex = g_currentMapScene->m_mapInfo.getIndex( QPoint( coordX, coordY ) );
-	TileInfo tile(g_currentMapScene->m_layers[layerIndex]->m_tileList[tileIndex]->getTileInfo());
-	return tile == *tileInfo;
+	return g_currentMapScene->m_layers[layerIndex]->getTileInfo(coordX, coordY) == *tileInfo;
 }
 
 bool BrushHelper::isContainTile( int coordX, int coordY, const QJSValue& value )
@@ -70,8 +68,7 @@ bool BrushHelper::isContainTile( int coordX, int coordY, const QJSValue& value )
 	{
 		return false;
 	}
-	int tileIndex = g_currentMapScene->m_mapInfo.getIndex( QPoint( coordX, coordY ) );
-	TileInfo tile( g_currentMapScene->m_layers[layerIndex]->m_tileList[tileIndex]->getTileInfo() );
+	TileInfo tile = g_currentMapScene->m_layers[layerIndex]->getTileInfo(coordX, coordY);
 	if ( value.isArray() )
 	{
 		int length = value.property( "length" ).toInt();

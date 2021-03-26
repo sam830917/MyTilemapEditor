@@ -91,7 +91,7 @@ void LayerWidget::addNewMarkerLayer()
 		}
 	}
 
-	implementAddNewMarkerLayer( 0, name );
+	addedNewMarkerLayerFromIndex( 0, name );
 }
 
 void LayerWidget::implementAddNewLayer( int index, const QString& name )

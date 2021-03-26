@@ -53,6 +53,7 @@ public slots:
 signals:
 	void getTabCount( int& tabCount );
 	void addedNewLayerFromIndex( int index, const QString& name );
+	void addedNewMarkerLayerFromIndex( int index, const QString& name );
 	void movedLayerGroup( int fromItemIndex, int toItemIndex );
 	void deletedLayer( int index );
 	void setLayerIsLock( int index, bool isLock );
