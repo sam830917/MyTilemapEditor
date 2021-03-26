@@ -1,4 +1,5 @@
 #include "LayerWidget.h"
+#include "Utils/ProjectCommon.h"
 #include <QListWidget>
 #include <QMenuBar>
 #include <QBoxLayout>
@@ -14,6 +15,7 @@
 #include <QVariant>
 #include <QPushButton>
 #include <QDebug>
+#include <QColorDialog>
 
 LayerGroup::LayerGroup( MapInfo mapInfo, LayerWidget* parent /*= Q_NULLPTR */ )
 	:QListWidget(parent),
@@ -70,6 +72,28 @@ void LayerWidget::addNewLayer( LayerInfo layerInfo )
 	updateToolbarStatus();
 }
 
+void LayerWidget::addNewMarkerLayer()
+{
+	if( !m_newMarkerLayerAction->isEnabled() )
+	{
+		return;
+	}
+	QString name = QString( "Marker Layer 1" );
+	int nameCount = 1;
+	int count = m_listWidgetList[m_currentIndex]->count();
+	for( int i = 0; i < count; ++i )
+	{
+		LayerRow* row = static_cast<LayerRow*>(m_listWidgetList[m_currentIndex]->item( i ));
+		if( name == row->m_layerRowWidget->getName() )
+		{
+			name = QString( "Marker Layer %1" ).arg( ++nameCount );
+			i = -1;
+		}
+	}
+
+	implementAddNewMarkerLayer( 0, name );
+}
+
 void LayerWidget::implementAddNewLayer( int index, const QString& name )
 {
 	LayerRow* newRow = new LayerRow( m_listWidgetList[m_currentIndex], index );
@@ -79,6 +103,23 @@ void LayerWidget::implementAddNewLayer( int index, const QString& name )
 
 	LayerGroup* layerGroup = m_listWidgetList[m_currentIndex];
 	for ( int i = 0; i < layerGroup->count(); ++i )
+	{
+		LayerRow* row = static_cast<LayerRow*>(m_listWidgetList[m_currentIndex]->item( i ));
+		row->m_index = i;
+	}
+	updateToolbarStatus();
+	modifiedCurrentScene();
+}
+
+void LayerWidget::implementAddNewMarkerLayer( int index, const QString& name )
+{
+	LayerRow* newRow = new LayerRow( m_listWidgetList[m_currentIndex], index, true );
+	newRow->m_layerRowWidget->m_label->setText( name );
+	newRow->m_layerRowWidget->m_lineEdit->setText( name );
+	m_listWidgetList[m_currentIndex]->setCurrentRow( index );
+
+	LayerGroup* layerGroup = m_listWidgetList[m_currentIndex];
+	for( int i = 0; i < layerGroup->count(); ++i )
 	{
 		LayerRow* row = static_cast<LayerRow*>(m_listWidgetList[m_currentIndex]->item( i ));
 		row->m_index = i;
@@ -297,6 +338,9 @@ void LayerWidget::initialToolbar()
 	m_newLayerAction = new QAction( QIcon( ":/MainWindow/Icon/plus.png" ), tr( "&New Layer" ), this );
 	m_newLayerAction->setToolTip( tr( "New Layer (Ctrl+Shift+N)" ) );
 	m_toolbar->addAction( m_newLayerAction );
+	m_newMarkerLayerAction = new QAction( QIcon( ":/MainWindow/Icon/plus.png" ), tr( "&New Marker Layer" ), this );
+	m_newMarkerLayerAction->setToolTip( tr( "New Marker Layer (Ctrl+Shift+M)" ) );
+	m_toolbar->addAction( m_newMarkerLayerAction );
 	m_raiseAction = new QAction( QIcon( ":/MainWindow/Icon/up-arrow.png" ), tr( "&Raise Layer" ), this );
 	m_raiseAction->setToolTip( tr( "Raise Layer (Ctrl+[)" ) );
 	m_toolbar->addAction( m_raiseAction );
@@ -307,6 +351,7 @@ void LayerWidget::initialToolbar()
 	m_toolbar->addAction( m_deleteAction );
 
 	connect( m_newLayerAction, SIGNAL( triggered(bool) ), this, SLOT( addNewLayer() ) );
+	connect( m_newMarkerLayerAction, SIGNAL( triggered(bool) ), this, SLOT( addNewMarkerLayer() ) );
 	connect( m_deleteAction, &QAction::triggered, this, &LayerWidget::removeLayer );
 	connect( m_raiseAction, &QAction::triggered, this, &LayerWidget::raiseCurrentLayer );
 	connect( m_lowerAction, &QAction::triggered, this, &LayerWidget::lowerCurrentLayer );
@@ -315,6 +360,7 @@ void LayerWidget::initialToolbar()
 void LayerWidget::updateToolbar( bool enableNewLayer, bool enableRaise, bool enableLower, bool enableDelete )
 {
 	m_newLayerAction->setDisabled( !enableNewLayer );
+	m_newMarkerLayerAction->setDisabled( !enableNewLayer );
 	m_raiseAction->setDisabled( !enableRaise );
 	m_lowerAction->setDisabled( !enableLower );
 	m_deleteAction->setDisabled( !enableDelete );
@@ -361,9 +407,10 @@ void LayerWidget::updateToolbarStatus()
 	}
 }
 
-LayerRowWidget::LayerRowWidget( const QString& name, LayerRow* layerRow, bool lockChecked, bool visibleChecked, QWidget* parent /*= Q_NULLPTR */ )
+LayerRowWidget::LayerRowWidget( const QString& name, LayerRow* layerRow, bool lockChecked, bool visibleChecked, bool isMarkerLayer, QWidget* parent /*= Q_NULLPTR */ )
 	:QWidget(parent),
-	m_layerRow(layerRow)
+	m_layerRow(layerRow),
+	m_isMarkerLayer(isMarkerLayer)
 {
 	m_stackedWidget = new QStackedWidget( this );
 	m_lineEdit = new QLineEdit( m_stackedWidget );
@@ -378,6 +425,31 @@ LayerRowWidget::LayerRowWidget( const QString& name, LayerRow* layerRow, bool lo
 	QHBoxLayout* h = new QHBoxLayout( this );
 	m_lockBtn = new QCheckBox;
 	m_visibleBtn = new QCheckBox;
+	if ( isMarkerLayer )
+	{
+		m_markerColor = QColorConstants::Yellow;
+		m_markerColorButton = new QPushButton();
+		QPalette pal = m_markerColorButton->palette();
+		pal.setColor( QPalette::Button, m_markerColor );
+		m_markerColorButton->setAutoFillBackground( true );
+		m_markerColorButton->setPalette( pal );
+		m_markerColorButton->update();
+		QObject::connect( m_markerColorButton, &QPushButton::clicked, [&]()
+			{
+				QColorDialog colorDialog(m_markerColor);
+				colorDialog.setWindowIcon( getApplicationIcon() );
+				if ( colorDialog.exec() == QDialog::Accepted )
+				{
+					m_markerColor = colorDialog.currentColor();
+					QPalette pal = m_markerColorButton->palette();
+					pal.setColor( QPalette::Button, m_markerColor );
+					m_markerColorButton->setAutoFillBackground( true );
+					m_markerColorButton->setPalette( pal );
+					m_markerColorButton->update();
+				}
+			} );
+		h->addWidget( m_markerColorButton );
+	}
 	h->addWidget( m_stackedWidget );
 	h->addWidget( m_lockBtn );
 	h->addWidget( m_visibleBtn );
@@ -464,13 +536,13 @@ bool LayerRowWidget::eventFilter( QObject* obj, QEvent* event )
 	return QWidget::eventFilter( obj, event );
 }
 
-LayerRow::LayerRow( LayerGroup* view, int insertIndex )
+LayerRow::LayerRow( LayerGroup* view, int insertIndex, bool isMarkerLayer )
 	:QListWidgetItem(),
 	m_layerGroup(view)
 {
 	LayerInfo info;
 
-	m_layerRowWidget = new LayerRowWidget( info.getNmae(), this );
+	m_layerRowWidget = new LayerRowWidget( info.getNmae(), this, false, true, isMarkerLayer );
 	m_index = insertIndex;
 	view->insertItem( insertIndex, this );
 	view->setItemWidget( this, m_layerRowWidget );

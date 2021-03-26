@@ -252,6 +252,7 @@ void MainWindow::initialConnections()
 	connect( m_pasteShortcut, &QShortcut::activated, m_centralWidget, &WorkspaceWidget::pasteCopiedTile );
 	connect( m_cutShortcut, &QShortcut::activated, m_centralWidget, &WorkspaceWidget::cutSelectedTile );
 	connect( m_newLayerShortcut, SIGNAL( activated() ), m_layerWidget, SLOT( addNewLayer() ) );
+	connect( m_newMarkerLayerShortcut, SIGNAL( activated() ), m_layerWidget, SLOT( addNewMarkerLayer() ) );
 	connect( m_raiseLayerShortcut, &QShortcut::activated, m_layerWidget, &LayerWidget::raiseCurrentLayer );
 	connect( m_lowerLayerShortcut, &QShortcut::activated, m_layerWidget, &LayerWidget::lowerCurrentLayer );
 
@@ -333,6 +334,7 @@ void MainWindow::initialShortcut()
 	m_workspaceSwitchTabShortcut =	new QShortcut( QKeySequence::NextChild, this );
 	m_workspaceCloseTabShortcut =	new QShortcut( tr( "Ctrl+W" ), this );
 	m_newLayerShortcut =			new QShortcut( tr( "Ctrl+Shift+N" ), this );
+	m_newMarkerLayerShortcut =		new QShortcut( tr( "Ctrl+Shift+M" ), this );
 	m_raiseLayerShortcut =			new QShortcut( tr( "Ctrl+[" ), this );
 	m_lowerLayerShortcut =			new QShortcut( tr( "Ctrl+]" ), this );
 }

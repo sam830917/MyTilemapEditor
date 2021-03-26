@@ -14,6 +14,7 @@ QT_FORWARD_DECLARE_CLASS( QLabel )
 QT_FORWARD_DECLARE_CLASS( QStackedWidget )
 QT_FORWARD_DECLARE_CLASS( QCheckBox )
 QT_FORWARD_DECLARE_CLASS( QLineEdit )
+QT_FORWARD_DECLARE_CLASS( QPushButton )
 class LayerRowWidget;
 class LayerGroup;
 
@@ -32,7 +33,9 @@ private:
 public slots:
 	void updateToolbarStatus();
 	void addNewLayer();
+	void addNewMarkerLayer();
 	void implementAddNewLayer( int index, const QString& name );
+	void implementAddNewMarkerLayer( int index, const QString& name );
 	void implementAddNewLayerWithInfo( int index, LayerInfo layerInfo );
 	void implementRenameLayer( int index, const QString& name );
 	void removeLayerFromIndex( int index );
@@ -69,6 +72,7 @@ private:
 
 	QToolBar* m_toolbar;
 	QAction* m_newLayerAction;
+	QAction* m_newMarkerLayerAction;
 	QAction* m_raiseAction;
 	QAction* m_lowerAction;
 	QAction* m_deleteAction;
@@ -80,7 +84,7 @@ class LayerRow : public QListWidgetItem
 	friend class LayerRowWidget;
 
 public:
-	LayerRow( LayerGroup* view, int insertIndex );
+	LayerRow( LayerGroup* view, int insertIndex, bool isMarkerLayer = false );
 	LayerRow( LayerGroup* view, LayerInfo layerInfo );
 
 	void setLayerInfo( const LayerInfo& layerInfo );
@@ -99,7 +103,7 @@ class LayerRowWidget : public QWidget
 	Q_OBJECT
 
 public:
-	LayerRowWidget( const QString& name, LayerRow* layerRow, bool lockChecked = false, bool visibleChecked = true, QWidget* parent = Q_NULLPTR );
+	LayerRowWidget( const QString& name, LayerRow* layerRow, bool lockChecked = false, bool visibleChecked = true, bool isMarkerLayer = false, QWidget* parent = Q_NULLPTR );
 
 	QString getName() const;
 
@@ -117,6 +121,10 @@ private:
 	QCheckBox* m_lockBtn;
 	QCheckBox* m_visibleBtn;
 	LayerRow* m_layerRow;
+
+	bool m_isMarkerLayer = false;
+	QColor m_markerColor;
+	QPushButton* m_markerColorButton;
 };
 
 class LayerGroup : public QListWidget
