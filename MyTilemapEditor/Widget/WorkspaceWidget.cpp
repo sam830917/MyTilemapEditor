@@ -125,7 +125,7 @@ void WorkspaceWidget::saveTileToFile( QList<const Tileset*>& tilesetList, int ta
 	{
 		XmlElement* mapTiles = mapDoc.NewElement( "Tiles" );
 		mapRoot.LinkEndChild( mapTiles );
-		Layer* layer = mapScene->m_layers[layerIndex];
+		TileLayer* layer = dynamic_cast<TileLayer*>(mapScene->m_layers[layerIndex]);
 		for( int i = 0; i < layer->m_tileList.size(); ++i )
 		{
 			Tile* tile = layer->m_tileList[i];
@@ -262,7 +262,7 @@ void WorkspaceWidget::insertMap( MapInfo mapInfo, QList<LayerInfo> layerInfoList
 	XmlElement* tilesetsEle = mapRoot->FirstChildElement( "Tilesets" );
 	if( !tilesetsEle )
 	{
-		Layer* newLayer = mapScene->addNewLayer( 0 );
+		TileLayer* newLayer = mapScene->addNewLayer( 0 );
 		if( layerInfoList.size() > 0 )
 		{
 			newLayer->m_layerInfo = layerInfoList[0];
@@ -294,7 +294,7 @@ void WorkspaceWidget::insertMap( MapInfo mapInfo, QList<LayerInfo> layerInfoList
 	int layerIndex = 0;
 	do
 	{
-		Layer* newLayer = mapScene->addNewLayer( layerIndex );
+		TileLayer* newLayer = mapScene->addNewLayer( layerIndex );
 		if ( layerInfoList.size() > layerIndex )
 		{
 			newLayer->m_layerInfo = layerInfoList[layerIndex];
@@ -774,8 +774,8 @@ void WorkspaceWidget::exportPNGFile()
 		QStyleOptionGraphicsItem opt;
 		for ( int i = 0; i < currentMapScene->m_layers.size(); ++i )
 		{
-			Layer* layer = currentMapScene->m_layers[i];
-			Layer* cloneLayer = cloneScene->addNewLayer( layer->getOrder() );
+			TileLayer* layer = dynamic_cast<TileLayer*>(currentMapScene->m_layers[i]);
+			TileLayer* cloneLayer = cloneScene->addNewLayer( layer->getOrder() );
 			
 			for ( int tileIndex = 0; tileIndex < layer->m_tileList.size(); ++tileIndex )
 			{

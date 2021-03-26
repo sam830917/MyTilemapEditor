@@ -6,6 +6,20 @@ Layer::Layer( MapScene* mapScene, int zValue )
 	:m_mapScene(mapScene),
 	m_zValue(zValue)
 {
+}
+
+Layer::~Layer()
+{
+}
+
+void Layer::setOrder( int value )
+{
+	m_zValue = value;
+}
+
+TileLayer::TileLayer( MapScene* mapScene, int zValue )
+	:Layer( mapScene, zValue )
+{
 	QSize mapSize = m_mapScene->m_mapInfo.getMapSize();
 	QSize tileSize = m_mapScene->m_mapInfo.getTileSize();
 
@@ -24,7 +38,7 @@ Layer::Layer( MapScene* mapScene, int zValue )
 	}
 }
 
-Layer::~Layer()
+TileLayer::~TileLayer()
 {
 	for ( Tile* tile : m_tileList )
 	{
@@ -32,22 +46,40 @@ Layer::~Layer()
 	}
 }
 
-void Layer::setOrder( int value )
+void TileLayer::setOrder( int value )
 {
 	for ( Tile* tile : m_tileList )
 	{
 		tile->setZValue( -value );
 	}
-	m_zValue = value;
+	Layer::setOrder(value);
 }
 
-TileInfo Layer::getTileInfo( int coordX, int coordY )
+void TileLayer::setTileInfo( int coordX, int coordY, const TileInfo& tileInfo )
+{
+	int tileIndex = m_mapScene->m_mapInfo.getIndex( QPoint( coordX, coordY ) );
+	m_tileList[tileIndex]->setTileInfo( tileInfo );
+	m_tileList[tileIndex]->update();
+}
+
+void TileLayer::setTileInfo( int index, const TileInfo& tileInfo )
+{
+	m_tileList[index]->setTileInfo( tileInfo );
+	m_tileList[index]->update();
+}
+
+TileInfo TileLayer::getTileInfo( int coordX, int coordY )
 {
 	int tileIndex = m_mapScene->m_mapInfo.getIndex( QPoint( coordX, coordY ) );
 	return m_tileList[tileIndex]->getTileInfo();
 }
 
-Tile::Tile( MapScene* scene, Layer* layer, QGraphicsItem* parent /*= Q_NULLPTR */ )
+TileInfo TileLayer::getTileInfo( int index )
+{
+	return m_tileList[index]->getTileInfo();
+}
+
+Tile::Tile( MapScene* scene, TileLayer* layer, QGraphicsItem* parent /*= Q_NULLPTR */ )
 	:m_mapScene( scene ),
 	m_layer(layer)
 {

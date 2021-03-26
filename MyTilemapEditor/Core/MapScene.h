@@ -36,7 +36,7 @@ class MapScene : public QGraphicsScene
 	friend class LayerAddCommand;
 	friend class LayerDeleteCommand;
 	friend class LayerRenameCommand;
-	friend class Layer;
+	friend class TileLayer;
 	friend class SelectMask;
 	friend class BrushHelper;
 
@@ -59,7 +59,7 @@ public:
 	void eraseMap( int index );
 	void eraseMap( QPoint coord );
 
-	Layer* addNewLayer( int zValue );
+	TileLayer* addNewLayer( int zValue );
 
 	void setIsShowSelection( bool isShow );
 	void updateSelection();

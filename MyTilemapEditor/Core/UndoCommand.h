@@ -7,7 +7,7 @@
 
 class MapScene;
 class Tile;
-class Layer;
+class TileLayer;
 
 class DrawCommand : public QUndoCommand
 {
@@ -51,7 +51,7 @@ private:
 	int m_index = 0;
 	MapScene* m_mapScene;
 	QString m_name;
-	Layer* m_layer;
+	TileLayer* m_layer;
 };
 
 class LayerDeleteCommand : public QUndoCommand
@@ -66,7 +66,7 @@ public:
 private:
 	int m_index = 0;
 	MapScene* m_mapScene;
-	Layer* m_layer;
+	TileLayer* m_layer;
 };
 
 class LayerRenameCommand : public QUndoCommand

@@ -9,6 +9,28 @@ class Tile;
 
 class Layer
 {
+public:
+	Layer( MapScene* mapScene, int zValue );
+	virtual ~Layer();
+
+	void setLayerInfo( const LayerInfo& layerInfo ) { m_layerInfo = layerInfo; }
+	void setName( const QString& name ) { m_layerInfo.setName( name ); }
+	void setIsLock( bool islock ) { m_layerInfo.setIsLock( islock ); }
+	void setIsVisible( bool isVisible ) { m_layerInfo.setIsVisible( isVisible ); }
+
+	virtual void setOrder( int value );
+
+	int getOrder() const { return m_zValue; }
+	LayerInfo getLayerInfo() const { return m_layerInfo; }
+
+protected:
+	int m_zValue = 0;
+	MapScene* m_mapScene;
+	LayerInfo m_layerInfo;
+};
+
+class TileLayer : public Layer
+{
 	friend class WorkspaceWidget;
 	friend class MapScene;
 	friend class LayerAddCommand;
@@ -16,26 +38,19 @@ class Layer
 	friend class Tile;
 
 public:
-	Layer( MapScene* mapScene, int zValue );
-	~Layer();
+	TileLayer( MapScene* mapScene, int zValue );
+	~TileLayer();
 
-	void setOrder( int value );
-	int getOrder() const { return m_zValue; }
+	virtual void setOrder( int value ) override;
 
-	void setLayerInfo( const LayerInfo& layerInfo ) { m_layerInfo = layerInfo; }
-	void setName( const QString& name ) { m_layerInfo.setName( name ); }
-	void setIsLock( bool islock ) { m_layerInfo.setIsLock( islock ); }
-	void setIsVisible( bool isVisible ) { m_layerInfo.setIsVisible( isVisible ); }
+	void setTileInfo( int coordX, int coordY, const TileInfo& tileInfo );
+	void setTileInfo( int index, const TileInfo& tileInfo );
 
 	TileInfo getTileInfo( int coordX, int coordY );
-
-	LayerInfo getLayerInfo() const { return m_layerInfo; }
+	TileInfo getTileInfo( int index );
 
 private:
-	int m_zValue = 0;
-	MapScene* m_mapScene;
 	QList<Tile*> m_tileList;
-	LayerInfo m_layerInfo;
 };
 
 class Tile : public QGraphicsRectItem
@@ -46,7 +61,7 @@ class Tile : public QGraphicsRectItem
 	friend class LayerDeleteCommand;
 
 public:
-	Tile( MapScene* scene, Layer* layer, QGraphicsItem* parent = Q_NULLPTR );
+	Tile( MapScene* scene, TileLayer* layer, QGraphicsItem* parent = Q_NULLPTR );
 
 	virtual void paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = Q_NULLPTR ) override;
 
@@ -58,5 +73,5 @@ protected:
 private:
 	TileInfo m_tileInfo;
 	MapScene* m_mapScene;
-	Layer* m_layer;
+	TileLayer* m_layer;
 };

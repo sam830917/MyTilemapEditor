@@ -270,7 +270,8 @@ void MapScene::editMapOnPoint( const QPointF& point )
 QList<QPoint> MapScene::editMapByFloodFill( int layerIndex, const QPoint& coord )
 {
 	QList<QPoint> readyToPaintTileIndexes;
-	TileInfo currentTileInfo = m_layers[layerIndex]->m_tileList[m_mapInfo.getIndex( coord )]->m_tileInfo;
+	TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[layerIndex]);
+	TileInfo currentTileInfo = tileLayer->getTileInfo( coord.x(), coord.y() );
 	paintTileByFloodFill( layerIndex, coord, currentTileInfo, readyToPaintTileIndexes );
 
 	return readyToPaintTileIndexes;
@@ -282,7 +283,8 @@ void MapScene::selectTilesByFloodFill( int layerIndex, const QPoint& coord )
 	{
 		mask->setSelected( false );
 	}
-	TileInfo currentTileInfo = m_layers[layerIndex]->m_tileList[m_mapInfo.getIndex( coord )]->m_tileInfo;
+	TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[layerIndex]);
+	TileInfo currentTileInfo = tileLayer->getTileInfo( coord.x(), coord.y() );
 	selectTilesByFloodFill( layerIndex, coord, currentTileInfo, getCurrentTile() );
 }
 
@@ -324,8 +326,8 @@ void MapScene::paintMap( int index, TileInfo tileInfo, int layerIndex )
 	{
 		return;
 	}
-	m_layers[layerIndex]->m_tileList[index]->m_tileInfo = tileInfo;
-	m_layers[layerIndex]->m_tileList[index]->update();
+	TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[layerIndex]);
+	tileLayer->setTileInfo( index, tileInfo );
 	m_parentWidget->markCurrentSceneForModified();
 }
 
@@ -347,6 +349,7 @@ void MapScene::paintMap( int index, TileInfo tileInfo )
 void MapScene::paintMap( const QMap<int, TileInfo>& tileInfoMap, int layerIndex )
 {
 	QMap<int, TileInfo>::const_iterator mapIterator = tileInfoMap.constBegin();
+	TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[layerIndex]);
 	while( mapIterator != tileInfoMap.constEnd() )
 	{
 		int index = mapIterator.key();
@@ -355,7 +358,7 @@ void MapScene::paintMap( const QMap<int, TileInfo>& tileInfoMap, int layerIndex 
 		{
 			continue;
 		}
-		m_layers[layerIndex]->m_tileList[index]->m_tileInfo = tileInfo;
+		tileLayer->setTileInfo( index, tileInfo );
 
 		++mapIterator;
 	}
@@ -393,15 +396,16 @@ void MapScene::showTileProperties( const QPointF& mousePos )
 	}
 	int index = coord.height() * m_mapInfo.getMapSize().width() + coord.width();
 	m_currentSelectedIndex = index;
-	Tile* tile = m_layers[currentIndex]->m_tileList[index];
+	TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[currentIndex]);
+	TileInfo tileInfo = tileLayer->getTileInfo( index );
 
 	QMap<QString, QString> informationMap;
 	informationMap["X"] = QString("%1").arg( coord.width() );
 	informationMap["Y"] = QString("%1").arg( coord.height() );
-	if ( tile->m_tileInfo.isValid() )
+	if ( tileInfo.isValid() )
 	{
-		informationMap["Tileset"] = tile->m_tileInfo.getTileset()->getName();
-		informationMap["Tileset Index"] = QString("%1").arg( tile->m_tileInfo.getIndex() );
+		informationMap["Tileset"] = tileInfo.getTileset()->getName();
+		informationMap["Tileset Index"] = QString("%1").arg( tileInfo.getIndex() );
 	}
 	else
 	{
@@ -433,15 +437,16 @@ void MapScene::showSelectedTileProperties()
 		return;
 	}
 	QSize coord = QSize( m_currentSelectedIndex % m_mapInfo.getMapSize().width(), m_currentSelectedIndex / m_mapInfo.getMapSize().width() );
-	Tile* tile = m_layers[currentIndex]->m_tileList[m_currentSelectedIndex];
+	TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[currentIndex]);
+	TileInfo tileInfo = tileLayer->getTileInfo( m_currentSelectedIndex );
 
 	QMap<QString, QString> informationMap;
 	informationMap["X"] = QString( "%1" ).arg( coord.width() );
 	informationMap["Y"] = QString( "%1" ).arg( coord.height() );
-	if( tile->m_tileInfo.isValid() )
+	if( tileInfo.isValid() )
 	{
-		informationMap["Tileset"] = tile->m_tileInfo.getTileset()->getName();
-		informationMap["Tileset Index"] = QString( "%1" ).arg( tile->m_tileInfo.getIndex() );
+		informationMap["Tileset"] = tileInfo.getTileset()->getName();
+		informationMap["Tileset Index"] = QString( "%1" ).arg( tileInfo.getIndex() );
 	}
 	else
 	{
@@ -456,13 +461,14 @@ void MapScene::paintTileByFloodFill( int layerIndex, const QPoint& coord, const 
 	if( coord.x() < 0 || coord.x() >= m_mapInfo.getMapSize().width() || coord.y() < 0 || coord.y() >= m_mapInfo.getMapSize().height() )
 		return;
 
-	int tileIndex = m_mapInfo.getIndex( coord );
-	if ( m_layers[layerIndex]->m_tileList[tileIndex]->m_tileInfo != currentTileInfo )
+	TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[layerIndex]);
+	TileInfo tileInfo = tileLayer->getTileInfo( coord.x(), coord.y() );
+	if ( tileInfo != currentTileInfo )
 		return;
 
 	for ( int i = 0; i < readyToPaintTileIndexes.size(); ++i )
 	{
-		if ( m_mapInfo.getIndex( readyToPaintTileIndexes[i] ) == tileIndex )
+		if ( readyToPaintTileIndexes[i] == coord )
 		{
 			return;
 		}
@@ -477,13 +483,14 @@ void MapScene::paintTileByFloodFill( int layerIndex, const QPoint& coord, const 
 
 void MapScene::selectTilesByFloodFill( int layerIndex, const QPoint& coord, const TileInfo& currentTileInfo, const TileInfo& newTileInfo )
 {
+	TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[layerIndex]);
 	if( coord.x() < 0 || coord.x() >= m_mapInfo.getMapSize().width() || coord.y() < 0 || coord.y() >= m_mapInfo.getMapSize().height() )
 		return;
 
-	if( m_layers[layerIndex]->m_tileList[m_mapInfo.getIndex( coord )]->m_tileInfo != currentTileInfo )
+	if( tileLayer->getTileInfo( coord.x(), coord.y() ) != currentTileInfo )
 		return;
 
-	if( m_layers[layerIndex]->m_tileList[m_mapInfo.getIndex( coord )]->m_tileInfo == newTileInfo )
+	if( tileLayer->getTileInfo( coord.x(), coord.y() ) == newTileInfo )
 		return;
 
 	if ( m_selectedTileItemList[m_mapInfo.getIndex( coord )]->m_isSelected )
@@ -509,8 +516,8 @@ void MapScene::eraseMap( int index )
 		return;
 	}
 
-	m_layers[currentIndex]->m_tileList[index]->m_tileInfo = TileInfo();
-	m_layers[currentIndex]->m_tileList[index]->update();
+	TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[currentIndex]);
+	tileLayer->setTileInfo( index, TileInfo() );
 	m_parentWidget->markCurrentSceneForModified();
 }
 
@@ -526,9 +533,9 @@ void MapScene::eraseMap( QPoint coord )
 	eraseMap( index );
 }
 
-Layer* MapScene::addNewLayer( int zValue )
+TileLayer* MapScene::addNewLayer( int zValue )
 {
-	Layer* newLayer = new Layer( this, zValue );
+	TileLayer* newLayer = new TileLayer( this, zValue );
 	m_layers.insert( zValue, newLayer );
 
 	// reorder z value
@@ -575,8 +582,9 @@ void MapScene::eraseSelectedTiles()
 	{
 		return;
 	}
-	m_beforeDrawTileInfo.reserve( m_layers[currentIndex]->m_tileList.size() );
-	for( Tile* tile : m_layers[currentIndex]->m_tileList )
+	TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[currentIndex]);
+	m_beforeDrawTileInfo.reserve( tileLayer->m_tileList.size() );
+	for( Tile* tile : tileLayer->m_tileList )
 	{
 		TileInfo& info = tile->getTileInfo();
 		m_beforeDrawTileInfo.push_back( info );
@@ -588,7 +596,7 @@ void MapScene::eraseSelectedTiles()
 			eraseMap( i );
 		}
 	}
-	QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, m_layers[currentIndex]->m_tileList );
+	QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, tileLayer->m_tileList );
 	m_undoStack->push( command );
 	setIsShowSelection( false );
 }
@@ -621,12 +629,13 @@ QList<TileModified> MapScene::getCopiedTiles() const
 	}
 
 	QPoint smallestPoint = QPoint( m_mapInfo.getMapSize().width(), m_mapInfo.getMapSize().height() );
+	TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[currentIndex]);
 	for( int i = 0; i < m_selectedTileItemList.size(); ++i )
 	{
 		if( m_selectedTileItemList[i]->m_isSelected )
 		{
 			QPoint coord = m_mapInfo.getCoord( i );
-			TileInfo tileinfo = m_layers[currentIndex]->m_tileList[i]->getTileInfo();
+			TileInfo tileinfo = tileLayer->getTileInfo(i);
 			TileModified tileModified( coord, tileinfo );
 			tileModifiedList.push_back( tileModified );
 			smallestPoint.setX( qMin( smallestPoint.x(), coord.x() ) );
@@ -653,8 +662,9 @@ void MapScene::pasteTilesOnCoord( const QPoint& coord, const QList<TileModified>
 		return;
 	}
 	m_beforeDrawTileInfo.clear();
-	m_beforeDrawTileInfo.reserve( m_layers[currentIndex]->m_tileList.size() );
-	for( Tile* tile : m_layers[currentIndex]->m_tileList )
+	TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[currentIndex]);
+	m_beforeDrawTileInfo.reserve( tileLayer->m_tileList.size() );
+	for( Tile* tile : tileLayer->m_tileList )
 	{
 		TileInfo& info = tile->getTileInfo();
 		m_beforeDrawTileInfo.push_back( info );
@@ -669,7 +679,7 @@ void MapScene::pasteTilesOnCoord( const QPoint& coord, const QList<TileModified>
 		}
 	}
 	setIsShowSelection( false );
-	QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, m_layers[currentIndex]->m_tileList );
+	QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, tileLayer->m_tileList );
 	m_undoStack->push( command );
 }
 
@@ -730,9 +740,10 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 			{
 				return;
 			}
+			TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[currentIndex]);
 			m_beforeDrawTileInfo.clear();
-			m_beforeDrawTileInfo.reserve( m_layers[currentIndex]->m_tileList.size() );
-			for( Tile* tile : m_layers[currentIndex]->m_tileList )
+			m_beforeDrawTileInfo.reserve( tileLayer->m_tileList.size() );
+			for( Tile* tile : tileLayer->m_tileList )
 			{
 				TileInfo& info = tile->getTileInfo();
 				m_beforeDrawTileInfo.push_back( info );
@@ -778,7 +789,7 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 					}
 				}
 			}
-			QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, m_layers[currentIndex]->m_tileList );
+			QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, tileLayer->m_tileList );
 			m_undoStack->push( command );
 		}
 		else if ( eDrawTool::SHAPE == m_parentWidget->m_drawTool )
@@ -802,9 +813,10 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 			{
 				return;
 			}
+			TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[currentIndex]);
 			m_beforeDrawTileInfo.clear();
-			m_beforeDrawTileInfo.reserve( m_layers[currentIndex]->m_tileList.size() );
-			for( Tile* tile : m_layers[currentIndex]->m_tileList )
+			m_beforeDrawTileInfo.reserve( tileLayer->m_tileList.size() );
+			for( Tile* tile : tileLayer->m_tileList )
 			{
 				TileInfo& info = tile->getTileInfo();
 				m_beforeDrawTileInfo.push_back( info );
@@ -876,10 +888,11 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 			{
 				return;
 			}
-			TileInfo currentTileInfo = m_layers[currentIndex]->m_tileList[m_mapInfo.getIndex( coord )]->m_tileInfo;
+			TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[currentIndex]);
+			TileInfo currentTileInfo = tileLayer->getTileInfo( coord.x(), coord.y() );
 			for( int i = 0; i < m_selectedTileItemList.size(); ++i )
 			{
-				if ( m_layers[currentIndex]->m_tileList[i]->m_tileInfo == currentTileInfo )
+				if ( tileLayer->getTileInfo( i ) == currentTileInfo )
 				{
 					m_selectedTileItemList[i]->setSelected( true );
 				}
@@ -902,9 +915,10 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 			{
 				return;
 			}
-
-			m_beforeDrawTileInfo.reserve( m_layers[currentIndex]->m_tileList.size() );
-			for( Tile* tile : m_layers[currentIndex]->m_tileList )
+			
+			TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[currentIndex]);
+			m_beforeDrawTileInfo.reserve( tileLayer->m_tileList.size() );
+			for( Tile* tile : tileLayer->m_tileList )
 			{
 				TileInfo& info = tile->getTileInfo();
 				m_beforeDrawTileInfo.push_back( info );
@@ -1088,7 +1102,8 @@ void MapScene::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 				return;
 			}
 
-			QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, m_layers[currentIndex]->m_tileList );
+			TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[currentIndex]);
+			QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, tileLayer->m_tileList );
 			m_undoStack->push( command );
 			m_parentWidget->disableShortcut( false );
 		}
@@ -1102,7 +1117,8 @@ void MapScene::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 				return;
 			}
 
-			QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, m_layers[currentIndex]->m_tileList );
+			TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[currentIndex]);
+			QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, tileLayer->m_tileList );
 			m_undoStack->push( command );
 			m_parentWidget->disableShortcut( false );
 		}
