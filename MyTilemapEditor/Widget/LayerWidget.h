@@ -34,8 +34,7 @@ public slots:
 	void updateToolbarStatus();
 	void addNewLayer();
 	void addNewMarkerLayer();
-	void implementAddNewLayer( int index, const QString& name );
-	void implementAddNewMarkerLayer( int index, const QString& name );
+	void implementAddNewLayer( int index, const QString& name, eLayerType type );
 	void implementAddNewLayerWithInfo( int index, LayerInfo layerInfo );
 	void implementRenameLayer( int index, const QString& name );
 	void removeLayerFromIndex( int index );

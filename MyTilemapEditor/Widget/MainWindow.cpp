@@ -301,6 +301,7 @@ void MainWindow::initialConnections()
 	connect( m_centralWidget, &WorkspaceWidget::isDefalutBrush, m_brushWidget, &BrushWidget::isDefalutBrush );
 
 	connect( m_layerWidget, &LayerWidget::addedNewLayerFromIndex,  m_centralWidget, &WorkspaceWidget::addNewLayerIntoMap );
+	connect( m_layerWidget, &LayerWidget::addedNewMarkerLayerFromIndex,  m_centralWidget, &WorkspaceWidget::addNewMarkerLayerIntoMap );
 	connect( m_layerWidget, &LayerWidget::modifiedCurrentScene, m_centralWidget, &WorkspaceWidget::markCurrentSceneForModified );
 	connect( m_layerWidget, &LayerWidget::setLayerIsVisible,  m_centralWidget, &WorkspaceWidget::setLayerVisible );
 	connect( m_layerWidget, &LayerWidget::changeLayerFocus,  m_centralWidget, &WorkspaceWidget::changeLayerFocus );

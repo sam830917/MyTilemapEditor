@@ -52,8 +52,8 @@ LayerMoveCommand::~LayerMoveCommand()
 
 void LayerMoveCommand::undo()
 {
-	TileLayer* layerA = dynamic_cast<TileLayer*>(m_mapScene->m_layers[m_indexA]);
-	TileLayer* layerB = dynamic_cast<TileLayer*>(m_mapScene->m_layers[m_indexB]);
+	Layer* layerA = m_mapScene->m_layers[m_indexA];
+	Layer* layerB = m_mapScene->m_layers[m_indexB];
 
 	m_mapScene->m_layers[m_indexA]->setOrder( m_indexB );
 	m_mapScene->m_layers[m_indexB]->setOrder( m_indexA );
@@ -66,8 +66,8 @@ void LayerMoveCommand::undo()
 
 void LayerMoveCommand::redo()
 {
-	TileLayer* layerA = dynamic_cast<TileLayer*>(m_mapScene->m_layers[m_indexA]);
-	TileLayer* layerB = dynamic_cast<TileLayer*>(m_mapScene->m_layers[m_indexB]);
+	Layer* layerA = m_mapScene->m_layers[m_indexA];
+	Layer* layerB = m_mapScene->m_layers[m_indexB];
 
 	m_mapScene->m_layers[m_indexA]->setOrder( m_indexB );
 	m_mapScene->m_layers[m_indexB]->setOrder( m_indexA );
@@ -78,15 +78,25 @@ void LayerMoveCommand::redo()
 	m_mapScene->m_parentWidget->movedLayerOrder( m_indexA, m_indexB );
 }
 
-LayerAddCommand::LayerAddCommand( MapScene* mapScene, int index, const QString& name, QUndoCommand* parent )
+LayerAddCommand::LayerAddCommand( MapScene* mapScene, int index, const QString& name, eLayerType type, QUndoCommand* parent )
 	: QUndoCommand( parent ),
 	m_mapScene(mapScene),
 	m_index(index),
-	m_name(name)
+	m_name(name),
+	m_layerType(type)
 {
-	TileLayer* newLayer = new TileLayer( m_mapScene, m_index );
-	m_layer = newLayer;
-	newLayer->setName( m_name );
+	switch( m_layerType )
+	{
+	case eLayerType::TILE_LAYER:
+		m_layer = new TileLayer( m_mapScene, m_index );
+		break;
+	case eLayerType::MARKER_LAYER:
+		m_layer = new MarkerLayer( m_mapScene, m_index );
+		break;
+	default:
+		break;
+	}
+	m_layer->setName( m_name );
 }
 
 LayerAddCommand::~LayerAddCommand()
@@ -96,9 +106,28 @@ LayerAddCommand::~LayerAddCommand()
 void LayerAddCommand::undo()
 {
 	m_mapScene->m_layers.removeAt( m_index );
-	for ( Tile* tile : m_layer->m_tileList )
+	switch( m_layerType )
 	{
-		m_mapScene->removeItem( tile );
+	case eLayerType::TILE_LAYER:
+	{
+		TileLayer* layer = dynamic_cast<TileLayer*>(m_layer);
+		for( Tile* tile : layer->m_tileList )
+		{
+			m_mapScene->removeItem( tile );
+		}
+		break;
+	}
+	case eLayerType::MARKER_LAYER:
+	{
+		MarkerLayer* layer = dynamic_cast<MarkerLayer*>(m_layer);
+		for( MarkerTile* tile : layer->m_tileList )
+		{
+			m_mapScene->removeItem( tile );
+		}
+		break;
+	}
+	default:
+		break;
 	}
 
 	for( int i = m_index; i < m_mapScene->m_layers.size(); ++i )
@@ -112,11 +141,30 @@ void LayerAddCommand::undo()
 void LayerAddCommand::redo()
 {
 	m_mapScene->m_layers.insert( m_index, m_layer );
-	for( Tile* tile : m_layer->m_tileList )
+	switch( m_layerType )
 	{
-		m_mapScene->addItem( tile );
+	case eLayerType::TILE_LAYER:
+	{
+		TileLayer* layer = dynamic_cast<TileLayer*>(m_layer);
+		for( Tile* tile : layer->m_tileList )
+		{
+			m_mapScene->addItem( tile );
+		}
+		break;
 	}
-	m_mapScene->m_parentWidget->addedNewLayer( m_index, m_name );
+	case eLayerType::MARKER_LAYER:
+	{
+		MarkerLayer* layer = dynamic_cast<MarkerLayer*>(m_layer);
+		for( MarkerTile* tile : layer->m_tileList )
+		{
+			m_mapScene->addItem( tile );
+		}
+		break;
+	}
+	default:
+		break;
+	}
+	m_mapScene->m_parentWidget->addedNewLayer( m_index, m_name, m_layerType );
 }
 
 LayerDeleteCommand::LayerDeleteCommand( MapScene* mapScene, int index, QUndoCommand* parent /*= 0 */ )

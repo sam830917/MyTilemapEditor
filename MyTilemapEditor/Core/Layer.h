@@ -4,8 +4,10 @@
 #include "Core/LayerInfo.h"
 #include <QGraphicsRectItem>
 #include <QList>
+
 class MapScene;
 class Tile;
+class MarkerTile;
 
 class Layer
 {
@@ -53,6 +55,28 @@ private:
 	QList<Tile*> m_tileList;
 };
 
+class MarkerLayer : public Layer
+{
+	friend class WorkspaceWidget;
+	friend class MapScene;
+	friend class LayerAddCommand;
+	friend class LayerDeleteCommand;
+
+public:
+	MarkerLayer( MapScene* mapScene, int zValue );
+	~MarkerLayer();
+
+	virtual void setOrder( int value ) override;
+
+	QColor getColor() const { return m_color; }
+	void markTile( int coordX, int coordY, bool isMark );
+	void markTile( int index, bool isMark );
+
+private:
+	QColor m_color;
+	QList<MarkerTile*> m_tileList;
+};
+
 class Tile : public QGraphicsRectItem
 {
 	friend class WorkspaceWidget;
@@ -63,15 +87,30 @@ class Tile : public QGraphicsRectItem
 public:
 	Tile( MapScene* scene, TileLayer* layer, QGraphicsItem* parent = Q_NULLPTR );
 
-	virtual void paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = Q_NULLPTR ) override;
-
 	void setTileInfo( TileInfo tileInfo ) { m_tileInfo = tileInfo; }
 	TileInfo getTileInfo() { return m_tileInfo; }
 
 protected:
+	virtual void paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = Q_NULLPTR ) override;
 
 private:
 	TileInfo m_tileInfo;
 	MapScene* m_mapScene;
 	TileLayer* m_layer;
+};
+
+class MarkerTile : public QGraphicsRectItem
+{
+	friend class MarkerLayer;
+
+public:
+	MarkerTile( MapScene* scene, MarkerLayer* layer, QGraphicsItem* parent = Q_NULLPTR );
+
+protected:
+	virtual void paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = Q_NULLPTR ) override;
+
+private:
+	bool m_marked = false;
+	MapScene* m_mapScene;
+	MarkerLayer* m_layer;
 };

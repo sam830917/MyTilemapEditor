@@ -37,6 +37,7 @@ class MapScene : public QGraphicsScene
 	friend class LayerDeleteCommand;
 	friend class LayerRenameCommand;
 	friend class TileLayer;
+	friend class MarkerLayer;
 	friend class SelectMask;
 	friend class BrushHelper;
 

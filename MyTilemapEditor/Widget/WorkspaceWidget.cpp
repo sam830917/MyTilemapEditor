@@ -569,7 +569,13 @@ void WorkspaceWidget::getTabCount( int& tabCount )
 
 void WorkspaceWidget::addNewLayerIntoMap( int index, const QString& name )
 {
-	LayerAddCommand* command = new LayerAddCommand( m_mapSceneList[m_mapTabWidget->currentIndex()], index, name );
+	LayerAddCommand* command = new LayerAddCommand( m_mapSceneList[m_mapTabWidget->currentIndex()], index, name, eLayerType::TILE_LAYER );
+	m_mapSceneList[m_mapTabWidget->currentIndex()]->m_undoStack->push( command );
+}
+
+void WorkspaceWidget::addNewMarkerLayerIntoMap( int index, const QString& name )
+{
+	LayerAddCommand* command = new LayerAddCommand( m_mapSceneList[m_mapTabWidget->currentIndex()], index, name, eLayerType::MARKER_LAYER );
 	m_mapSceneList[m_mapTabWidget->currentIndex()]->m_undoStack->push( command );
 }
 

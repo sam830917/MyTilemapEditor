@@ -326,8 +326,24 @@ void MapScene::paintMap( int index, TileInfo tileInfo, int layerIndex )
 	{
 		return;
 	}
-	TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[layerIndex]);
-	tileLayer->setTileInfo( index, tileInfo );
+	Layer* layer = m_layers[layerIndex];
+	switch( layer->getLayerInfo().getLayerType() )
+	{
+	case eLayerType::TILE_LAYER:
+	{
+		TileLayer* tileLayer = dynamic_cast<TileLayer*>(layer);
+		tileLayer->setTileInfo( index, tileInfo );
+		break;
+	}
+	case eLayerType::MARKER_LAYER:
+	{
+		MarkerLayer* tileLayer = dynamic_cast<MarkerLayer*>(layer);
+		tileLayer->markTile( index, true );
+		break;
+	}
+	default:
+		break;
+	}
 	m_parentWidget->markCurrentSceneForModified();
 }
 
@@ -396,22 +412,28 @@ void MapScene::showTileProperties( const QPointF& mousePos )
 	}
 	int index = coord.height() * m_mapInfo.getMapSize().width() + coord.width();
 	m_currentSelectedIndex = index;
-	TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[currentIndex]);
-	TileInfo tileInfo = tileLayer->getTileInfo( index );
 
 	QMap<QString, QString> informationMap;
-	informationMap["X"] = QString("%1").arg( coord.width() );
-	informationMap["Y"] = QString("%1").arg( coord.height() );
-	if ( tileInfo.isValid() )
+	informationMap["X"] = QString( "%1" ).arg( coord.width() );
+	informationMap["Y"] = QString( "%1" ).arg( coord.height() );
+
+	Layer* layer = m_layers[currentIndex];
+	if ( layer->getLayerInfo().getLayerType() == eLayerType::TILE_LAYER )
 	{
-		informationMap["Tileset"] = tileInfo.getTileset()->getName();
-		informationMap["Tileset Index"] = QString("%1").arg( tileInfo.getIndex() );
+		TileLayer* tileLayer = dynamic_cast<TileLayer*>(layer);
+		TileInfo tileInfo = tileLayer->getTileInfo( index );
+		if( tileInfo.isValid() )
+		{
+			informationMap["Tileset"] = tileInfo.getTileset()->getName();
+			informationMap["Tileset Index"] = QString( "%1" ).arg( tileInfo.getIndex() );
+		}
+		else
+		{
+			informationMap["Tileset"] = "";
+			informationMap["Tileset Index"] = "";
+		}
 	}
-	else
-	{
-		informationMap["Tileset"] = "";
-		informationMap["Tileset Index"] = "";
-	}
+
 	m_parentWidget->showProperties( informationMap );
 }
 
@@ -515,9 +537,25 @@ void MapScene::eraseMap( int index )
 	{
 		return;
 	}
+	Layer* layer = m_layers[currentIndex];
+	switch( layer->getLayerInfo().getLayerType() )
+	{
+	case eLayerType::TILE_LAYER:
+	{
+		TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[currentIndex]);
+		tileLayer->setTileInfo( index, TileInfo() );
+		break;
+	}
+	case eLayerType::MARKER_LAYER:
+	{
+		MarkerLayer* tileLayer = dynamic_cast<MarkerLayer*>(layer);
+		tileLayer->markTile( index, false );
+		break;
+	}
+	default:
+		break;
+	}
 
-	TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[currentIndex]);
-	tileLayer->setTileInfo( index, TileInfo() );
 	m_parentWidget->markCurrentSceneForModified();
 }
 
@@ -916,12 +954,21 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 				return;
 			}
 			
-			TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[currentIndex]);
-			m_beforeDrawTileInfo.reserve( tileLayer->m_tileList.size() );
-			for( Tile* tile : tileLayer->m_tileList )
+			Layer* layer = m_layers[currentIndex];
+			if ( layer->getLayerInfo().getLayerType() == eLayerType::TILE_LAYER )
 			{
-				TileInfo& info = tile->getTileInfo();
-				m_beforeDrawTileInfo.push_back( info );
+				TileLayer* tileLayer = dynamic_cast<TileLayer*>(layer);
+				m_beforeDrawTileInfo.reserve( tileLayer->m_tileList.size() );
+				for( Tile* tile : tileLayer->m_tileList )
+				{
+					TileInfo& info = tile->getTileInfo();
+					m_beforeDrawTileInfo.push_back( info );
+				}
+			}
+			if ( layer->getLayerInfo().getLayerType() == eLayerType::MARKER_LAYER )
+			{
+				MarkerLayer* markerLayer = dynamic_cast<MarkerLayer*>(layer);
+				// TODO
 			}
 			m_parentWidget->disableShortcut( true );
 			QPointF mousePos = event->scenePos();
@@ -1117,9 +1164,17 @@ void MapScene::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 				return;
 			}
 
-			TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[currentIndex]);
-			QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, tileLayer->m_tileList );
-			m_undoStack->push( command );
+			Layer* layer = m_layers[currentIndex];
+			if( layer->getLayerInfo().getLayerType() == eLayerType::TILE_LAYER )
+			{
+				TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[currentIndex]);
+				QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, tileLayer->m_tileList );
+				m_undoStack->push( command );
+			}
+			else
+			{
+				// TODO
+			}
 			m_parentWidget->disableShortcut( false );
 		}
 	}

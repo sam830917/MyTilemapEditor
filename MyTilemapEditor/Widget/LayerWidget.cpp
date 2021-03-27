@@ -94,32 +94,26 @@ void LayerWidget::addNewMarkerLayer()
 	addedNewMarkerLayerFromIndex( 0, name );
 }
 
-void LayerWidget::implementAddNewLayer( int index, const QString& name )
+void LayerWidget::implementAddNewLayer( int index, const QString& name, eLayerType type )
 {
-	LayerRow* newRow = new LayerRow( m_listWidgetList[m_currentIndex], index );
+	LayerRow* newRow;
+	switch( type )
+	{
+	case eLayerType::TILE_LAYER:
+		newRow = new LayerRow( m_listWidgetList[m_currentIndex], index );
+		break;
+	case eLayerType::MARKER_LAYER:
+		newRow = new LayerRow( m_listWidgetList[m_currentIndex], index, true );
+		break;
+	default:
+		break;
+	}
 	newRow->m_layerRowWidget->m_label->setText(name);
 	newRow->m_layerRowWidget->m_lineEdit->setText(name);
 	m_listWidgetList[m_currentIndex]->setCurrentRow( index );
 
 	LayerGroup* layerGroup = m_listWidgetList[m_currentIndex];
 	for ( int i = 0; i < layerGroup->count(); ++i )
-	{
-		LayerRow* row = static_cast<LayerRow*>(m_listWidgetList[m_currentIndex]->item( i ));
-		row->m_index = i;
-	}
-	updateToolbarStatus();
-	modifiedCurrentScene();
-}
-
-void LayerWidget::implementAddNewMarkerLayer( int index, const QString& name )
-{
-	LayerRow* newRow = new LayerRow( m_listWidgetList[m_currentIndex], index, true );
-	newRow->m_layerRowWidget->m_label->setText( name );
-	newRow->m_layerRowWidget->m_lineEdit->setText( name );
-	m_listWidgetList[m_currentIndex]->setCurrentRow( index );
-
-	LayerGroup* layerGroup = m_listWidgetList[m_currentIndex];
-	for( int i = 0; i < layerGroup->count(); ++i )
 	{
 		LayerRow* row = static_cast<LayerRow*>(m_listWidgetList[m_currentIndex]->item( i ));
 		row->m_index = i;
@@ -314,7 +308,16 @@ void LayerWidget::moveItem( int fromItemIndex, int toItemIndex )
 	m_listWidgetList[m_currentIndex]->takeItem( fromItemIndex );
 	m_listWidgetList[m_currentIndex]->insertItem( toItemIndex, currentItem );
 
-	currentItem->m_layerRowWidget = new LayerRowWidget( name, currentItem, lockChecked, visibleChecked );
+	if ( currentItem->m_layerRowWidget->m_isMarkerLayer )
+	{
+		delete currentItem->m_layerRowWidget;
+		currentItem->m_layerRowWidget = new LayerRowWidget( name, currentItem, lockChecked, visibleChecked, true );
+	}
+	else
+	{
+		delete currentItem->m_layerRowWidget;
+		currentItem->m_layerRowWidget = new LayerRowWidget( name, currentItem, lockChecked, visibleChecked );
+	}
 	m_listWidgetList[m_currentIndex]->setItemWidget( m_listWidgetList[m_currentIndex]->item( toItemIndex ), currentItem->m_layerRowWidget );
 
 	// reorder index

@@ -2,6 +2,7 @@
 
 #include "Core/TileInfo.h"
 #include "Core/LayerInfo.h"
+#include "Core/Layer.h"
 #include <QUndoCommand>
 #include <QList>
 
@@ -42,7 +43,7 @@ class LayerAddCommand : public QUndoCommand
 {
 	// Index A and Index B exchange position in the list.
 public:
-	LayerAddCommand( MapScene* mapScene, int index, const QString& name, QUndoCommand* parent = 0 );
+	LayerAddCommand( MapScene* mapScene, int index, const QString& name, eLayerType type, QUndoCommand* parent = 0 );
 	~LayerAddCommand();
 
 	virtual void undo() override;
@@ -51,7 +52,8 @@ private:
 	int m_index = 0;
 	MapScene* m_mapScene;
 	QString m_name;
-	TileLayer* m_layer;
+	Layer* m_layer;
+	eLayerType m_layerType;
 };
 
 class LayerDeleteCommand : public QUndoCommand
