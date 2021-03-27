@@ -60,6 +60,7 @@ signals:
 	void setLayerName( int index, const QString& name );
 	void modifiedCurrentScene();
 	void changeLayerFocus();
+	void changeColor( int index,  const QColor& color );
 
 private:
 	void addNewLayer( LayerInfo layerInfo );
@@ -110,6 +111,7 @@ public:
 public slots:
 	void setIsLock();
 	void setIsVisible();
+	void setColor();
 
 protected:
 	virtual bool eventFilter( QObject* obj, QEvent* event );

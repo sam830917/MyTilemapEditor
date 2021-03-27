@@ -56,6 +56,7 @@ public slots:
 	void deleteLayerFromIndex( int index );
 	void setLayerLock( int index, bool isLock );
 	void setLayerVisible( int index, bool isVisible );
+	void setLayerColor( int index,  const QColor& color );
 	void setLayerName( int index, const QString& name );
 	void changeLayerFocus();
 

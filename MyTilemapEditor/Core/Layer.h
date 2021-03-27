@@ -19,6 +19,7 @@ public:
 	void setName( const QString& name ) { m_layerInfo.setName( name ); }
 	void setIsLock( bool islock ) { m_layerInfo.setIsLock( islock ); }
 	void setIsVisible( bool isVisible ) { m_layerInfo.setIsVisible( isVisible ); }
+	void setColor( const QColor& color ) { m_layerInfo.setColor( color ); }
 
 	virtual void setOrder( int value );
 
@@ -68,12 +69,11 @@ public:
 
 	virtual void setOrder( int value ) override;
 
-	QColor getColor() const { return m_color; }
+	QColor getColor() const { return m_layerInfo.getColor(); }
 	void markTile( int coordX, int coordY, bool isMark );
 	void markTile( int index, bool isMark );
 
 private:
-	QColor m_color;
 	QList<MarkerTile*> m_tileList;
 };
 

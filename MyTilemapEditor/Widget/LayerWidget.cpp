@@ -134,6 +134,10 @@ void LayerWidget::implementAddNewLayerWithInfo( int index, LayerInfo layerInfo )
 void LayerWidget::implementRenameLayer( int index, const QString& name )
 {
 	LayerRowWidget* layerRow = dynamic_cast<LayerRowWidget*>(m_listWidgetList[m_currentIndex]->itemWidget( m_listWidgetList[m_currentIndex]->item( index ) ));
+	if( !layerRow )
+	{
+		return;
+	}
 	layerRow->m_label->setText( name );
 	layerRow->m_lineEdit->setText( name );
 	modifiedCurrentScene();
@@ -310,8 +314,11 @@ void LayerWidget::moveItem( int fromItemIndex, int toItemIndex )
 
 	if ( currentItem->m_layerRowWidget->m_isMarkerLayer )
 	{
+		QColor color = currentItem->m_layerRowWidget->m_markerColor;
 		delete currentItem->m_layerRowWidget;
 		currentItem->m_layerRowWidget = new LayerRowWidget( name, currentItem, lockChecked, visibleChecked, true );
+		currentItem->m_layerRowWidget->m_markerColor = color;
+		currentItem->m_layerRowWidget->setColor();
 	}
 	else
 	{
@@ -432,11 +439,7 @@ LayerRowWidget::LayerRowWidget( const QString& name, LayerRow* layerRow, bool lo
 	{
 		m_markerColor = QColorConstants::Yellow;
 		m_markerColorButton = new QPushButton();
-		QPalette pal = m_markerColorButton->palette();
-		pal.setColor( QPalette::Button, m_markerColor );
-		m_markerColorButton->setAutoFillBackground( true );
-		m_markerColorButton->setPalette( pal );
-		m_markerColorButton->update();
+		setColor();
 		QObject::connect( m_markerColorButton, &QPushButton::clicked, [&]()
 			{
 				QColorDialog colorDialog(m_markerColor);
@@ -444,11 +447,8 @@ LayerRowWidget::LayerRowWidget( const QString& name, LayerRow* layerRow, bool lo
 				if ( colorDialog.exec() == QDialog::Accepted )
 				{
 					m_markerColor = colorDialog.currentColor();
-					QPalette pal = m_markerColorButton->palette();
-					pal.setColor( QPalette::Button, m_markerColor );
-					m_markerColorButton->setAutoFillBackground( true );
-					m_markerColorButton->setPalette( pal );
-					m_markerColorButton->update();
+					setColor();
+					m_layerRow->m_layerGroup->m_layerWidget->changeColor(m_layerRow->m_index, m_markerColor);
 				}
 			} );
 		h->addWidget( m_markerColorButton );
@@ -493,6 +493,15 @@ void LayerRowWidget::setIsVisible()
 	m_layerRow->m_layerGroup->setCurrentRow( m_layerRow->m_index );
 	m_layerRow->m_layerGroup->m_layerWidget->setLayerIsVisible( m_layerRow->m_index, checked );
 	m_layerRow->m_layerGroup->m_layerWidget->modifiedCurrentScene();
+}
+
+void LayerRowWidget::setColor()
+{
+	QPalette pal = m_markerColorButton->palette();
+	pal.setColor( QPalette::Button, m_markerColor );
+	m_markerColorButton->setAutoFillBackground( true );
+	m_markerColorButton->setPalette( pal );
+	m_markerColorButton->update();
 }
 
 bool LayerRowWidget::eventFilter( QObject* obj, QEvent* event )
@@ -556,10 +565,12 @@ LayerRow::LayerRow( LayerGroup* view, LayerInfo layerInfo )
 	:QListWidgetItem(),
 	m_layerGroup( view )
 {
-	m_layerRowWidget = new LayerRowWidget( layerInfo.getNmae(), this, layerInfo.isLock(), layerInfo.isVisible() );
+	m_layerRowWidget = new LayerRowWidget( layerInfo.getNmae(), this, layerInfo.isLock(), layerInfo.isVisible()
+		, layerInfo.getLayerType()== eLayerType::MARKER_LAYER ? true : false );
 	m_index = view->count();
 	view->addItem( this );
 	view->setItemWidget( this, m_layerRowWidget );
+	m_layerRowWidget->m_markerColor = layerInfo.getColor();
 	setSizeHint( QSize( 0, 40 ) );
 }
 

@@ -119,7 +119,7 @@ MarkerLayer::MarkerLayer( MapScene* mapScene, int zValue )
 			m_tileList.push_back( tile );
 		}
 	}
-	m_color = QColorConstants::Yellow;
+	m_layerInfo.setColor( QColorConstants::Yellow );
 }
 
 MarkerLayer::~MarkerLayer()
@@ -160,7 +160,7 @@ MarkerTile::MarkerTile( MapScene* scene, MarkerLayer* layer, QGraphicsItem* pare
 
 void MarkerTile::paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget /*= Q_NULLPTR */ )
 {
-	if ( m_marked )
+	if ( m_marked && m_layer->getLayerInfo().isVisible() )
 	{
 		QRectF rect = boundingRect();
 		QSize& mapTileSize = m_mapScene->getMapInfo().getTileSize();

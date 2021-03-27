@@ -304,6 +304,7 @@ void MainWindow::initialConnections()
 	connect( m_layerWidget, &LayerWidget::addedNewMarkerLayerFromIndex,  m_centralWidget, &WorkspaceWidget::addNewMarkerLayerIntoMap );
 	connect( m_layerWidget, &LayerWidget::modifiedCurrentScene, m_centralWidget, &WorkspaceWidget::markCurrentSceneForModified );
 	connect( m_layerWidget, &LayerWidget::setLayerIsVisible,  m_centralWidget, &WorkspaceWidget::setLayerVisible );
+	connect( m_layerWidget, &LayerWidget::changeColor,  m_centralWidget, &WorkspaceWidget::setLayerColor );
 	connect( m_layerWidget, &LayerWidget::changeLayerFocus,  m_centralWidget, &WorkspaceWidget::changeLayerFocus );
 	connect( m_layerWidget, &LayerWidget::movedLayerGroup,  m_centralWidget, &WorkspaceWidget::changeLayerOrder );
 	connect( m_layerWidget, &LayerWidget::setLayerIsLock,  m_centralWidget, &WorkspaceWidget::setLayerLock );

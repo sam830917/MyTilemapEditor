@@ -610,6 +610,13 @@ void WorkspaceWidget::setLayerVisible( int index, bool isVisible )
 	m_mapSceneList[m_mapTabWidget->currentIndex()]->update();
 }
 
+void WorkspaceWidget::setLayerColor( int index, const QColor& color )
+{
+	MapScene* mapScene = m_mapSceneList[m_mapTabWidget->currentIndex()];
+	mapScene->m_layers[index]->setColor( color );
+	m_mapSceneList[m_mapTabWidget->currentIndex()]->update();
+}
+
 void WorkspaceWidget::setLayerName( int index, const QString& name )
 {
 	MapScene* mapScene = m_mapSceneList[m_mapTabWidget->currentIndex()];
