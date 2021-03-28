@@ -6,6 +6,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QList>
+#include <QSet>
 #include <QUndoStack>
 
 class WorkspaceWidget;
@@ -36,6 +37,7 @@ class MapScene : public QGraphicsScene
 	friend class LayerAddCommand;
 	friend class LayerDeleteCommand;
 	friend class LayerRenameCommand;
+	friend class LayerColorChangeCommand;
 	friend class TileLayer;
 	friend class MarkerLayer;
 	friend class SelectMask;
@@ -47,12 +49,14 @@ public:
 	~MapScene();
 
 	MapInfo getMapInfo() const { return m_mapInfo; }
+	TileInfo getTileInfo( int tileIndex, int layerIndex ) const;
 
 	void editMapOnPoint( const QPointF& point );
 	QList<QPoint> editMapByFloodFill( int layerIndex, const QPoint& coord );
 	void selectTilesByFloodFill( int layerIndex, const QPoint& coord );
 
 	void paintMap( int index, TileInfo tileInfo, int layerIndex );
+	void paintMap( const QPoint& coord, TileInfo tileInfo, int layerIndex );
 	void paintMap( int index, TileInfo tileInfo );
 	void paintMap( int index );
 	void paintMap( QSize coord );
@@ -90,7 +94,7 @@ private:
 	MapInfo m_mapInfo;
 	QList<Layer*> m_layers;
 
-	QList<TileInfo> m_beforeDrawTileInfo;
+	QSet<TileModified> m_oldTileModifiedList;
 	QUndoStack* m_undoStack = Q_NULLPTR;
 
 	// Select tool

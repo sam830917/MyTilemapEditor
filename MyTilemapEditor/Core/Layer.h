@@ -36,6 +36,7 @@ class TileLayer : public Layer
 {
 	friend class WorkspaceWidget;
 	friend class MapScene;
+	friend class DrawCommand;
 	friend class LayerAddCommand;
 	friend class LayerDeleteCommand;
 	friend class Tile;
@@ -62,6 +63,7 @@ class MarkerLayer : public Layer
 	friend class MapScene;
 	friend class LayerAddCommand;
 	friend class LayerDeleteCommand;
+	friend class LayerColorChangeCommand;
 
 public:
 	MarkerLayer( MapScene* mapScene, int zValue );

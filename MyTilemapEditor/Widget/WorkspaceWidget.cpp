@@ -683,7 +683,9 @@ void WorkspaceWidget::setLayerVisible( int index, bool isVisible )
 void WorkspaceWidget::setLayerColor( int index, const QColor& color )
 {
 	MapScene* mapScene = m_mapSceneList[m_mapTabWidget->currentIndex()];
-	mapScene->m_layers[index]->setColor( color );
+
+	LayerColorChangeCommand* command = new LayerColorChangeCommand( mapScene, index, color );
+	mapScene->m_undoStack->push( command );
 	m_mapSceneList[m_mapTabWidget->currentIndex()]->update();
 }
 

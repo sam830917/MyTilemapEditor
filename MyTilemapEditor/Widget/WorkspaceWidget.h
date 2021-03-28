@@ -82,6 +82,7 @@ signals:
 	void addedNewLayerWithInfo( int index, LayerInfo layerInfo );
 	void deletedLayer( int index );
 	void renamedLayer( int index, const QString& name );
+	void changedColorLayer( int index, const QColor& color );
 
 	void showProperties( const QMap<QString, QString>& informationMap );
 	void addNewLayerGroup( MapInfo mapInfo, QList<LayerInfo> layerInfoList );

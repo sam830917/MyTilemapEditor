@@ -295,6 +295,7 @@ void MainWindow::initialConnections()
 	connect( m_centralWidget, &WorkspaceWidget::addedNewLayer, m_layerWidget, &LayerWidget::implementAddNewLayer );
 	connect( m_centralWidget, &WorkspaceWidget::deletedLayer, m_layerWidget, &LayerWidget::removeLayerFromIndex );
 	connect( m_centralWidget, &WorkspaceWidget::renamedLayer, m_layerWidget, &LayerWidget::implementRenameLayer );
+	connect( m_centralWidget, &WorkspaceWidget::changedColorLayer, m_layerWidget, &LayerWidget::implementChangeColorLayer );
 	connect( m_centralWidget, &WorkspaceWidget::addNewLayerGroup, m_layerWidget, &LayerWidget::addNewLayerGroup );
 	connect( m_centralWidget, &WorkspaceWidget::showProperties, m_propertiesWidget, &PropertiesWidget::showProperties );
 	connect( m_centralWidget, &WorkspaceWidget::getPaintMapModified, m_brushWidget, &BrushWidget::getPaintMapModified );

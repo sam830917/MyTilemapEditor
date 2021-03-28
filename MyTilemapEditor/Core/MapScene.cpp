@@ -186,6 +186,16 @@ MapScene::~MapScene()
 	}
 }
 
+TileInfo MapScene::getTileInfo( int tileIndex, int layerIndex ) const
+{
+	if ( m_layers[layerIndex]->getLayerInfo().getLayerType() == eLayerType::TILE_LAYER )
+	{
+		TileLayer* layer = dynamic_cast<TileLayer*>(m_layers[layerIndex]);
+		return layer->getTileInfo(tileIndex);
+	}
+	return TileInfo();
+}
+
 void MapScene::editMapOnPoint( const QPointF& point )
 {
 	// Check out of bound
@@ -214,6 +224,7 @@ void MapScene::editMapOnPoint( const QPointF& point )
 	{
 		bool isDefault = true;
 		m_parentWidget->isDefalutBrush( isDefault );
+		int layerIndex = getCurrentLayerIndex();
 		if ( isDefault )
 		{
 			QList<TileInfo> selectedTileList = getCurrentTiles();
@@ -228,7 +239,9 @@ void MapScene::editMapOnPoint( const QPointF& point )
 				for( int w = 0; w < regionSize.width(); ++w )
 				{
 					TileInfo t = selectedTileList[h * regionSize.width() + w];
-					paintMap( QPoint( coord.width() + w, coord.height() + h ), t );
+					QPoint pCoord = QPoint( coord.width() + w, coord.height() + h );
+					m_oldTileModifiedList.insert( TileModified( pCoord, getTileInfo( m_mapInfo.getIndex( pCoord ), layerIndex ) ) );
+					paintMap( pCoord, t );
 				}
 			}
 		}
@@ -238,6 +251,7 @@ void MapScene::editMapOnPoint( const QPointF& point )
 			m_parentWidget->getPaintMapModified( modifiedList, QPoint( coord.width(), coord.height() ), m_parentWidget->getCurrentDrawTool() );
 			for( TileModified m : modifiedList )
 			{
+				m_oldTileModifiedList.insert( TileModified( m.m_coordinate, getTileInfo( m_mapInfo.getIndex( m.m_coordinate ), layerIndex ) ) );
 				paintMap( m.m_coordinate, m.m_tileInfo );
 			}
 		}
@@ -247,9 +261,12 @@ void MapScene::editMapOnPoint( const QPointF& point )
 	{
 		bool isDefault = true;
 		m_parentWidget->isDefalutBrush( isDefault );
+		int layerIndex = getCurrentLayerIndex();
 		if( isDefault )
 		{
-			eraseMap( QPoint( coord.width(), coord.height() ) );
+			QPoint pCoord = QPoint( coord.width(), coord.height() );
+			m_oldTileModifiedList.insert( TileModified( pCoord, getTileInfo( m_mapInfo.getIndex( pCoord ), layerIndex ) ) );
+			eraseMap( pCoord );
 		}
 		else
 		{
@@ -257,6 +274,7 @@ void MapScene::editMapOnPoint( const QPointF& point )
 			m_parentWidget->getPaintMapModified( modifiedList, QPoint( coord.width(), coord.height() ), m_parentWidget->getCurrentDrawTool() );
 			for( TileModified m : modifiedList )
 			{
+				m_oldTileModifiedList.insert( m );
 				paintMap( m.m_coordinate, m.m_tileInfo );
 			}
 		}
@@ -321,8 +339,7 @@ void MapScene::paintMap( QSize coord )
 
 void MapScene::paintMap( int index, TileInfo tileInfo, int layerIndex )
 {
-	int currentIndex = getCurrentLayerIndex();
-	if( index < 0 || m_layers[currentIndex]->getLayerInfo().isLock() )
+	if( m_layers[layerIndex]->getLayerInfo().isLock() )
 	{
 		return;
 	}
@@ -345,6 +362,12 @@ void MapScene::paintMap( int index, TileInfo tileInfo, int layerIndex )
 		break;
 	}
 	m_parentWidget->markCurrentSceneForModified();
+}
+
+void MapScene::paintMap( const QPoint& coord, TileInfo tileInfo, int layerIndex )
+{
+	int index = m_mapInfo.getIndex(coord);
+	paintMap( index, tileInfo, layerIndex );
 }
 
 void MapScene::paintMap( int index, TileInfo tileInfo )
@@ -646,27 +669,24 @@ void MapScene::eraseSelectedTiles()
 	{
 		return;
 	}
-	m_beforeDrawTileInfo.clear();
+	m_oldTileModifiedList.clear();
 	int currentIndex = getCurrentLayerIndex();
 	if( currentIndex == -1 || m_layers[currentIndex]->getLayerInfo().isLock() || !m_layers[currentIndex]->getLayerInfo().isVisible() )
 	{
 		return;
 	}
 	TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[currentIndex]);
-	m_beforeDrawTileInfo.reserve( tileLayer->m_tileList.size() );
-	for( Tile* tile : tileLayer->m_tileList )
-	{
-		TileInfo& info = tile->getTileInfo();
-		m_beforeDrawTileInfo.push_back( info );
-	}
+
+	int layerIndex = getCurrentLayerIndex();
 	for( int i = 0; i < m_selectedTileItemList.size(); ++i )
 	{
 		if( m_selectedTileItemList[i]->m_isSelected )
 		{
+			m_oldTileModifiedList.insert( TileModified( m_mapInfo.getCoord(i), getTileInfo( i, layerIndex ) ) );
 			eraseMap( i );
 		}
 	}
-	QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, tileLayer->m_tileList );
+	QUndoCommand* command = new DrawCommand( this, layerIndex, m_oldTileModifiedList );
 	m_undoStack->push( command );
 	setIsShowSelection( false );
 }
@@ -731,25 +751,21 @@ void MapScene::pasteTilesOnCoord( const QPoint& coord, const QList<TileModified>
 	{
 		return;
 	}
-	m_beforeDrawTileInfo.clear();
+	m_oldTileModifiedList.clear();
 	TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[currentIndex]);
-	m_beforeDrawTileInfo.reserve( tileLayer->m_tileList.size() );
-	for( Tile* tile : tileLayer->m_tileList )
-	{
-		TileInfo& info = tile->getTileInfo();
-		m_beforeDrawTileInfo.push_back( info );
-	}
+	int layerIndex = getCurrentLayerIndex();
 
 	for( TileModified tileModified : copiedTileList )
 	{
 		QPoint point = tileModified.m_coordinate + coord;
 		if ( tileModified.m_tileInfo.isValid() )
 		{
+			m_oldTileModifiedList.insert( TileModified( point, getTileInfo( m_mapInfo.getIndex(point), layerIndex ) ) );
 			paintMap( point, tileModified.m_tileInfo );
 		}
 	}
 	setIsShowSelection( false );
-	QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, tileLayer->m_tileList );
+	QUndoCommand* command = new DrawCommand( this, layerIndex, m_oldTileModifiedList );
 	m_undoStack->push( command );
 }
 
@@ -811,13 +827,7 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 				return;
 			}
 			TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[currentIndex]);
-			m_beforeDrawTileInfo.clear();
-			m_beforeDrawTileInfo.reserve( tileLayer->m_tileList.size() );
-			for( Tile* tile : tileLayer->m_tileList )
-			{
-				TileInfo& info = tile->getTileInfo();
-				m_beforeDrawTileInfo.push_back( info );
-			}
+			m_oldTileModifiedList.clear();
 
 			// Implement Flood fill and Paint tiles
 			QList<QPoint> readyToPaintTileCoords = editMapByFloodFill( currentIndex, coord );
@@ -833,6 +843,7 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 			}
 
 			bool isDefault = true;
+			int layerIndex = getCurrentLayerIndex();
 			m_parentWidget->isDefalutBrush( isDefault );
 			if ( isDefault )
 			{
@@ -844,6 +855,7 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 					QPoint targetCoord = readyToPaintTileCoords[i];
 					QPoint coord = QPoint( (targetCoord.x() - smallestPoint.x()) % regionSize.width(), (targetCoord.y() - smallestPoint.y()) % regionSize.height() );
 					int index = coord.x() + coord.y() * regionSize.width();
+					m_oldTileModifiedList.insert( TileModified( targetCoord, getTileInfo( m_mapInfo.getIndex( targetCoord ), layerIndex ) ) );
 					paintMap( targetCoord, selectedTileList[index] );
 				}
 			}
@@ -855,11 +867,12 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 					m_parentWidget->getPaintMapModified( modifiedList, readyToPaintTileCoords[i], eDrawTool::BRUSH );
 					for( TileModified m : modifiedList )
 					{
+						m_oldTileModifiedList.insert( TileModified( m.m_coordinate, getTileInfo( m_mapInfo.getIndex( m.m_coordinate ), layerIndex ) ) );
 						paintMap( m.m_coordinate, m.m_tileInfo );
 					}
 				}
 			}
-			QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, tileLayer->m_tileList );
+			QUndoCommand* command = new DrawCommand( this, layerIndex, m_oldTileModifiedList );
 			m_undoStack->push( command );
 		}
 		else if ( eDrawTool::SHAPE == m_parentWidget->m_drawTool )
@@ -884,15 +897,10 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 				return;
 			}
 			TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[currentIndex]);
-			m_beforeDrawTileInfo.clear();
-			m_beforeDrawTileInfo.reserve( tileLayer->m_tileList.size() );
-			for( Tile* tile : tileLayer->m_tileList )
-			{
-				TileInfo& info = tile->getTileInfo();
-				m_beforeDrawTileInfo.push_back( info );
-			}
+			m_oldTileModifiedList.clear();
 			m_parentWidget->disableShortcut( true );
 
+			int layerIndex = getCurrentLayerIndex();
 			bool isDefault = true;
 			m_parentWidget->isDefalutBrush( isDefault );
 			if ( isDefault )
@@ -904,6 +912,7 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 					return;
 				}
 				TileInfo t = selectedTileList[0];
+				m_oldTileModifiedList.insert( TileModified( coord, getTileInfo( m_mapInfo.getIndex( coord ), layerIndex ) ) );
 				paintMap( coord, t );
 			}
 			else
@@ -912,6 +921,7 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 				m_parentWidget->getPaintMapModified( modifiedList, QPoint( coord.x(), coord.y() ), m_parentWidget->getCurrentDrawTool() );
 				for( TileModified m : modifiedList )
 				{
+					m_oldTileModifiedList.insert( TileModified( m.m_coordinate, getTileInfo( m_mapInfo.getIndex( m.m_coordinate ), layerIndex ) ) );
 					paintMap( m.m_coordinate, m.m_tileInfo );
 				}
 			}
@@ -979,7 +989,7 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 		else if ( eDrawTool::BRUSH == m_parentWidget->m_drawTool ||
 				eDrawTool::ERASER == m_parentWidget->m_drawTool )
 		{
-			m_beforeDrawTileInfo.clear();
+			m_oldTileModifiedList.clear();
 			int currentIndex = getCurrentLayerIndex();
 			if( currentIndex == -1 || m_layers[currentIndex]->getLayerInfo().isLock() || !m_layers[currentIndex]->getLayerInfo().isVisible() )
 			{
@@ -989,15 +999,9 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 			Layer* layer = m_layers[currentIndex];
 			if ( layer->getLayerInfo().getLayerType() == eLayerType::TILE_LAYER )
 			{
-				TileLayer* tileLayer = dynamic_cast<TileLayer*>(layer);
-				m_beforeDrawTileInfo.reserve( tileLayer->m_tileList.size() );
-				for( Tile* tile : tileLayer->m_tileList )
-				{
-					TileInfo& info = tile->getTileInfo();
-					m_beforeDrawTileInfo.push_back( info );
-				}
+				// TODO
 			}
-			if ( layer->getLayerInfo().getLayerType() == eLayerType::MARKER_LAYER )
+			else if ( layer->getLayerInfo().getLayerType() == eLayerType::MARKER_LAYER )
 			{
 				MarkerLayer* markerLayer = dynamic_cast<MarkerLayer*>(layer);
 				// TODO
@@ -1094,13 +1098,16 @@ void MapScene::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
 
 			QSize regionSize = QSize( m_selectedMaxCoord.x() - m_selectedMinCoord.x(), m_selectedMaxCoord.y() - m_selectedMinCoord.y() );
 
-			for( int i = 0; i < m_beforeDrawTileInfo.size(); ++i )
-			{
-				TileInfo tile = m_beforeDrawTileInfo[i];
-				paintMap( i, tile );
+			QSet<TileModified>::const_iterator i = m_oldTileModifiedList.constBegin();
+			while( i != m_oldTileModifiedList.constEnd() ) {
+				TileInfo tile = i->m_tileInfo;
+				paintMap( i->m_coordinate, tile );
+				++i;
 			}
 
+			QMap<QPoint, TileModified> selectedPointMap;
 			bool isDefault = true;
+			int layerIndex = getCurrentLayerIndex();
 			m_parentWidget->isDefalutBrush( isDefault );
 			if( isDefault )
 			{
@@ -1114,6 +1121,8 @@ void MapScene::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
 
 						QPoint tileCoord = QPoint( (targetCoord.x() - m_selectedMinCoord.x()) % tileRegionSize.width(), (targetCoord.y() - m_selectedMinCoord.y()) % tileRegionSize.height() );
 						int index = tileCoord.x() + tileCoord.y() * tileRegionSize.width();
+
+						m_oldTileModifiedList.insert( TileModified( targetCoord, getTileInfo( m_mapInfo.getIndex( targetCoord ), layerIndex ) ) );
 						paintMap( targetCoord, selectedTileList[index] );
 					}
 				}
@@ -1132,6 +1141,7 @@ void MapScene::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
 						m_parentWidget->getPaintMapModified( modifiedList, QPoint( targetCoord.x(), targetCoord.y() ), eDrawTool::BRUSH );
 						for( TileModified m : modifiedList )
 						{
+							m_oldTileModifiedList.insert( TileModified( m.m_coordinate, getTileInfo( m_mapInfo.getIndex( m.m_coordinate ), layerIndex ) ) );
 							paintMap( m.m_coordinate, m.m_tileInfo );
 						}
 					}
@@ -1180,9 +1190,10 @@ void MapScene::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 			{
 				return;
 			}
+			int layerIndex = getCurrentLayerIndex();
 
 			TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[currentIndex]);
-			QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, tileLayer->m_tileList );
+			QUndoCommand* command = new DrawCommand( this, layerIndex, m_oldTileModifiedList );
 			m_undoStack->push( command );
 			m_parentWidget->disableShortcut( false );
 		}
@@ -1195,12 +1206,13 @@ void MapScene::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 			{
 				return;
 			}
+			int layerIndex = getCurrentLayerIndex();
 
 			Layer* layer = m_layers[currentIndex];
 			if( layer->getLayerInfo().getLayerType() == eLayerType::TILE_LAYER )
 			{
 				TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[currentIndex]);
-				QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, tileLayer->m_tileList );
+				QUndoCommand* command = new DrawCommand( this, layerIndex, m_oldTileModifiedList );
 				m_undoStack->push( command );
 			}
 			else

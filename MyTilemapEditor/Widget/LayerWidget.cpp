@@ -143,6 +143,18 @@ void LayerWidget::implementRenameLayer( int index, const QString& name )
 	modifiedCurrentScene();
 }
 
+void LayerWidget::implementChangeColorLayer( int index, const QColor& color )
+{
+	LayerRowWidget* layerRow = dynamic_cast<LayerRowWidget*>(m_listWidgetList[m_currentIndex]->itemWidget( m_listWidgetList[m_currentIndex]->item( index ) ));
+	if( !layerRow || !layerRow->m_isMarkerLayer )
+	{
+		return;
+	}
+	layerRow->m_markerColor = color;
+	layerRow->setButtonColor();
+	modifiedCurrentScene();
+}
+
 void LayerWidget::removeLayerFromIndex( int index )
 {
 	delete m_listWidgetList[m_currentIndex]->takeItem( index );
@@ -323,7 +335,7 @@ void LayerWidget::moveItem( int fromItemIndex, int toItemIndex )
 		delete currentItem->m_layerRowWidget;
 		currentItem->m_layerRowWidget = new LayerRowWidget( name, currentItem, lockChecked, visibleChecked, true );
 		currentItem->m_layerRowWidget->m_markerColor = color;
-		currentItem->m_layerRowWidget->setColor();
+		currentItem->m_layerRowWidget->setButtonColor();
 	}
 	else
 	{
@@ -444,7 +456,7 @@ LayerRowWidget::LayerRowWidget( const QString& name, LayerRow* layerRow, bool lo
 	{
 		m_markerColor = QColorConstants::Yellow;
 		m_markerColorButton = new QPushButton();
-		setColor();
+		setButtonColor();
 		QObject::connect( m_markerColorButton, &QPushButton::clicked, [&]()
 			{
 				QColorDialog colorDialog(m_markerColor);
@@ -452,7 +464,7 @@ LayerRowWidget::LayerRowWidget( const QString& name, LayerRow* layerRow, bool lo
 				if ( colorDialog.exec() == QDialog::Accepted )
 				{
 					m_markerColor = colorDialog.currentColor();
-					setColor();
+					setButtonColor();
 					m_layerRow->m_layerGroup->m_layerWidget->changeColor(m_layerRow->m_index, m_markerColor);
 				}
 			} );
@@ -500,7 +512,7 @@ void LayerRowWidget::setIsVisible()
 	m_layerRow->m_layerGroup->m_layerWidget->modifiedCurrentScene();
 }
 
-void LayerRowWidget::setColor()
+void LayerRowWidget::setButtonColor()
 {
 	QPalette pal = m_markerColorButton->palette();
 	pal.setColor( QPalette::Button, m_markerColor );
@@ -575,7 +587,11 @@ LayerRow::LayerRow( LayerGroup* view, LayerInfo layerInfo )
 	m_index = view->count();
 	view->addItem( this );
 	view->setItemWidget( this, m_layerRowWidget );
-	m_layerRowWidget->m_markerColor = layerInfo.getColor();
+	if ( layerInfo.getLayerType()== eLayerType::MARKER_LAYER )
+	{
+		m_layerRowWidget->m_markerColor = layerInfo.getColor();
+		m_layerRowWidget->setButtonColor();
+	}
 	setSizeHint( QSize( 0, 40 ) );
 }
 

@@ -3,6 +3,7 @@
 #include "Core/TileInfo.h"
 #include "Core/LayerInfo.h"
 #include "Core/Layer.h"
+#include "Brush/BrushCommon.h"
 #include <QUndoCommand>
 #include <QList>
 
@@ -13,15 +14,16 @@ class TileLayer;
 class DrawCommand : public QUndoCommand
 {
 public:
-	DrawCommand( QList<TileInfo> tileInfoList, QList<Tile*> tiles, QUndoCommand* parent = 0 );
+	DrawCommand( MapScene* mapScene, int layerIndex, QSet<TileModified> oldTileModifiedList, QUndoCommand* parent = 0 );
 	~DrawCommand();
 
 	virtual void undo() override;
 	virtual void redo() override;
 private:
-	QList<TileInfo> m_tileInfoBeforeList;
-	QList<TileInfo> m_tileInfoAfterList;
-	QList<Tile*> m_tiles;
+	int m_index = 0;
+	MapScene* m_mapScene;
+	QSet<TileModified> m_oldTileModifiedList;
+	QSet<TileModified> m_newTileModifiedList;
 };
 
 class LayerMoveCommand : public QUndoCommand
@@ -85,4 +87,20 @@ private:
 	MapScene* m_mapScene;
 	QString m_oldName;
 	QString m_newName;
+};
+
+class LayerColorChangeCommand : public QUndoCommand
+{
+	// Index A and Index B exchange position in the list.
+public:
+	LayerColorChangeCommand( MapScene* mapScene, int index, const QColor& color, QUndoCommand* parent = 0 );
+	~LayerColorChangeCommand();
+
+	virtual void undo() override;
+	virtual void redo() override;
+private:
+	int m_index = 0;
+	MapScene* m_mapScene;
+	QColor m_oldColor;
+	QColor m_newColor;
 };

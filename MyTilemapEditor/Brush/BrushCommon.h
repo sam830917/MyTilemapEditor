@@ -25,7 +25,11 @@ struct TileModified
 
 	QPoint m_coordinate;
 	TileInfo m_tileInfo;
+
+	bool operator==( const TileModified& compare ) const;
 };
+
+uint qHash( const TileModified key );
 
 struct AddBrushItem
 {

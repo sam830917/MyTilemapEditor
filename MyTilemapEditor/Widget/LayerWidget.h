@@ -37,6 +37,7 @@ public slots:
 	void implementAddNewLayer( int index, const QString& name, eLayerType type );
 	void implementAddNewLayerWithInfo( int index, LayerInfo layerInfo );
 	void implementRenameLayer( int index, const QString& name );
+	void implementChangeColorLayer( int index, const QColor& color );
 	void removeLayerFromIndex( int index );
 	void removeLayer();
 	void raiseCurrentLayer();
@@ -111,7 +112,7 @@ public:
 public slots:
 	void setIsLock();
 	void setIsVisible();
-	void setColor();
+	void setButtonColor();
 
 protected:
 	virtual bool eventFilter( QObject* obj, QEvent* event );
