@@ -364,19 +364,38 @@ void MapScene::paintMap( int index, TileInfo tileInfo )
 
 void MapScene::paintMap( const QMap<int, TileInfo>& tileInfoMap, int layerIndex )
 {
-	QMap<int, TileInfo>::const_iterator mapIterator = tileInfoMap.constBegin();
-	TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[layerIndex]);
-	while( mapIterator != tileInfoMap.constEnd() )
+	if( m_layers[layerIndex]->getLayerInfo().getLayerType() == eLayerType::TILE_LAYER )
 	{
-		int index = mapIterator.key();
-		TileInfo tileInfo = mapIterator.value();
-		if( index < 0 )
+		QMap<int, TileInfo>::const_iterator mapIterator = tileInfoMap.constBegin();
+		TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[layerIndex]);
+		while( mapIterator != tileInfoMap.constEnd() )
 		{
-			continue;
-		}
-		tileLayer->setTileInfo( index, tileInfo );
+			int index = mapIterator.key();
+			TileInfo tileInfo = mapIterator.value();
+			if( index < 0 )
+			{
+				continue;
+			}
+			tileLayer->setTileInfo( index, tileInfo );
 
-		++mapIterator;
+			++mapIterator;
+		}
+	}
+	else if ( m_layers[layerIndex]->getLayerInfo().getLayerType() == eLayerType::MARKER_LAYER )
+	{
+		QMap<int, TileInfo>::const_iterator mapIterator = tileInfoMap.constBegin();
+		MarkerLayer* tileLayer = dynamic_cast<MarkerLayer*>(m_layers[layerIndex]);
+		while( mapIterator != tileInfoMap.constEnd() )
+		{
+			int index = mapIterator.key();
+			if( index < 0 )
+			{
+				continue;
+			}
+			tileLayer->markTile( index, true );
+
+			++mapIterator;
+		}
 	}
 	update();
 }
@@ -580,6 +599,19 @@ TileLayer* MapScene::addNewLayer( int zValue )
 	for ( int i = 0; i < m_layers.size(); ++i )
 	{
 		m_layers[i]->setOrder(i);
+	}
+	return newLayer;
+}
+
+MarkerLayer* MapScene::addNewMarkerLayer( int zValue )
+{
+	MarkerLayer* newLayer = new MarkerLayer( this, zValue );
+	m_layers.insert( zValue, newLayer );
+
+	// reorder z value
+	for( int i = 0; i < m_layers.size(); ++i )
+	{
+		m_layers[i]->setOrder( i );
 	}
 	return newLayer;
 }

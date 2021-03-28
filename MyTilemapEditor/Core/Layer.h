@@ -106,6 +106,8 @@ class MarkerTile : public QGraphicsRectItem
 public:
 	MarkerTile( MapScene* scene, MarkerLayer* layer, QGraphicsItem* parent = Q_NULLPTR );
 
+	bool isMarked() const { return m_marked; }
+
 protected:
 	virtual void paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = Q_NULLPTR ) override;
 

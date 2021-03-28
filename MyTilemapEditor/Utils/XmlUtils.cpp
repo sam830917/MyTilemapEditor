@@ -174,11 +174,20 @@ void convertToMapInfo( const QString& mapFilePath, MapInfo& mapInfo, QList<Layer
 			LayerInfo emptyInfo;
 			for( XmlElement* layerEle = layersEle->FirstChildElement( "Layer" ); layerEle; layerEle = layerEle->NextSiblingElement( "Layer" ) )
 			{
-				QString name = parseXmlAttribute( *layerEle, "name", emptyInfo.getNmae() );
-				bool isLock = parseXmlAttribute( *layerEle, "isLock", emptyInfo.isLock() );
-				bool isVisible = parseXmlAttribute( *layerEle, "isVisible", emptyInfo.isVisible() );
+				emptyInfo.setName( parseXmlAttribute( *layerEle, "name", emptyInfo.getNmae() ) );
+				emptyInfo.setIsLock( parseXmlAttribute( *layerEle, "isLock", emptyInfo.isLock() ) );
+				emptyInfo.setIsVisible( parseXmlAttribute( *layerEle, "isVisible", emptyInfo.isVisible() ) );
+				QString type = parseXmlAttribute( *layerEle, "type", QString( "TILE" ) );
+				emptyInfo.setLayerType( eLayerType::TILE_LAYER );
+				if ( type == "MARKER" )
+				{
+					emptyInfo.setLayerType(eLayerType::MARKER_LAYER);
+					QString color = parseXmlAttribute( *layerEle, "color", QString("0,0,0") );
+					QStringList colors = color.split(",");
+					emptyInfo.setColor( QColor( colors[0].toInt(), colors[1].toInt(), colors[2].toInt() ) );
+				}
 
-				layerInfo.push_back( LayerInfo( name, isLock, isVisible ) );
+				layerInfo.push_back( emptyInfo );
 			}
 		}
 		else
@@ -186,6 +195,4 @@ void convertToMapInfo( const QString& mapFilePath, MapInfo& mapInfo, QList<Layer
 			layerInfo.push_back( LayerInfo() );
 		}
 	}
-
-	return;
 }

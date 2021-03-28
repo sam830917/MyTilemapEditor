@@ -61,6 +61,7 @@ public:
 	void eraseMap( QPoint coord );
 
 	TileLayer* addNewLayer( int zValue );
+	MarkerLayer* addNewMarkerLayer( int zValue );
 
 	void setIsShowSelection( bool isShow );
 	void updateSelection();

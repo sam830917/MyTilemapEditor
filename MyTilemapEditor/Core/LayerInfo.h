@@ -13,6 +13,7 @@ class LayerInfo
 {
 public:
 	LayerInfo( const QString& name = "Layer 1", bool isLock = false, bool isVisible = true );
+	LayerInfo( const LayerInfo& copyLayerInfo );
 	~LayerInfo();
 
 	QString		getNmae() const { return m_name; }

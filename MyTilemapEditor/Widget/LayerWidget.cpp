@@ -293,6 +293,11 @@ void LayerWidget::getLayerGroupInfoList( int index, QList<LayerInfo>& layerInfoL
 	{
 		LayerRowWidget* layerRow = dynamic_cast<LayerRowWidget*>( layerGroup->itemWidget( layerGroup->item(i) ) );
 		LayerInfo layerInfo = LayerInfo( layerRow->getName(), layerRow->m_lockBtn->isChecked(), layerRow->m_visibleBtn->isChecked() );
+		if ( layerRow->m_isMarkerLayer )
+		{
+			layerInfo.setLayerType(eLayerType::MARKER_LAYER);
+			layerInfo.setColor( layerRow->m_markerColor );
+		}
 		layerInfoList.push_back(layerInfo);
 	}
 }
