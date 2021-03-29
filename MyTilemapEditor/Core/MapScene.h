@@ -87,6 +87,7 @@ private:
 	void paintTileByFloodFill( int layerIndex, const QPoint& coord, const TileInfo& currentTileInfo, QList<QPoint>& readyToPaintTileIndexes );
 	void paintTileByFloodFill( int layerIndex, const QPoint& coord, bool targetMarked, QList<QPoint>& readyToPaintTileIndexes );
 	void selectTilesByFloodFill( int layerIndex, const QPoint& coord, const TileInfo& currentTileInfo, const TileInfo& newTileInfo );
+	void selectTilesByFloodFill( int layerIndex, const QPoint& coord, bool targetMarked );
 
 	void mousePress_Move();
 	void mousePress_Cursor( const QPointF& mousePos );

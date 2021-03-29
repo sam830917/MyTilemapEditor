@@ -370,7 +370,7 @@ void LayerWidget::initialToolbar()
 	m_newLayerAction = new QAction( QIcon( ":/MainWindow/Icon/plus.png" ), tr( "&New Layer" ), this );
 	m_newLayerAction->setToolTip( tr( "New Layer (Ctrl+Shift+N)" ) );
 	m_toolbar->addAction( m_newLayerAction );
-	m_newMarkerLayerAction = new QAction( QIcon( ":/MainWindow/Icon/plus.png" ), tr( "&New Marker Layer" ), this );
+	m_newMarkerLayerAction = new QAction( QIcon( ":/MainWindow/Icon/marker_plus.png" ), tr( "&New Marker Layer" ), this );
 	m_newMarkerLayerAction->setToolTip( tr( "New Marker Layer (Ctrl+Shift+M)" ) );
 	m_toolbar->addAction( m_newMarkerLayerAction );
 	m_raiseAction = new QAction( QIcon( ":/MainWindow/Icon/up-arrow.png" ), tr( "&Raise Layer" ), this );

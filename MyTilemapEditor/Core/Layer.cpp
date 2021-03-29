@@ -145,6 +145,11 @@ bool MarkerLayer::IsMarked( int coordX, int coordY )
 	return m_tileList[tileIndex]->m_marked;
 }
 
+bool MarkerLayer::IsMarked( int index )
+{
+	return m_tileList[index]->m_marked;
+}
+
 void MarkerLayer::markTile( int coordX, int coordY, bool isMark )
 {
 	int tileIndex = m_mapScene->m_mapInfo.getIndex( QPoint( coordX, coordY ) );

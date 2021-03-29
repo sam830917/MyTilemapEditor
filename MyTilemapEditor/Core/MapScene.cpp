@@ -366,13 +366,23 @@ QList<QPoint> MapScene::editMapByFloodFill( int layerIndex, const QPoint& coord 
 
 void MapScene::selectTilesByFloodFill( int layerIndex, const QPoint& coord )
 {
+	Layer* layer = m_layers[layerIndex];
 	for( SelectMask* mask : m_selectedTileItemList )
 	{
 		mask->setSelected( false );
 	}
-	TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[layerIndex]);
-	TileInfo currentTileInfo = tileLayer->getTileInfo( coord.x(), coord.y() );
-	selectTilesByFloodFill( layerIndex, coord, currentTileInfo, getCurrentTile() );
+
+	if( layer->getLayerInfo().getLayerType() == eLayerType::TILE_LAYER )
+	{
+		TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[layerIndex]);
+		TileInfo currentTileInfo = tileLayer->getTileInfo( coord.x(), coord.y() );
+		selectTilesByFloodFill( layerIndex, coord, currentTileInfo, getCurrentTile() );
+	}
+	else if( layer->getLayerInfo().getLayerType() == eLayerType::MARKER_LAYER )
+	{
+		MarkerLayer* markerLayer = dynamic_cast<MarkerLayer*>(m_layers[layerIndex]);
+		selectTilesByFloodFill( layerIndex, coord, markerLayer->IsMarked( coord.x(), coord.y() ) );
+	}
 }
 
 void MapScene::mousePress_Move()
@@ -576,20 +586,40 @@ void MapScene::mousePress_SelectSameTile( const QPointF& mousePos )
 	{
 		return;
 	}
-	TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[currentIndex]);
-	TileInfo currentTileInfo = tileLayer->getTileInfo( coord.x(), coord.y() );
-	for( int i = 0; i < m_selectedTileItemList.size(); ++i )
+
+	Layer* layer = m_layers[currentIndex];
+	if( layer->getLayerInfo().getLayerType() == eLayerType::TILE_LAYER )
 	{
-		if( tileLayer->getTileInfo( i ) == currentTileInfo )
+		TileLayer* tileLayer = dynamic_cast<TileLayer*>(layer);
+		TileInfo currentTileInfo = tileLayer->getTileInfo( coord.x(), coord.y() );
+		for( int i = 0; i < m_selectedTileItemList.size(); ++i )
 		{
-			m_selectedTileItemList[i]->setSelected( true );
-		}
-		else
-		{
-			m_selectedTileItemList[i]->setSelected( false );
+			if( tileLayer->getTileInfo( i ) == currentTileInfo )
+			{
+				m_selectedTileItemList[i]->setSelected( true );
+			}
+			else
+			{
+				m_selectedTileItemList[i]->setSelected( false );
+			}
 		}
 	}
+	else if( layer->getLayerInfo().getLayerType() == eLayerType::MARKER_LAYER )
+	{
+		MarkerLayer* markerLayer = dynamic_cast<MarkerLayer*>(layer);
 
+		for( int i = 0; i < m_selectedTileItemList.size(); ++i )
+		{
+			if( markerLayer->IsMarked( i ) ==  markerLayer->IsMarked( coord.x(), coord.y() ) )
+			{
+				m_selectedTileItemList[i]->setSelected( true );
+			}
+			else
+			{
+				m_selectedTileItemList[i]->setSelected( false );
+			}
+		}
+	}
 	setIsShowSelection( true );
 	showSelectedTileProperties();
 }
@@ -1098,6 +1128,27 @@ void MapScene::selectTilesByFloodFill( int layerIndex, const QPoint& coord, cons
 	selectTilesByFloodFill( layerIndex, QPoint( coord.x() - 1, coord.y() ), currentTileInfo, newTileInfo );
 	selectTilesByFloodFill( layerIndex, QPoint( coord.x(), coord.y() + 1 ), currentTileInfo, newTileInfo );
 	selectTilesByFloodFill( layerIndex, QPoint( coord.x(), coord.y() - 1 ), currentTileInfo, newTileInfo );
+}
+
+void MapScene::selectTilesByFloodFill( int layerIndex, const QPoint& coord, bool targetMarked )
+{
+	if( coord.x() < 0 || coord.x() >= m_mapInfo.getMapSize().width() || coord.y() < 0 || coord.y() >= m_mapInfo.getMapSize().height() )
+		return;
+
+	MarkerLayer* markerLayer = dynamic_cast<MarkerLayer*>(m_layers[layerIndex]);
+
+	if( markerLayer->IsMarked( coord.x(), coord.y() ) != targetMarked )
+		return;
+
+	if( m_selectedTileItemList[m_mapInfo.getIndex( coord )]->m_isSelected )
+		return;
+
+	m_selectedTileItemList[m_mapInfo.getIndex( coord )]->setSelected( true );
+
+	selectTilesByFloodFill( layerIndex, QPoint( coord.x() + 1, coord.y() ), targetMarked );
+	selectTilesByFloodFill( layerIndex, QPoint( coord.x() - 1, coord.y() ), targetMarked );
+	selectTilesByFloodFill( layerIndex, QPoint( coord.x(), coord.y() + 1 ), targetMarked );
+	selectTilesByFloodFill( layerIndex, QPoint( coord.x(), coord.y() - 1 ), targetMarked );
 }
 
 void MapScene::eraseMap( int tileIndex, int layerIndex )

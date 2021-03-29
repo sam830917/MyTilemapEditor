@@ -73,6 +73,7 @@ public:
 
 	QColor getColor() const { return m_layerInfo.getColor(); }
 	bool IsMarked( int coordX, int coordY );
+	bool IsMarked( int index );
 
 	void markTile( int coordX, int coordY, bool isMark );
 	void markTile( int index, bool isMark );
