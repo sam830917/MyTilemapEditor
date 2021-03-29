@@ -512,17 +512,24 @@ void MapScene::mousePress_Shape( const QPointF& mousePos )
 	int layerIndex = getCurrentLayerIndex();
 	bool isDefault = true;
 	m_parentWidget->isDefalutBrush( isDefault );
-	if( isDefault )
+	Layer* layer = m_layers[layerIndex];
+	if( isDefault || layer->getLayerInfo().getLayerType() != eLayerType::TILE_LAYER )
 	{
 		QList<TileInfo> selectedTileList = getCurrentTiles();
-
 		if( selectedTileList.empty() )
 		{
 			return;
 		}
 		TileInfo t = selectedTileList[0];
-		m_oldTileModifiedList.insert( TileModified( coord, getTileInfo( m_mapInfo.getIndex( coord ), layerIndex ) ) );
-		paintMap( coord, t );
+		if( layer->getLayerInfo().getLayerType() == eLayerType::TILE_LAYER )
+		{
+			m_oldTileModifiedList.insert( TileModified( coord, getTileInfo( m_mapInfo.getIndex( coord ), layerIndex ) ) );
+		}
+		else if ( layer->getLayerInfo().getLayerType() == eLayerType::MARKER_LAYER )
+		{
+			m_oldTileMarkerModifiedList.insert( TileMarkerModified( coord, getIsMarked( m_mapInfo.getIndex( coord ), layerIndex ) ) );
+		}
+		paintMap( coord, t, layerIndex );
 	}
 	else
 	{
@@ -668,17 +675,32 @@ void MapScene::mouseMove_Shape( const QPointF& mousePos )
 	QSize regionSize = QSize( m_selectedMaxCoord.x() - m_selectedMinCoord.x(), m_selectedMaxCoord.y() - m_selectedMinCoord.y() );
 
 	QSet<TileModified>::const_iterator i = m_oldTileModifiedList.constBegin();
-	while( i != m_oldTileModifiedList.constEnd() ) {
+	while( i != m_oldTileModifiedList.constEnd() ) 
+	{
 		TileInfo tile = i->m_tileInfo;
 		paintMap( i->m_coordinate, tile );
 		++i;
+	}
+	QSet<TileMarkerModified>::const_iterator j = m_oldTileMarkerModifiedList.constBegin();
+	while( j != m_oldTileMarkerModifiedList.constEnd() )
+	{
+		if( j->m_isMarked )
+		{
+			paintMap( j->m_coordinate, TileInfo() );
+		}
+		else
+		{
+			eraseMap( j->m_coordinate );
+		}
+		++j;
 	}
 
 	QMap<QPoint, TileModified> selectedPointMap;
 	bool isDefault = true;
 	int layerIndex = getCurrentLayerIndex();
 	m_parentWidget->isDefalutBrush( isDefault );
-	if( isDefault )
+	Layer* layer = m_layers[layerIndex];
+	if( isDefault || layer->getLayerInfo().getLayerType() != eLayerType::TILE_LAYER )
 	{
 		QList<TileInfo> selectedTileList = getCurrentTiles();
 		QSize tileRegionSize = getSelectedTilesRegionSize();
@@ -691,7 +713,14 @@ void MapScene::mouseMove_Shape( const QPointF& mousePos )
 				QPoint tileCoord = QPoint( (targetCoord.x() - m_selectedMinCoord.x()) % tileRegionSize.width(), (targetCoord.y() - m_selectedMinCoord.y()) % tileRegionSize.height() );
 				int index = tileCoord.x() + tileCoord.y() * tileRegionSize.width();
 
-				m_oldTileModifiedList.insert( TileModified( targetCoord, getTileInfo( m_mapInfo.getIndex( targetCoord ), layerIndex ) ) );
+				if ( layer->getLayerInfo().getLayerType() == eLayerType::TILE_LAYER )
+				{
+					m_oldTileModifiedList.insert( TileModified( targetCoord, getTileInfo( m_mapInfo.getIndex( targetCoord ), layerIndex ) ) );
+				}
+				else if ( layer->getLayerInfo().getLayerType() == eLayerType::MARKER_LAYER )
+				{
+					m_oldTileMarkerModifiedList.insert( TileMarkerModified( targetCoord, getIsMarked( m_mapInfo.getIndex( targetCoord ), layerIndex ) ) );
+				}
 				paintMap( targetCoord, selectedTileList[index] );
 			}
 		}
@@ -743,9 +772,17 @@ void MapScene::mouseRelease_Shape()
 	}
 	int layerIndex = getCurrentLayerIndex();
 
-	TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[currentIndex]);
-	QUndoCommand* command = new DrawCommand( this, layerIndex, m_oldTileModifiedList );
-	m_undoStack->push( command );
+	Layer* layer = m_layers[currentIndex];
+	if ( layer->getLayerInfo().getLayerType() == eLayerType::TILE_LAYER )
+	{
+		QUndoCommand* command = new DrawCommand( this, layerIndex, m_oldTileModifiedList );
+		m_undoStack->push( command );
+	}
+	else if ( layer->getLayerInfo().getLayerType() == eLayerType::MARKER_LAYER )
+	{
+		QUndoCommand* command = new DrawMarkerCommand( this, layerIndex, m_oldTileMarkerModifiedList );
+		m_undoStack->push( command );
+	}
 	m_parentWidget->disableShortcut( false );
 }
 
