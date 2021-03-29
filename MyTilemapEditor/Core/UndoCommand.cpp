@@ -47,6 +47,69 @@ void DrawCommand::redo()
 	m_mapScene->m_parentWidget->markCurrentSceneForModified();
 }
 
+DrawMarkerCommand::DrawMarkerCommand( MapScene* mapScene, int layerIndex, QSet<TileMarkerModified> oldTileModifiedList, QUndoCommand* parent /*= 0 */ )
+	: QUndoCommand( parent ),
+	m_mapScene( mapScene ),
+	m_index( layerIndex ),
+	m_oldTileModifiedList( oldTileModifiedList )
+{
+	if( m_mapScene->m_layers[m_index]->getLayerInfo().getLayerType() == eLayerType::MARKER_LAYER )
+	{
+		MarkerLayer* markerLayer = dynamic_cast<MarkerLayer*>(m_mapScene->m_layers[m_index]);
+		QSet<TileMarkerModified>::const_iterator i = m_oldTileModifiedList.constBegin();
+		while( i != m_oldTileModifiedList.constEnd() ) 
+		{
+			TileMarkerModified tileModified( i->m_coordinate, markerLayer->IsMarked( i->m_coordinate.x(), i->m_coordinate.y() ) );
+			m_newTileModifiedList.insert( tileModified );
+			++i;
+		}
+	}
+}
+
+DrawMarkerCommand::~DrawMarkerCommand()
+{
+
+}
+
+void DrawMarkerCommand::undo()
+{
+	QSet<TileMarkerModified>::const_iterator i = m_oldTileModifiedList.constBegin();
+	while( i != m_oldTileModifiedList.constEnd() )
+	{
+		if( i->m_isMarked )
+		{
+			m_mapScene->paintMap( i->m_coordinate, TileInfo(), m_index );
+		}
+		else
+		{
+			m_mapScene->eraseMap( i->m_coordinate, m_index );
+		}
+		++i;
+	}
+
+	m_mapScene->m_parentWidget->markCurrentSceneForModified();
+}
+
+void DrawMarkerCommand::redo()
+{
+	QSet<TileMarkerModified>::const_iterator i = m_newTileModifiedList.constBegin();
+	while( i != m_newTileModifiedList.constEnd() ) 
+	{
+		if ( i->m_isMarked )
+		{
+			m_mapScene->paintMap( i->m_coordinate, TileInfo(), m_index );
+		}
+		else
+		{
+			m_mapScene->eraseMap( i->m_coordinate, m_index );
+		}
+		++i;
+	}
+
+	m_mapScene->m_parentWidget->markCurrentSceneForModified();
+}
+
+
 LayerMoveCommand::LayerMoveCommand( MapScene* mapScene, int fromItemIndex, int toItemIndex, QUndoCommand* parent /*= 0 */ )
 	: QUndoCommand( parent ),
 	m_mapScene( mapScene ),
@@ -181,7 +244,7 @@ LayerDeleteCommand::LayerDeleteCommand( MapScene* mapScene, int index, QUndoComm
 	m_mapScene( mapScene ),
 	m_index( index )
 {
-	m_layer = dynamic_cast<TileLayer*>(m_mapScene->m_layers[m_index]);
+	m_layer = m_mapScene->m_layers[m_index];
 }
 
 LayerDeleteCommand::~LayerDeleteCommand()
@@ -191,9 +254,21 @@ LayerDeleteCommand::~LayerDeleteCommand()
 void LayerDeleteCommand::undo()
 {
 	m_mapScene->m_layers.insert( m_index, m_layer );
-	for( Tile* tile : m_layer->m_tileList )
+	if ( m_layer->getLayerInfo().getLayerType() == eLayerType::TILE_LAYER )
 	{
-		m_mapScene->addItem( tile );
+		TileLayer* layer = dynamic_cast<TileLayer*>(m_layer);
+		for( Tile* tile : layer->m_tileList )
+		{
+			m_mapScene->addItem( tile );
+		}
+	}
+	else if ( m_layer->getLayerInfo().getLayerType() == eLayerType::MARKER_LAYER )
+	{
+		MarkerLayer* layer = dynamic_cast<MarkerLayer*>(m_layer);
+		for( MarkerTile* tile : layer->m_tileList )
+		{
+			m_mapScene->addItem( tile );
+		}
 	}
 
 	// reorder z value
@@ -201,17 +276,30 @@ void LayerDeleteCommand::undo()
 	{
 		m_mapScene->m_layers[i]->setOrder( i );
 	}
-	m_mapScene->m_parentWidget->addedNewLayerWithInfo( m_index, m_layer->m_layerInfo );
+	m_mapScene->m_parentWidget->addedNewLayerWithInfo( m_index, m_layer->getLayerInfo() );
 }
 
 void LayerDeleteCommand::redo()
 {
 	m_mapScene->m_layers.removeAt( m_index );
-	for( Tile* tile : m_layer->m_tileList )
+	if( m_layer->getLayerInfo().getLayerType() == eLayerType::TILE_LAYER )
 	{
-		m_mapScene->removeItem( tile );
+		TileLayer* layer = dynamic_cast<TileLayer*>(m_layer);
+		for( Tile* tile : layer->m_tileList )
+		{
+			m_mapScene->removeItem( tile );
+		}
+	}
+	else if( m_layer->getLayerInfo().getLayerType() == eLayerType::MARKER_LAYER )
+	{
+		MarkerLayer* layer = dynamic_cast<MarkerLayer*>(m_layer);
+		for( MarkerTile* tile : layer->m_tileList )
+		{
+			m_mapScene->removeItem( tile );
+		}
 	}
 
+	// reorder z value
 	for( int i = m_index; i < m_mapScene->m_layers.size(); ++i )
 	{
 		m_mapScene->m_layers[i]->setOrder( i );
@@ -289,4 +377,14 @@ void LayerColorChangeCommand::redo()
 		}
 	}
 	m_mapScene->m_parentWidget->changedColorLayer( m_index, m_newColor );
+}
+
+bool TileMarkerModified::operator==( const TileMarkerModified& compare ) const
+{
+	return compare.m_coordinate.x() == m_coordinate.x() && compare.m_coordinate.y() == m_coordinate.y();
+}
+
+uint qHash( const TileMarkerModified key )
+{
+	return key.m_coordinate.x() + key.m_coordinate.y();
 }

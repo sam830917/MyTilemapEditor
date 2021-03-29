@@ -139,6 +139,12 @@ void MarkerLayer::setOrder( int value )
 	Layer::setOrder( value );
 }
 
+bool MarkerLayer::IsMarked( int coordX, int coordY )
+{
+	int tileIndex = m_mapScene->m_mapInfo.getIndex( QPoint( coordX, coordY ) );
+	return m_tileList[tileIndex]->m_marked;
+}
+
 void MarkerLayer::markTile( int coordX, int coordY, bool isMark )
 {
 	int tileIndex = m_mapScene->m_mapInfo.getIndex( QPoint( coordX, coordY ) );

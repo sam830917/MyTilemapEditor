@@ -11,6 +11,18 @@ class MapScene;
 class Tile;
 class TileLayer;
 
+struct TileMarkerModified
+{
+	TileMarkerModified( QPoint coordinate, bool isMarked ):m_coordinate( coordinate ), m_isMarked( isMarked ) {}
+
+	QPoint m_coordinate;
+	bool m_isMarked = false;
+
+	bool operator==( const TileMarkerModified& compare ) const;
+};
+uint qHash( const TileMarkerModified key );
+
+//--------------------------------------------------------------------------------------------------------------------------
 class DrawCommand : public QUndoCommand
 {
 public:
@@ -24,6 +36,21 @@ private:
 	MapScene* m_mapScene;
 	QSet<TileModified> m_oldTileModifiedList;
 	QSet<TileModified> m_newTileModifiedList;
+};
+
+class DrawMarkerCommand : public QUndoCommand
+{
+public:
+	DrawMarkerCommand( MapScene* mapScene, int layerIndex, QSet<TileMarkerModified> oldTileModifiedList, QUndoCommand* parent = 0 );
+	~DrawMarkerCommand();
+
+	virtual void undo() override;
+	virtual void redo() override;
+private:
+	int m_index = 0;
+	MapScene* m_mapScene;
+	QSet<TileMarkerModified> m_oldTileModifiedList;
+	QSet<TileMarkerModified> m_newTileModifiedList;
 };
 
 class LayerMoveCommand : public QUndoCommand
@@ -70,7 +97,7 @@ public:
 private:
 	int m_index = 0;
 	MapScene* m_mapScene;
-	TileLayer* m_layer;
+	Layer* m_layer;
 };
 
 class LayerRenameCommand : public QUndoCommand

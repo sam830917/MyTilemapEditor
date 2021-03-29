@@ -18,5 +18,5 @@ bool isListType( eItemType type )
 
 bool TileModified::operator==( const TileModified& compare ) const
 {
-	return compare.m_coordinate.x() == m_coordinate.x() && compare.m_coordinate.y() == m_coordinate.y() && compare.m_tileInfo == m_tileInfo;
+	return compare.m_coordinate.x() == m_coordinate.x() && compare.m_coordinate.y() == m_coordinate.y();
 }

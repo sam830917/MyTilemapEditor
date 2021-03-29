@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MapInfo.h"
+#include "UndoCommand.h"
 #include "TileInfo.h"
 #include "Core/Layer.h"
 #include <QGraphicsScene>
@@ -38,6 +39,7 @@ class MapScene : public QGraphicsScene
 	friend class LayerDeleteCommand;
 	friend class LayerRenameCommand;
 	friend class LayerColorChangeCommand;
+	friend class DrawMarkerCommand;
 	friend class TileLayer;
 	friend class MarkerLayer;
 	friend class SelectMask;
@@ -50,6 +52,7 @@ public:
 
 	MapInfo getMapInfo() const { return m_mapInfo; }
 	TileInfo getTileInfo( int tileIndex, int layerIndex ) const;
+	bool getIsMarked( int tileIndex, int layerIndex ) const;
 
 	void editMapOnPoint( const QPointF& point );
 	QList<QPoint> editMapByFloodFill( int layerIndex, const QPoint& coord );
@@ -61,6 +64,8 @@ public:
 	void paintMap( int index );
 	void paintMap( QSize coord );
 	void paintMap( QPoint coord, TileInfo tileInfo );
+	void eraseMap( int tileIndex, int layerIndex );
+	void eraseMap( const QPoint& coord, int layerIndex );
 	void eraseMap( int index );
 	void eraseMap( QPoint coord );
 
@@ -95,6 +100,7 @@ private:
 	QList<Layer*> m_layers;
 
 	QSet<TileModified> m_oldTileModifiedList;
+	QSet<TileMarkerModified> m_oldTileMarkerModifiedList;
 	QUndoStack* m_undoStack = Q_NULLPTR;
 
 	// Select tool

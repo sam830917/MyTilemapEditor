@@ -124,8 +124,13 @@ void LayerWidget::implementAddNewLayer( int index, const QString& name, eLayerTy
 
 void LayerWidget::implementAddNewLayerWithInfo( int index, LayerInfo layerInfo )
 {
-	LayerRow* newRow = new LayerRow( m_listWidgetList[m_currentIndex], index );
+	LayerRow* newRow = new LayerRow( m_listWidgetList[m_currentIndex], index, layerInfo.getLayerType() == eLayerType::MARKER_LAYER ? true : false );
 	newRow->setLayerInfo( layerInfo );
+	if ( layerInfo.getLayerType() == eLayerType::MARKER_LAYER )
+	{
+		newRow->m_layerRowWidget->m_markerColor = layerInfo.getColor();
+		newRow->m_layerRowWidget->setButtonColor();
+	}
 	m_listWidgetList[m_currentIndex]->setCurrentRow( index );
 	updateToolbarStatus();
 	modifiedCurrentScene();
