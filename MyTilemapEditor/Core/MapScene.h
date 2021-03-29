@@ -85,7 +85,25 @@ private:
 	void showTileProperties( const QPointF& mousePos );
 	void showSelectedTileProperties();
 	void paintTileByFloodFill( int layerIndex, const QPoint& coord, const TileInfo& currentTileInfo, QList<QPoint>& readyToPaintTileIndexes );
+	void paintTileByFloodFill( int layerIndex, const QPoint& coord, bool targetMarked, QList<QPoint>& readyToPaintTileIndexes );
 	void selectTilesByFloodFill( int layerIndex, const QPoint& coord, const TileInfo& currentTileInfo, const TileInfo& newTileInfo );
+
+	void mousePress_Move();
+	void mousePress_Cursor( const QPointF& mousePos );
+	void mousePress_Bucket( const QPointF& mousePos );
+	void mousePress_Shape ( const QPointF& mousePos );
+	void mousePress_MagicWand( const QPointF& mousePos );
+	void mousePress_SelectSameTile( const QPointF& mousePos );
+	void mousePress_BrushAndEraser( const QPointF& mousePos );
+
+	void mouseMove_Move( QGraphicsSceneMouseEvent* event );
+	void mouseMove_Cursor( const QPointF& mousePos );
+	void mouseMove_Shape( const QPointF& mousePos );
+	void mouseMove_BrushAndEraser( const QPointF& mousePos );
+
+	void mouseRelease_Move();
+	void mouseRelease_Shape();
+	void mouseRelease_BrushAndEraser();
 
 protected:
 	virtual void mousePressEvent( QGraphicsSceneMouseEvent* event ) override;
