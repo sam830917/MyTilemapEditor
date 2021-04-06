@@ -252,6 +252,7 @@ void MainWindow::initialConnections()
 	connect( m_pasteShortcut, &QShortcut::activated, m_centralWidget, &WorkspaceWidget::pasteCopiedTile );
 	connect( m_cutShortcut, &QShortcut::activated, m_centralWidget, &WorkspaceWidget::cutSelectedTile );
 	connect( m_newLayerShortcut, SIGNAL( activated() ), m_layerWidget, SLOT( addNewLayer() ) );
+	connect( m_newMarkerLayerShortcut, SIGNAL( activated() ), m_layerWidget, SLOT( addNewMarkerLayer() ) );
 	connect( m_raiseLayerShortcut, &QShortcut::activated, m_layerWidget, &LayerWidget::raiseCurrentLayer );
 	connect( m_lowerLayerShortcut, &QShortcut::activated, m_layerWidget, &LayerWidget::lowerCurrentLayer );
 
@@ -294,14 +295,17 @@ void MainWindow::initialConnections()
 	connect( m_centralWidget, &WorkspaceWidget::addedNewLayer, m_layerWidget, &LayerWidget::implementAddNewLayer );
 	connect( m_centralWidget, &WorkspaceWidget::deletedLayer, m_layerWidget, &LayerWidget::removeLayerFromIndex );
 	connect( m_centralWidget, &WorkspaceWidget::renamedLayer, m_layerWidget, &LayerWidget::implementRenameLayer );
+	connect( m_centralWidget, &WorkspaceWidget::changedColorLayer, m_layerWidget, &LayerWidget::implementChangeColorLayer );
 	connect( m_centralWidget, &WorkspaceWidget::addNewLayerGroup, m_layerWidget, &LayerWidget::addNewLayerGroup );
 	connect( m_centralWidget, &WorkspaceWidget::showProperties, m_propertiesWidget, &PropertiesWidget::showProperties );
 	connect( m_centralWidget, &WorkspaceWidget::getPaintMapModified, m_brushWidget, &BrushWidget::getPaintMapModified );
 	connect( m_centralWidget, &WorkspaceWidget::isDefalutBrush, m_brushWidget, &BrushWidget::isDefalutBrush );
 
 	connect( m_layerWidget, &LayerWidget::addedNewLayerFromIndex,  m_centralWidget, &WorkspaceWidget::addNewLayerIntoMap );
+	connect( m_layerWidget, &LayerWidget::addedNewMarkerLayerFromIndex,  m_centralWidget, &WorkspaceWidget::addNewMarkerLayerIntoMap );
 	connect( m_layerWidget, &LayerWidget::modifiedCurrentScene, m_centralWidget, &WorkspaceWidget::markCurrentSceneForModified );
 	connect( m_layerWidget, &LayerWidget::setLayerIsVisible,  m_centralWidget, &WorkspaceWidget::setLayerVisible );
+	connect( m_layerWidget, &LayerWidget::changeColor,  m_centralWidget, &WorkspaceWidget::setLayerColor );
 	connect( m_layerWidget, &LayerWidget::changeLayerFocus,  m_centralWidget, &WorkspaceWidget::changeLayerFocus );
 	connect( m_layerWidget, &LayerWidget::movedLayerGroup,  m_centralWidget, &WorkspaceWidget::changeLayerOrder );
 	connect( m_layerWidget, &LayerWidget::setLayerIsLock,  m_centralWidget, &WorkspaceWidget::setLayerLock );
@@ -333,6 +337,7 @@ void MainWindow::initialShortcut()
 	m_workspaceSwitchTabShortcut =	new QShortcut( QKeySequence::NextChild, this );
 	m_workspaceCloseTabShortcut =	new QShortcut( tr( "Ctrl+W" ), this );
 	m_newLayerShortcut =			new QShortcut( tr( "Ctrl+Shift+N" ), this );
+	m_newMarkerLayerShortcut =		new QShortcut( tr( "Ctrl+Shift+M" ), this );
 	m_raiseLayerShortcut =			new QShortcut( tr( "Ctrl+[" ), this );
 	m_lowerLayerShortcut =			new QShortcut( tr( "Ctrl+]" ), this );
 }

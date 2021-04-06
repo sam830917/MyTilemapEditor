@@ -1,5 +1,4 @@
 #include "MapScene.h"
-#include "UndoCommand.h"
 #include "Tileset.h"
 #include "Widget/WorkspaceWidget.h"
 #include "Utils/ProjectCommon.h"
@@ -111,6 +110,7 @@ MapScene::MapScene( MapInfo mapInfo, WorkspaceWidget* parent )
 {
 	m_view = new MapView( this );
 	m_undoStack = new QUndoStack( this );
+	m_undoStack->setUndoLimit( 30 );
 
 	QSize mapSize = m_mapInfo.getMapSize();
 	QSize tileSize = m_mapInfo.getTileSize();
@@ -155,8 +155,6 @@ MapScene::MapScene( MapInfo mapInfo, WorkspaceWidget* parent )
 			m_selectedTileItemList.push_back( mask );
 		}
 	}
-
-	m_undoStack->setUndoLimit( 30 );
 }
 
 MapScene::MapScene( MapInfo mapInfo )
@@ -184,6 +182,26 @@ MapScene::~MapScene()
 		delete m_undoStack;
 		m_undoStack = Q_NULLPTR;
 	}
+}
+
+TileInfo MapScene::getTileInfo( int tileIndex, int layerIndex ) const
+{
+	if ( m_layers[layerIndex]->getLayerInfo().getLayerType() == eLayerType::TILE_LAYER )
+	{
+		TileLayer* layer = dynamic_cast<TileLayer*>(m_layers[layerIndex]);
+		return layer->getTileInfo(tileIndex);
+	}
+	return TileInfo();
+}
+
+bool MapScene::getIsMarked( int tileIndex, int layerIndex ) const
+{
+	if( m_layers[layerIndex]->getLayerInfo().getLayerType() == eLayerType::MARKER_LAYER )
+	{
+		MarkerLayer* layer = dynamic_cast<MarkerLayer*>(m_layers[layerIndex]);
+		return layer->m_tileList[tileIndex]->isMarked();
+	}
+	return false;
 }
 
 void MapScene::editMapOnPoint( const QPointF& point )
@@ -214,7 +232,9 @@ void MapScene::editMapOnPoint( const QPointF& point )
 	{
 		bool isDefault = true;
 		m_parentWidget->isDefalutBrush( isDefault );
-		if ( isDefault )
+		int layerIndex = getCurrentLayerIndex();
+		Layer* layer = m_layers[layerIndex];
+		if ( isDefault || layer->getLayerInfo().getLayerType() != eLayerType::TILE_LAYER )
 		{
 			QList<TileInfo> selectedTileList = getCurrentTiles();
 			QSize regionSize = getSelectedTilesRegionSize();
@@ -223,12 +243,39 @@ void MapScene::editMapOnPoint( const QPointF& point )
 			{
 				return;
 			}
-			for( int h = 0; h < regionSize.height(); ++h )
+			if ( layer->getLayerInfo().getLayerType() == eLayerType::TILE_LAYER )
 			{
-				for( int w = 0; w < regionSize.width(); ++w )
+				for( int h = 0; h < regionSize.height(); ++h )
 				{
-					TileInfo t = selectedTileList[h * regionSize.width() + w];
-					paintMap( QPoint( coord.width() + w, coord.height() + h ), t );
+					for( int w = 0; w < regionSize.width(); ++w )
+					{
+						TileInfo t = selectedTileList[h * regionSize.width() + w];
+						QPoint pCoord = QPoint( coord.width() + w, coord.height() + h );
+
+						TileModified tileModified( pCoord, getTileInfo( m_mapInfo.getIndex( pCoord ), layerIndex ) );
+						if( !m_oldTileModifiedList.contains( tileModified ) )
+						{
+							m_oldTileModifiedList.insert( tileModified );
+						}
+						paintMap( pCoord, t );
+					}
+				}
+			}
+			else if ( layer->getLayerInfo().getLayerType() == eLayerType::MARKER_LAYER )
+			{
+				for( int h = 0; h < regionSize.height(); ++h )
+				{
+					for( int w = 0; w < regionSize.width(); ++w )
+					{
+						QPoint pCoord = QPoint( coord.width() + w, coord.height() + h );
+
+						TileMarkerModified tileModified( pCoord, getIsMarked( m_mapInfo.getIndex( pCoord ), layerIndex ) );
+						if( !m_oldTileMarkerModifiedList.contains( tileModified ) )
+						{
+							m_oldTileMarkerModifiedList.insert( tileModified );
+						}
+						paintMap( pCoord, TileInfo() );
+					}
 				}
 			}
 		}
@@ -238,6 +285,11 @@ void MapScene::editMapOnPoint( const QPointF& point )
 			m_parentWidget->getPaintMapModified( modifiedList, QPoint( coord.width(), coord.height() ), m_parentWidget->getCurrentDrawTool() );
 			for( TileModified m : modifiedList )
 			{
+				TileModified tileModified( m.m_coordinate, getTileInfo( m_mapInfo.getIndex( m.m_coordinate ), layerIndex ) );
+				if( !m_oldTileModifiedList.contains( tileModified ) )
+				{
+					m_oldTileModifiedList.insert( tileModified );
+				}
 				paintMap( m.m_coordinate, m.m_tileInfo );
 			}
 		}
@@ -247,9 +299,29 @@ void MapScene::editMapOnPoint( const QPointF& point )
 	{
 		bool isDefault = true;
 		m_parentWidget->isDefalutBrush( isDefault );
-		if( isDefault )
+		int layerIndex = getCurrentLayerIndex();
+		Layer* layer = m_layers[layerIndex];
+		if( isDefault || layer->getLayerInfo().getLayerType() != eLayerType::TILE_LAYER )
 		{
-			eraseMap( QPoint( coord.width(), coord.height() ) );
+			QPoint pCoord = QPoint( coord.width(), coord.height() );
+
+			if( layer->getLayerInfo().getLayerType() == eLayerType::TILE_LAYER )
+			{
+				TileModified tileModified( pCoord, getTileInfo( m_mapInfo.getIndex( pCoord ), layerIndex ) );
+				if( !m_oldTileModifiedList.contains( tileModified ) )
+				{
+					m_oldTileModifiedList.insert( tileModified );
+				}
+			}
+			else if ( layer->getLayerInfo().getLayerType() == eLayerType::MARKER_LAYER )
+			{
+				TileMarkerModified tileModified( pCoord, getIsMarked( m_mapInfo.getIndex( pCoord ), layerIndex ) );
+				if( !m_oldTileMarkerModifiedList.contains( tileModified ) )
+				{
+					m_oldTileMarkerModifiedList.insert( tileModified );
+				}
+			}
+			eraseMap( pCoord );
 		}
 		else
 		{
@@ -257,6 +329,10 @@ void MapScene::editMapOnPoint( const QPointF& point )
 			m_parentWidget->getPaintMapModified( modifiedList, QPoint( coord.width(), coord.height() ), m_parentWidget->getCurrentDrawTool() );
 			for( TileModified m : modifiedList )
 			{
+				if( !m_oldTileModifiedList.contains( m ) )
+				{
+					m_oldTileModifiedList.insert( m );
+				}
 				paintMap( m.m_coordinate, m.m_tileInfo );
 			}
 		}
@@ -269,21 +345,497 @@ void MapScene::editMapOnPoint( const QPointF& point )
 
 QList<QPoint> MapScene::editMapByFloodFill( int layerIndex, const QPoint& coord )
 {
+	Layer* layer = m_layers[layerIndex];
 	QList<QPoint> readyToPaintTileIndexes;
-	TileInfo currentTileInfo = m_layers[layerIndex]->m_tileList[m_mapInfo.getIndex( coord )]->m_tileInfo;
-	paintTileByFloodFill( layerIndex, coord, currentTileInfo, readyToPaintTileIndexes );
+
+	if( layer->getLayerInfo().getLayerType() == eLayerType::TILE_LAYER )
+	{
+		TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[layerIndex]);
+		TileInfo currentTileInfo = tileLayer->getTileInfo( coord.x(), coord.y() );
+		paintTileByFloodFill( layerIndex, coord, currentTileInfo, readyToPaintTileIndexes );
+	}
+	else if ( layer->getLayerInfo().getLayerType() == eLayerType::MARKER_LAYER )
+	{
+		MarkerLayer* markerLayer = dynamic_cast<MarkerLayer*>(m_layers[layerIndex]);
+		paintTileByFloodFill( layerIndex, coord, markerLayer->IsMarked( coord.x(), coord.y() ), readyToPaintTileIndexes );
+	}
 
 	return readyToPaintTileIndexes;
 }
 
 void MapScene::selectTilesByFloodFill( int layerIndex, const QPoint& coord )
 {
+	Layer* layer = m_layers[layerIndex];
 	for( SelectMask* mask : m_selectedTileItemList )
 	{
 		mask->setSelected( false );
 	}
-	TileInfo currentTileInfo = m_layers[layerIndex]->m_tileList[m_mapInfo.getIndex( coord )]->m_tileInfo;
-	selectTilesByFloodFill( layerIndex, coord, currentTileInfo, getCurrentTile() );
+
+	if( layer->getLayerInfo().getLayerType() == eLayerType::TILE_LAYER )
+	{
+		TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[layerIndex]);
+		TileInfo currentTileInfo = tileLayer->getTileInfo( coord.x(), coord.y() );
+		selectTilesByFloodFill( layerIndex, coord, currentTileInfo, getCurrentTile() );
+	}
+	else if( layer->getLayerInfo().getLayerType() == eLayerType::MARKER_LAYER )
+	{
+		MarkerLayer* markerLayer = dynamic_cast<MarkerLayer*>(m_layers[layerIndex]);
+		selectTilesByFloodFill( layerIndex, coord, markerLayer->IsMarked( coord.x(), coord.y() ) );
+	}
+}
+
+void MapScene::mousePress_Move()
+{
+	m_view->viewport()->setCursor( Qt::ClosedHandCursor );
+	m_parentWidget->disableShortcut( true );
+}
+
+void MapScene::mousePress_Cursor( const QPointF& mousePos )
+{
+	m_isSelectedMoreThanOneTile = false;
+	m_startPos = mousePos;
+	QPoint coord = QPoint( qFloor( mousePos.x() / m_mapInfo.getTileSize().width() ), qFloor( mousePos.y() / m_mapInfo.getTileSize().height() ) );
+	m_selectedMinCoord = coord;
+	m_selectedMaxCoord = coord + QPoint( 1, 1 );
+	for( SelectMask* mask : m_selectedTileItemList )
+	{
+		mask->setSelected( false );
+		if( mask->m_coord.x() >= m_selectedMinCoord.x() && mask->m_coord.x() < m_selectedMaxCoord.x() &&
+			mask->m_coord.y() < m_selectedMaxCoord.y() && mask->m_coord.y() >= m_selectedMinCoord.y() )
+		{
+			mask->setSelected( true );
+		}
+	}
+	setIsShowSelection( true );
+	showTileProperties( mousePos );
+}
+
+void MapScene::mousePress_Bucket( const QPointF& mousePos )
+{
+	QSizeF bound = QSizeF( m_mapInfo.getTileSize().width() * m_mapInfo.getMapSize().width(), m_mapInfo.getTileSize().height() * m_mapInfo.getMapSize().height() );
+	if( mousePos.x() >= bound.width() || mousePos.y() >= bound.height() || mousePos.x() <= 0 || mousePos.y() <= 0 )
+	{
+		return;
+	}
+	QPoint coord = QPoint( qFloor( mousePos.x() / m_mapInfo.getTileSize().width() ), qFloor( mousePos.y() / m_mapInfo.getTileSize().height() ) );
+
+	// Flood fill Algorithm
+	int currentIndex = getCurrentLayerIndex();
+	if( currentIndex == -1 )
+	{
+		return;
+	}
+	m_oldTileModifiedList.clear();
+	m_oldTileMarkerModifiedList.clear();
+
+	// Implement Flood fill and Paint tiles
+	QList<QPoint> readyToPaintTileCoords = editMapByFloodFill( currentIndex, coord );
+	if( readyToPaintTileCoords.isEmpty() )
+	{
+		return;
+	}
+	QPoint smallestPoint = readyToPaintTileCoords[0];
+	for( QPoint p : readyToPaintTileCoords )
+	{
+		smallestPoint.setX( qMin( smallestPoint.x(), p.x() ) );
+		smallestPoint.setY( qMin( smallestPoint.y(), p.y() ) );
+	}
+
+	bool isDefault = true;
+	int layerIndex = getCurrentLayerIndex();
+	m_parentWidget->isDefalutBrush( isDefault );
+	Layer* layer = m_layers[layerIndex];
+	if( isDefault || layer->getLayerInfo().getLayerType() != eLayerType::TILE_LAYER )
+	{
+		QList<TileInfo> selectedTileList = getCurrentTiles();
+		QSize regionSize = getSelectedTilesRegionSize();
+
+		if( layer->getLayerInfo().getLayerType() == eLayerType::TILE_LAYER )
+		{
+			for( int i = 0; i < readyToPaintTileCoords.size(); ++i )
+			{
+				QPoint targetCoord = readyToPaintTileCoords[i];
+				QPoint coord = QPoint( (targetCoord.x() - smallestPoint.x()) % regionSize.width(), (targetCoord.y() - smallestPoint.y()) % regionSize.height() );
+				int index = coord.x() + coord.y() * regionSize.width();
+				m_oldTileModifiedList.insert( TileModified( targetCoord, getTileInfo( m_mapInfo.getIndex( targetCoord ), layerIndex ) ) );
+				paintMap( targetCoord, selectedTileList[index] );
+			}
+		}
+		else if( layer->getLayerInfo().getLayerType() == eLayerType::MARKER_LAYER )
+		{
+			for( int i = 0; i < readyToPaintTileCoords.size(); ++i )
+			{
+				QPoint targetCoord = readyToPaintTileCoords[i];
+				QPoint coord = QPoint( (targetCoord.x() - smallestPoint.x()) % regionSize.width(), (targetCoord.y() - smallestPoint.y()) % regionSize.height() );
+				int index = coord.x() + coord.y() * regionSize.width();
+				m_oldTileMarkerModifiedList.insert( TileMarkerModified( targetCoord, getIsMarked( m_mapInfo.getIndex( targetCoord ), layerIndex ) ) );
+				paintMap( targetCoord, selectedTileList[index] );
+			}
+		}
+	}
+	else
+	{
+		for( int i = 0; i < readyToPaintTileCoords.size(); ++i )
+		{
+			QList<TileModified> modifiedList;
+			m_parentWidget->getPaintMapModified( modifiedList, readyToPaintTileCoords[i], eDrawTool::BRUSH );
+			for( TileModified m : modifiedList )
+			{
+				m_oldTileModifiedList.insert( TileModified( m.m_coordinate, getTileInfo( m_mapInfo.getIndex( m.m_coordinate ), layerIndex ) ) );
+				paintMap( m.m_coordinate, m.m_tileInfo );
+			}
+		}
+	}
+	if( layer->getLayerInfo().getLayerType() == eLayerType::TILE_LAYER )
+	{
+		QUndoCommand* command = new DrawCommand( this, layerIndex, m_oldTileModifiedList );
+		m_undoStack->push( command );
+	}
+	else if( layer->getLayerInfo().getLayerType() == eLayerType::MARKER_LAYER )
+	{
+		QUndoCommand* command = new DrawMarkerCommand( this, layerIndex, m_oldTileMarkerModifiedList );
+		m_undoStack->push( command );
+	}
+}
+
+void MapScene::mousePress_Shape( const QPointF& mousePos )
+{
+	QSizeF bound = QSizeF( m_mapInfo.getTileSize().width() * m_mapInfo.getMapSize().width(), m_mapInfo.getTileSize().height() * m_mapInfo.getMapSize().height() );
+	if( mousePos.x() >= bound.width() || mousePos.y() >= bound.height() || mousePos.x() <= 0 || mousePos.y() <= 0 )
+	{
+		return;
+	}
+	QPoint coord = QPoint( qFloor( mousePos.x() / m_mapInfo.getTileSize().width() ), qFloor( mousePos.y() / m_mapInfo.getTileSize().height() ) );
+	m_lastPaintCoord = coord;
+	m_startPos = mousePos;
+
+	int currentIndex = getCurrentLayerIndex();
+	if( currentIndex == -1 )
+	{
+		return;
+	}
+	m_oldTileModifiedList.clear();
+	m_oldTileMarkerModifiedList.clear();
+	m_parentWidget->disableShortcut( true );
+
+	int layerIndex = getCurrentLayerIndex();
+	bool isDefault = true;
+	m_parentWidget->isDefalutBrush( isDefault );
+	Layer* layer = m_layers[layerIndex];
+	if( isDefault || layer->getLayerInfo().getLayerType() != eLayerType::TILE_LAYER )
+	{
+		QList<TileInfo> selectedTileList = getCurrentTiles();
+		if( selectedTileList.empty() )
+		{
+			return;
+		}
+		TileInfo t = selectedTileList[0];
+		if( layer->getLayerInfo().getLayerType() == eLayerType::TILE_LAYER )
+		{
+			m_oldTileModifiedList.insert( TileModified( coord, getTileInfo( m_mapInfo.getIndex( coord ), layerIndex ) ) );
+		}
+		else if ( layer->getLayerInfo().getLayerType() == eLayerType::MARKER_LAYER )
+		{
+			m_oldTileMarkerModifiedList.insert( TileMarkerModified( coord, getIsMarked( m_mapInfo.getIndex( coord ), layerIndex ) ) );
+		}
+		paintMap( coord, t, layerIndex );
+	}
+	else
+	{
+		QList<TileModified> modifiedList;
+		m_parentWidget->getPaintMapModified( modifiedList, QPoint( coord.x(), coord.y() ), m_parentWidget->getCurrentDrawTool() );
+		for( TileModified m : modifiedList )
+		{
+			m_oldTileModifiedList.insert( TileModified( m.m_coordinate, getTileInfo( m_mapInfo.getIndex( m.m_coordinate ), layerIndex ) ) );
+			paintMap( m.m_coordinate, m.m_tileInfo );
+		}
+	}
+}
+
+void MapScene::mousePress_MagicWand( const QPointF& mousePos )
+{
+	QSizeF bound = QSizeF( m_mapInfo.getTileSize().width() * m_mapInfo.getMapSize().width(), m_mapInfo.getTileSize().height() * m_mapInfo.getMapSize().height() );
+	if( mousePos.x() >= bound.width() || mousePos.y() >= bound.height() || mousePos.x() <= 0 || mousePos.y() <= 0 )
+	{
+		return;
+	}
+	QPoint coord = QPoint( qFloor( mousePos.x() / m_mapInfo.getTileSize().width() ), qFloor( mousePos.y() / m_mapInfo.getTileSize().height() ) );
+
+	int currentIndex = getCurrentLayerIndex();
+	if( currentIndex == -1 )
+	{
+		return;
+	}
+	selectTilesByFloodFill( currentIndex, coord );
+	setIsShowSelection( true );
+	showSelectedTileProperties();
+}
+
+void MapScene::mousePress_SelectSameTile( const QPointF& mousePos )
+{
+	QSizeF bound = QSizeF( m_mapInfo.getTileSize().width() * m_mapInfo.getMapSize().width(), m_mapInfo.getTileSize().height() * m_mapInfo.getMapSize().height() );
+	if( mousePos.x() >= bound.width() || mousePos.y() >= bound.height() || mousePos.x() <= 0 || mousePos.y() <= 0 )
+	{
+		return;
+	}
+	QPoint coord = QPoint( qFloor( mousePos.x() / m_mapInfo.getTileSize().width() ), qFloor( mousePos.y() / m_mapInfo.getTileSize().height() ) );
+
+	int currentIndex = getCurrentLayerIndex();
+	if( currentIndex == -1 )
+	{
+		return;
+	}
+
+	Layer* layer = m_layers[currentIndex];
+	if( layer->getLayerInfo().getLayerType() == eLayerType::TILE_LAYER )
+	{
+		TileLayer* tileLayer = dynamic_cast<TileLayer*>(layer);
+		TileInfo currentTileInfo = tileLayer->getTileInfo( coord.x(), coord.y() );
+		for( int i = 0; i < m_selectedTileItemList.size(); ++i )
+		{
+			if( tileLayer->getTileInfo( i ) == currentTileInfo )
+			{
+				m_selectedTileItemList[i]->setSelected( true );
+			}
+			else
+			{
+				m_selectedTileItemList[i]->setSelected( false );
+			}
+		}
+	}
+	else if( layer->getLayerInfo().getLayerType() == eLayerType::MARKER_LAYER )
+	{
+		MarkerLayer* markerLayer = dynamic_cast<MarkerLayer*>(layer);
+
+		for( int i = 0; i < m_selectedTileItemList.size(); ++i )
+		{
+			if( markerLayer->IsMarked( i ) ==  markerLayer->IsMarked( coord.x(), coord.y() ) )
+			{
+				m_selectedTileItemList[i]->setSelected( true );
+			}
+			else
+			{
+				m_selectedTileItemList[i]->setSelected( false );
+			}
+		}
+	}
+	setIsShowSelection( true );
+	showSelectedTileProperties();
+}
+
+void MapScene::mousePress_BrushAndEraser( const QPointF& mousePos )
+{
+	int currentIndex = getCurrentLayerIndex();
+	if( currentIndex == -1 || m_layers[currentIndex]->getLayerInfo().isLock() || !m_layers[currentIndex]->getLayerInfo().isVisible() )
+	{
+		return;
+	}
+	m_oldTileModifiedList.clear();
+	m_oldTileMarkerModifiedList.clear();
+	m_parentWidget->disableShortcut( true );
+	m_lastPaintCoord = QPoint( -1, -1 );
+	editMapOnPoint( mousePos );
+}
+
+void MapScene::mouseMove_Move( QGraphicsSceneMouseEvent* event )
+{
+	QPoint currentPosition = event->screenPos();
+	QPoint lastPosition = event->lastScreenPos();
+	m_view->verticalScrollBar()->setValue( m_view->verticalScrollBar()->value() - (currentPosition.y() - lastPosition.y()) );
+	m_view->horizontalScrollBar()->setValue( m_view->horizontalScrollBar()->value() - (currentPosition.x() - lastPosition.x()) );
+}
+
+void MapScene::mouseMove_Cursor( const QPointF& mousePos )
+{
+	if ( m_selectedTileItemList.isEmpty() )
+	{
+		return;
+	}
+	QSize& tileSize = m_mapInfo.getTileSize();
+	QPointF minPoint = QPointF( qMin( m_startPos.x(), mousePos.x() ), qMin( m_startPos.y(), mousePos.y() ) );
+	QPointF maxPoint = QPointF( qMax( m_startPos.x(), mousePos.x() ), qMax( m_startPos.y(), mousePos.y() ) );
+
+	m_selectedMinCoord = QPoint( qFloor( minPoint.x() / tileSize.width() ), qFloor( minPoint.y() / tileSize.height() ) );
+	m_selectedMaxCoord = QPoint( qCeil( maxPoint.x() / tileSize.width() ), qCeil( maxPoint.y() / tileSize.height() ) );
+
+	QPoint coordDiff = m_selectedMaxCoord - m_selectedMinCoord;
+	if( coordDiff.x() > 1 || coordDiff.y() > 1 )
+	{
+		m_isSelectedMoreThanOneTile = true;
+	}
+	else
+	{
+		m_isSelectedMoreThanOneTile = false;
+	}
+	for( SelectMask* mask : m_selectedTileItemList )
+	{
+		mask->setSelected( false );
+		if( mask->m_coord.x() >= m_selectedMinCoord.x() && mask->m_coord.x() < m_selectedMaxCoord.x() &&
+			mask->m_coord.y() < m_selectedMaxCoord.y() && mask->m_coord.y() >= m_selectedMinCoord.y() )
+		{
+			mask->setSelected( true );
+		}
+	}
+	setIsShowSelection( true );
+	showSelectedTileProperties();
+}
+
+void MapScene::mouseMove_Shape( const QPointF& mousePos )
+{
+	QSizeF bound = QSizeF( m_mapInfo.getTileSize().width() * m_mapInfo.getMapSize().width(), m_mapInfo.getTileSize().height() * m_mapInfo.getMapSize().height() );
+	if( mousePos.x() >= bound.width() || mousePos.y() >= bound.height() || mousePos.x() <= 0 || mousePos.y() <= 0 )
+	{
+		return;
+	}
+	QPoint coord = QPoint( qFloor( mousePos.x() / m_mapInfo.getTileSize().width() ), qFloor( mousePos.y() / m_mapInfo.getTileSize().height() ) );
+	if( m_lastPaintCoord.x() == coord.x() && m_lastPaintCoord.y() == coord.y() )
+	{
+		return;
+	}
+
+	m_lastPaintCoord = coord;
+	QSize& tileSize = m_mapInfo.getTileSize();
+	QPointF minPoint = QPointF( qMin( m_startPos.x(), mousePos.x() ), qMin( m_startPos.y(), mousePos.y() ) );
+	QPointF maxPoint = QPointF( qMax( m_startPos.x(), mousePos.x() ), qMax( m_startPos.y(), mousePos.y() ) );
+
+	m_selectedMinCoord = QPoint( qFloor( minPoint.x() / tileSize.width() ), qFloor( minPoint.y() / tileSize.height() ) );
+	m_selectedMaxCoord = QPoint( qCeil( maxPoint.x() / tileSize.width() ), qCeil( maxPoint.y() / tileSize.height() ) );
+
+	QSize regionSize = QSize( m_selectedMaxCoord.x() - m_selectedMinCoord.x(), m_selectedMaxCoord.y() - m_selectedMinCoord.y() );
+
+	QSet<TileModified>::const_iterator i = m_oldTileModifiedList.constBegin();
+	while( i != m_oldTileModifiedList.constEnd() ) 
+	{
+		TileInfo tile = i->m_tileInfo;
+		paintMap( i->m_coordinate, tile );
+		++i;
+	}
+	QSet<TileMarkerModified>::const_iterator j = m_oldTileMarkerModifiedList.constBegin();
+	while( j != m_oldTileMarkerModifiedList.constEnd() )
+	{
+		if( j->m_isMarked )
+		{
+			paintMap( j->m_coordinate, TileInfo() );
+		}
+		else
+		{
+			eraseMap( j->m_coordinate );
+		}
+		++j;
+	}
+
+	QMap<QPoint, TileModified> selectedPointMap;
+	bool isDefault = true;
+	int layerIndex = getCurrentLayerIndex();
+	m_parentWidget->isDefalutBrush( isDefault );
+	Layer* layer = m_layers[layerIndex];
+	if( isDefault || layer->getLayerInfo().getLayerType() != eLayerType::TILE_LAYER )
+	{
+		QList<TileInfo> selectedTileList = getCurrentTiles();
+		QSize tileRegionSize = getSelectedTilesRegionSize();
+		for( int y = 0; y < regionSize.height(); ++y )
+		{
+			for( int x = 0; x < regionSize.width(); ++x )
+			{
+				QPoint targetCoord = m_selectedMinCoord + QPoint( x, y );
+
+				QPoint tileCoord = QPoint( (targetCoord.x() - m_selectedMinCoord.x()) % tileRegionSize.width(), (targetCoord.y() - m_selectedMinCoord.y()) % tileRegionSize.height() );
+				int index = tileCoord.x() + tileCoord.y() * tileRegionSize.width();
+
+				if ( layer->getLayerInfo().getLayerType() == eLayerType::TILE_LAYER )
+				{
+					m_oldTileModifiedList.insert( TileModified( targetCoord, getTileInfo( m_mapInfo.getIndex( targetCoord ), layerIndex ) ) );
+				}
+				else if ( layer->getLayerInfo().getLayerType() == eLayerType::MARKER_LAYER )
+				{
+					m_oldTileMarkerModifiedList.insert( TileMarkerModified( targetCoord, getIsMarked( m_mapInfo.getIndex( targetCoord ), layerIndex ) ) );
+				}
+				paintMap( targetCoord, selectedTileList[index] );
+			}
+		}
+	}
+	else
+	{
+		QList<TileInfo> selectedTileList = getCurrentTiles();
+		QSize tileRegionSize = getSelectedTilesRegionSize();
+		for( int y = 0; y < regionSize.height(); ++y )
+		{
+			for( int x = 0; x < regionSize.width(); ++x )
+			{
+				QPoint targetCoord = m_selectedMinCoord + QPoint( x, y );
+
+				QList<TileModified> modifiedList;
+				m_parentWidget->getPaintMapModified( modifiedList, QPoint( targetCoord.x(), targetCoord.y() ), eDrawTool::BRUSH );
+				for( TileModified m : modifiedList )
+				{
+					m_oldTileModifiedList.insert( TileModified( m.m_coordinate, getTileInfo( m_mapInfo.getIndex( m.m_coordinate ), layerIndex ) ) );
+					paintMap( m.m_coordinate, m.m_tileInfo );
+				}
+			}
+		}
+	}
+}
+
+void MapScene::mouseMove_BrushAndEraser( const QPointF& mousePos )
+{
+	int currentIndex = getCurrentLayerIndex();
+	if( currentIndex == -1 || m_layers[currentIndex]->getLayerInfo().isLock() || !m_layers[currentIndex]->getLayerInfo().isVisible() )
+	{
+		return;
+	}
+	editMapOnPoint( mousePos );
+}
+
+void MapScene::mouseRelease_Move()
+{
+	m_view->viewport()->setCursor( m_parentWidget->m_currentCursor );
+	m_parentWidget->disableShortcut( false );
+}
+
+void MapScene::mouseRelease_Shape()
+{
+	int currentIndex = getCurrentLayerIndex();
+	if( currentIndex == -1 || m_layers[currentIndex]->getLayerInfo().isLock() || !m_layers[currentIndex]->getLayerInfo().isVisible() )
+	{
+		return;
+	}
+	int layerIndex = getCurrentLayerIndex();
+
+	Layer* layer = m_layers[currentIndex];
+	if ( layer->getLayerInfo().getLayerType() == eLayerType::TILE_LAYER )
+	{
+		QUndoCommand* command = new DrawCommand( this, layerIndex, m_oldTileModifiedList );
+		m_undoStack->push( command );
+	}
+	else if ( layer->getLayerInfo().getLayerType() == eLayerType::MARKER_LAYER )
+	{
+		QUndoCommand* command = new DrawMarkerCommand( this, layerIndex, m_oldTileMarkerModifiedList );
+		m_undoStack->push( command );
+	}
+	m_parentWidget->disableShortcut( false );
+}
+
+void MapScene::mouseRelease_BrushAndEraser()
+{
+	int currentIndex = getCurrentLayerIndex();
+	if( currentIndex == -1 || m_layers[currentIndex]->getLayerInfo().isLock() || !m_layers[currentIndex]->getLayerInfo().isVisible() )
+	{
+		return;
+	}
+	int layerIndex = getCurrentLayerIndex();
+
+	Layer* layer = m_layers[currentIndex];
+	if( layer->getLayerInfo().getLayerType() == eLayerType::TILE_LAYER )
+	{
+		QUndoCommand* command = new DrawCommand( this, layerIndex, m_oldTileModifiedList );
+		m_undoStack->push( command );
+	}
+	else if( layer->getLayerInfo().getLayerType() == eLayerType::MARKER_LAYER )
+	{
+		QUndoCommand* command = new DrawMarkerCommand( this, layerIndex, m_oldTileMarkerModifiedList );
+		m_undoStack->push( command );
+	}
+	m_parentWidget->disableShortcut( false );
 }
 
 int MapScene::getCurrentLayerIndex() const
@@ -319,14 +871,36 @@ void MapScene::paintMap( QSize coord )
 
 void MapScene::paintMap( int index, TileInfo tileInfo, int layerIndex )
 {
-	int currentIndex = getCurrentLayerIndex();
-	if( index < 0 || m_layers[currentIndex]->getLayerInfo().isLock() )
+	if( m_layers[layerIndex]->getLayerInfo().isLock() )
 	{
 		return;
 	}
-	m_layers[layerIndex]->m_tileList[index]->m_tileInfo = tileInfo;
-	m_layers[layerIndex]->m_tileList[index]->update();
+	Layer* layer = m_layers[layerIndex];
+	switch( layer->getLayerInfo().getLayerType() )
+	{
+	case eLayerType::TILE_LAYER:
+	{
+		TileLayer* tileLayer = dynamic_cast<TileLayer*>(layer);
+		tileLayer->setTileInfo( index, tileInfo );
+		break;
+	}
+	case eLayerType::MARKER_LAYER:
+	{
+		MarkerLayer* tileLayer = dynamic_cast<MarkerLayer*>(layer);
+		tileLayer->markTile( index, true );
+		break;
+	}
+	default:
+		break;
+	}
+	update();
 	m_parentWidget->markCurrentSceneForModified();
+}
+
+void MapScene::paintMap( const QPoint& coord, TileInfo tileInfo, int layerIndex )
+{
+	int index = m_mapInfo.getIndex(coord);
+	paintMap( index, tileInfo, layerIndex );
 }
 
 void MapScene::paintMap( int index, TileInfo tileInfo )
@@ -346,18 +920,38 @@ void MapScene::paintMap( int index, TileInfo tileInfo )
 
 void MapScene::paintMap( const QMap<int, TileInfo>& tileInfoMap, int layerIndex )
 {
-	QMap<int, TileInfo>::const_iterator mapIterator = tileInfoMap.constBegin();
-	while( mapIterator != tileInfoMap.constEnd() )
+	if( m_layers[layerIndex]->getLayerInfo().getLayerType() == eLayerType::TILE_LAYER )
 	{
-		int index = mapIterator.key();
-		TileInfo tileInfo = mapIterator.value();
-		if( index < 0 )
+		QMap<int, TileInfo>::const_iterator mapIterator = tileInfoMap.constBegin();
+		TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[layerIndex]);
+		while( mapIterator != tileInfoMap.constEnd() )
 		{
-			continue;
-		}
-		m_layers[layerIndex]->m_tileList[index]->m_tileInfo = tileInfo;
+			int index = mapIterator.key();
+			TileInfo tileInfo = mapIterator.value();
+			if( index < 0 )
+			{
+				continue;
+			}
+			tileLayer->setTileInfo( index, tileInfo );
 
-		++mapIterator;
+			++mapIterator;
+		}
+	}
+	else if ( m_layers[layerIndex]->getLayerInfo().getLayerType() == eLayerType::MARKER_LAYER )
+	{
+		QMap<int, TileInfo>::const_iterator mapIterator = tileInfoMap.constBegin();
+		MarkerLayer* tileLayer = dynamic_cast<MarkerLayer*>(m_layers[layerIndex]);
+		while( mapIterator != tileInfoMap.constEnd() )
+		{
+			int index = mapIterator.key();
+			if( index < 0 )
+			{
+				continue;
+			}
+			tileLayer->markTile( index, true );
+
+			++mapIterator;
+		}
 	}
 	update();
 }
@@ -393,21 +987,28 @@ void MapScene::showTileProperties( const QPointF& mousePos )
 	}
 	int index = coord.height() * m_mapInfo.getMapSize().width() + coord.width();
 	m_currentSelectedIndex = index;
-	Tile* tile = m_layers[currentIndex]->m_tileList[index];
 
 	QMap<QString, QString> informationMap;
-	informationMap["X"] = QString("%1").arg( coord.width() );
-	informationMap["Y"] = QString("%1").arg( coord.height() );
-	if ( tile->m_tileInfo.isValid() )
+	informationMap["X"] = QString( "%1" ).arg( coord.width() );
+	informationMap["Y"] = QString( "%1" ).arg( coord.height() );
+
+	Layer* layer = m_layers[currentIndex];
+	if ( layer->getLayerInfo().getLayerType() == eLayerType::TILE_LAYER )
 	{
-		informationMap["Tileset"] = tile->m_tileInfo.getTileset()->getName();
-		informationMap["Tileset Index"] = QString("%1").arg( tile->m_tileInfo.getIndex() );
+		TileLayer* tileLayer = dynamic_cast<TileLayer*>(layer);
+		TileInfo tileInfo = tileLayer->getTileInfo( index );
+		if( tileInfo.isValid() )
+		{
+			informationMap["Tileset"] = tileInfo.getTileset()->getName();
+			informationMap["Tileset Index"] = QString( "%1" ).arg( tileInfo.getIndex() );
+		}
+		else
+		{
+			informationMap["Tileset"] = "";
+			informationMap["Tileset Index"] = "";
+		}
 	}
-	else
-	{
-		informationMap["Tileset"] = "";
-		informationMap["Tileset Index"] = "";
-	}
+
 	m_parentWidget->showProperties( informationMap );
 }
 
@@ -433,20 +1034,25 @@ void MapScene::showSelectedTileProperties()
 		return;
 	}
 	QSize coord = QSize( m_currentSelectedIndex % m_mapInfo.getMapSize().width(), m_currentSelectedIndex / m_mapInfo.getMapSize().width() );
-	Tile* tile = m_layers[currentIndex]->m_tileList[m_currentSelectedIndex];
+	Layer* layer = m_layers[currentIndex];
 
 	QMap<QString, QString> informationMap;
 	informationMap["X"] = QString( "%1" ).arg( coord.width() );
 	informationMap["Y"] = QString( "%1" ).arg( coord.height() );
-	if( tile->m_tileInfo.isValid() )
+	if ( layer->getLayerInfo().getLayerType() == eLayerType::TILE_LAYER )
 	{
-		informationMap["Tileset"] = tile->m_tileInfo.getTileset()->getName();
-		informationMap["Tileset Index"] = QString( "%1" ).arg( tile->m_tileInfo.getIndex() );
-	}
-	else
-	{
-		informationMap["Tileset"] = "";
-		informationMap["Tileset Index"] = "";
+		TileLayer* tileLayer = dynamic_cast<TileLayer*>(layer);
+		TileInfo tileInfo = tileLayer->getTileInfo( m_currentSelectedIndex );
+		if( tileInfo.isValid() )
+		{
+			informationMap["Tileset"] = tileInfo.getTileset()->getName();
+			informationMap["Tileset Index"] = QString( "%1" ).arg( tileInfo.getIndex() );
+		}
+		else
+		{
+			informationMap["Tileset"] = "";
+			informationMap["Tileset Index"] = "";
+		}
 	}
 	m_parentWidget->showProperties( informationMap );
 }
@@ -456,13 +1062,14 @@ void MapScene::paintTileByFloodFill( int layerIndex, const QPoint& coord, const 
 	if( coord.x() < 0 || coord.x() >= m_mapInfo.getMapSize().width() || coord.y() < 0 || coord.y() >= m_mapInfo.getMapSize().height() )
 		return;
 
-	int tileIndex = m_mapInfo.getIndex( coord );
-	if ( m_layers[layerIndex]->m_tileList[tileIndex]->m_tileInfo != currentTileInfo )
+	TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[layerIndex]);
+	TileInfo tileInfo = tileLayer->getTileInfo( coord.x(), coord.y() );
+	if ( tileInfo != currentTileInfo )
 		return;
 
 	for ( int i = 0; i < readyToPaintTileIndexes.size(); ++i )
 	{
-		if ( m_mapInfo.getIndex( readyToPaintTileIndexes[i] ) == tileIndex )
+		if ( readyToPaintTileIndexes[i] == coord )
 		{
 			return;
 		}
@@ -475,15 +1082,41 @@ void MapScene::paintTileByFloodFill( int layerIndex, const QPoint& coord, const 
 	paintTileByFloodFill( layerIndex, QPoint( coord.x(), coord.y() - 1 ), currentTileInfo, readyToPaintTileIndexes );
 }
 
-void MapScene::selectTilesByFloodFill( int layerIndex, const QPoint& coord, const TileInfo& currentTileInfo, const TileInfo& newTileInfo )
+void MapScene::paintTileByFloodFill( int layerIndex, const QPoint& coord, bool targetMarked, QList<QPoint>& readyToPaintTileIndexes )
 {
 	if( coord.x() < 0 || coord.x() >= m_mapInfo.getMapSize().width() || coord.y() < 0 || coord.y() >= m_mapInfo.getMapSize().height() )
 		return;
 
-	if( m_layers[layerIndex]->m_tileList[m_mapInfo.getIndex( coord )]->m_tileInfo != currentTileInfo )
+	MarkerLayer* markerLayer = dynamic_cast<MarkerLayer*>(m_layers[layerIndex]);
+
+	if( markerLayer->IsMarked( coord.x(), coord.y() ) != targetMarked )
 		return;
 
-	if( m_layers[layerIndex]->m_tileList[m_mapInfo.getIndex( coord )]->m_tileInfo == newTileInfo )
+	for( int i = 0; i < readyToPaintTileIndexes.size(); ++i )
+	{
+		if( readyToPaintTileIndexes[i] == coord )
+		{
+			return;
+		}
+	}
+	readyToPaintTileIndexes.push_back( coord );
+
+	paintTileByFloodFill( layerIndex, QPoint( coord.x() + 1, coord.y() ), targetMarked, readyToPaintTileIndexes );
+	paintTileByFloodFill( layerIndex, QPoint( coord.x() - 1, coord.y() ), targetMarked, readyToPaintTileIndexes );
+	paintTileByFloodFill( layerIndex, QPoint( coord.x(), coord.y() + 1 ), targetMarked, readyToPaintTileIndexes );
+	paintTileByFloodFill( layerIndex, QPoint( coord.x(), coord.y() - 1 ), targetMarked, readyToPaintTileIndexes );
+}
+
+void MapScene::selectTilesByFloodFill( int layerIndex, const QPoint& coord, const TileInfo& currentTileInfo, const TileInfo& newTileInfo )
+{
+	TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[layerIndex]);
+	if( coord.x() < 0 || coord.x() >= m_mapInfo.getMapSize().width() || coord.y() < 0 || coord.y() >= m_mapInfo.getMapSize().height() )
+		return;
+
+	if( tileLayer->getTileInfo( coord.x(), coord.y() ) != currentTileInfo )
+		return;
+
+	if( tileLayer->getTileInfo( coord.x(), coord.y() ) == newTileInfo )
 		return;
 
 	if ( m_selectedTileItemList[m_mapInfo.getIndex( coord )]->m_isSelected )
@@ -497,6 +1130,55 @@ void MapScene::selectTilesByFloodFill( int layerIndex, const QPoint& coord, cons
 	selectTilesByFloodFill( layerIndex, QPoint( coord.x(), coord.y() - 1 ), currentTileInfo, newTileInfo );
 }
 
+void MapScene::selectTilesByFloodFill( int layerIndex, const QPoint& coord, bool targetMarked )
+{
+	if( coord.x() < 0 || coord.x() >= m_mapInfo.getMapSize().width() || coord.y() < 0 || coord.y() >= m_mapInfo.getMapSize().height() )
+		return;
+
+	MarkerLayer* markerLayer = dynamic_cast<MarkerLayer*>(m_layers[layerIndex]);
+
+	if( markerLayer->IsMarked( coord.x(), coord.y() ) != targetMarked )
+		return;
+
+	if( m_selectedTileItemList[m_mapInfo.getIndex( coord )]->m_isSelected )
+		return;
+
+	m_selectedTileItemList[m_mapInfo.getIndex( coord )]->setSelected( true );
+
+	selectTilesByFloodFill( layerIndex, QPoint( coord.x() + 1, coord.y() ), targetMarked );
+	selectTilesByFloodFill( layerIndex, QPoint( coord.x() - 1, coord.y() ), targetMarked );
+	selectTilesByFloodFill( layerIndex, QPoint( coord.x(), coord.y() + 1 ), targetMarked );
+	selectTilesByFloodFill( layerIndex, QPoint( coord.x(), coord.y() - 1 ), targetMarked );
+}
+
+void MapScene::eraseMap( int tileIndex, int layerIndex )
+{
+	if( tileIndex < 0 )
+	{
+		return;
+	}
+	Layer* layer = m_layers[layerIndex];
+	switch( layer->getLayerInfo().getLayerType() )
+	{
+	case eLayerType::TILE_LAYER:
+	{
+		TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[layerIndex]);
+		tileLayer->setTileInfo( tileIndex, TileInfo() );
+		break;
+	}
+	case eLayerType::MARKER_LAYER:
+	{
+		MarkerLayer* tileLayer = dynamic_cast<MarkerLayer*>(layer);
+		tileLayer->markTile( tileIndex, false );
+		break;
+	}
+	default:
+		break;
+	}
+
+	m_parentWidget->markCurrentSceneForModified();
+}
+
 void MapScene::eraseMap( int index )
 {
 	if( index < 0 )
@@ -508,10 +1190,7 @@ void MapScene::eraseMap( int index )
 	{
 		return;
 	}
-
-	m_layers[currentIndex]->m_tileList[index]->m_tileInfo = TileInfo();
-	m_layers[currentIndex]->m_tileList[index]->update();
-	m_parentWidget->markCurrentSceneForModified();
+	eraseMap( index, currentIndex );
 }
 
 void MapScene::eraseMap( QPoint coord )
@@ -526,15 +1205,34 @@ void MapScene::eraseMap( QPoint coord )
 	eraseMap( index );
 }
 
-Layer* MapScene::addNewLayer( int zValue )
+void MapScene::eraseMap( const QPoint& coord, int layerIndex )
 {
-	Layer* newLayer = new Layer( this, zValue );
+	int index = coord.y() * m_mapInfo.getMapSize().width() + coord.x();
+	eraseMap( index, layerIndex );
+}
+
+TileLayer* MapScene::addNewLayer( int zValue )
+{
+	TileLayer* newLayer = new TileLayer( this, zValue );
 	m_layers.insert( zValue, newLayer );
 
 	// reorder z value
 	for ( int i = 0; i < m_layers.size(); ++i )
 	{
 		m_layers[i]->setOrder(i);
+	}
+	return newLayer;
+}
+
+MarkerLayer* MapScene::addNewMarkerLayer( int zValue )
+{
+	MarkerLayer* newLayer = new MarkerLayer( this, zValue );
+	m_layers.insert( zValue, newLayer );
+
+	// reorder z value
+	for( int i = 0; i < m_layers.size(); ++i )
+	{
+		m_layers[i]->setOrder( i );
 	}
 	return newLayer;
 }
@@ -569,27 +1267,44 @@ void MapScene::eraseSelectedTiles()
 	{
 		return;
 	}
-	m_beforeDrawTileInfo.clear();
 	int currentIndex = getCurrentLayerIndex();
 	if( currentIndex == -1 || m_layers[currentIndex]->getLayerInfo().isLock() || !m_layers[currentIndex]->getLayerInfo().isVisible() )
 	{
 		return;
 	}
-	m_beforeDrawTileInfo.reserve( m_layers[currentIndex]->m_tileList.size() );
-	for( Tile* tile : m_layers[currentIndex]->m_tileList )
+	m_oldTileModifiedList.clear();
+	m_oldTileMarkerModifiedList.clear();
+	Layer* layer = m_layers[currentIndex];
+	if ( layer->getLayerInfo().getLayerType() == eLayerType::TILE_LAYER )
 	{
-		TileInfo& info = tile->getTileInfo();
-		m_beforeDrawTileInfo.push_back( info );
-	}
-	for( int i = 0; i < m_selectedTileItemList.size(); ++i )
-	{
-		if( m_selectedTileItemList[i]->m_isSelected )
+		TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[currentIndex]);
+
+		for( int i = 0; i < m_selectedTileItemList.size(); ++i )
 		{
-			eraseMap( i );
+			if( m_selectedTileItemList[i]->m_isSelected )
+			{
+				m_oldTileModifiedList.insert( TileModified( m_mapInfo.getCoord( i ), getTileInfo( i, currentIndex ) ) );
+				eraseMap( i );
+			}
 		}
+		QUndoCommand* command = new DrawCommand( this, currentIndex, m_oldTileModifiedList );
+		m_undoStack->push( command );
 	}
-	QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, m_layers[currentIndex]->m_tileList );
-	m_undoStack->push( command );
+	else if ( layer->getLayerInfo().getLayerType() == eLayerType::MARKER_LAYER )
+	{
+		MarkerLayer* markerLayer = dynamic_cast<MarkerLayer*>(m_layers[currentIndex]);
+
+		for( int i = 0; i < m_selectedTileItemList.size(); ++i )
+		{
+			if( m_selectedTileItemList[i]->m_isSelected )
+			{
+				m_oldTileMarkerModifiedList.insert( TileMarkerModified( m_mapInfo.getCoord( i ), getIsMarked( i, currentIndex ) ) );
+				eraseMap( i );
+			}
+		}
+		QUndoCommand* command = new DrawMarkerCommand( this, currentIndex, m_oldTileMarkerModifiedList );
+		m_undoStack->push( command );
+	}
 	setIsShowSelection( false );
 }
 
@@ -621,12 +1336,13 @@ QList<TileModified> MapScene::getCopiedTiles() const
 	}
 
 	QPoint smallestPoint = QPoint( m_mapInfo.getMapSize().width(), m_mapInfo.getMapSize().height() );
+	TileLayer* tileLayer = dynamic_cast<TileLayer*>(m_layers[currentIndex]);
 	for( int i = 0; i < m_selectedTileItemList.size(); ++i )
 	{
 		if( m_selectedTileItemList[i]->m_isSelected )
 		{
 			QPoint coord = m_mapInfo.getCoord( i );
-			TileInfo tileinfo = m_layers[currentIndex]->m_tileList[i]->getTileInfo();
+			TileInfo tileinfo = tileLayer->getTileInfo(i);
 			TileModified tileModified( coord, tileinfo );
 			tileModifiedList.push_back( tileModified );
 			smallestPoint.setX( qMin( smallestPoint.x(), coord.x() ) );
@@ -652,25 +1368,26 @@ void MapScene::pasteTilesOnCoord( const QPoint& coord, const QList<TileModified>
 	{
 		return;
 	}
-	m_beforeDrawTileInfo.clear();
-	m_beforeDrawTileInfo.reserve( m_layers[currentIndex]->m_tileList.size() );
-	for( Tile* tile : m_layers[currentIndex]->m_tileList )
+	m_oldTileModifiedList.clear();
+	Layer* layer = m_layers[currentIndex];
+	if ( layer->getLayerInfo().getLayerType() == eLayerType::TILE_LAYER )
 	{
-		TileInfo& info = tile->getTileInfo();
-		m_beforeDrawTileInfo.push_back( info );
-	}
+		TileLayer* tileLayer = dynamic_cast<TileLayer*>(layer);
+		int layerIndex = getCurrentLayerIndex();
 
-	for( TileModified tileModified : copiedTileList )
-	{
-		QPoint point = tileModified.m_coordinate + coord;
-		if ( tileModified.m_tileInfo.isValid() )
+		for( TileModified tileModified : copiedTileList )
 		{
-			paintMap( point, tileModified.m_tileInfo );
+			QPoint point = tileModified.m_coordinate + coord;
+			if( tileModified.m_tileInfo.isValid() )
+			{
+				m_oldTileModifiedList.insert( TileModified( point, getTileInfo( m_mapInfo.getIndex( point ), layerIndex ) ) );
+				paintMap( point, tileModified.m_tileInfo );
+			}
 		}
+		setIsShowSelection( false );
+		QUndoCommand* command = new DrawCommand( this, layerIndex, m_oldTileModifiedList );
+		m_undoStack->push( command );
 	}
-	setIsShowSelection( false );
-	QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, m_layers[currentIndex]->m_tileList );
-	m_undoStack->push( command );
 }
 
 void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
@@ -679,244 +1396,38 @@ void MapScene::mousePressEvent( QGraphicsSceneMouseEvent* event )
 	setIsShowSelection( false );
 	if( event->button() & Qt::LeftButton )
 	{
+		QPointF mousePos = event->scenePos();
+		if( mousePos == QPointF() )
+		{
+			return;
+		}
 		if ( eDrawTool::MOVE == m_parentWidget->m_drawTool )
 		{
-			m_view->viewport()->setCursor( Qt::ClosedHandCursor );
-			m_parentWidget->disableShortcut( true );
-			return;
+			mousePress_Move();
 		}
 		else if ( eDrawTool::CURSOR == m_parentWidget->m_drawTool )
 		{
-			QPointF mousePos = event->scenePos();
-			if( mousePos == QPointF() )
-			{
-				return;
-			}
-			m_isSelectedMoreThanOneTile = false;
-			m_startPos = mousePos;
-			QPoint coord = QPoint( qFloor( mousePos.x() / m_mapInfo.getTileSize().width() ), qFloor( mousePos.y() / m_mapInfo.getTileSize().height() ) );
-			m_selectedMinCoord = coord;
-			m_selectedMaxCoord = coord + QPoint( 1, 1 );
-			for ( SelectMask* mask : m_selectedTileItemList )
-			{
-				mask->setSelected( false );
-				if( mask->m_coord.x() >= m_selectedMinCoord.x() && mask->m_coord.x() < m_selectedMaxCoord.x() && 
-					mask->m_coord.y() < m_selectedMaxCoord.y() && mask->m_coord.y() >= m_selectedMinCoord.y() )
-				{
-					mask->setSelected( true );
-				}
-			}
-			setIsShowSelection( true );
-			showTileProperties( mousePos );
-			return;
+			mousePress_Cursor( mousePos );
 		}
 		else if ( eDrawTool::BUCKET == m_parentWidget->m_drawTool )
 		{
-			QPointF mousePos = event->scenePos();
-			if( mousePos == QPointF() )
-			{
-				return;
-			}
-			QSizeF bound = QSizeF( m_mapInfo.getTileSize().width() * m_mapInfo.getMapSize().width(), m_mapInfo.getTileSize().height() * m_mapInfo.getMapSize().height() );
-			if( mousePos.x() >= bound.width() || mousePos.y() >= bound.height() || mousePos.x() <= 0 || mousePos.y() <= 0 )
-			{
-				return;
-			}
-			QPoint coord = QPoint( qFloor( mousePos.x() / m_mapInfo.getTileSize().width() ), qFloor( mousePos.y() / m_mapInfo.getTileSize().height() ) );
-
-			// Flood fill Algorithm
-			int currentIndex = getCurrentLayerIndex();
-			if( currentIndex == -1 )
-			{
-				return;
-			}
-			m_beforeDrawTileInfo.clear();
-			m_beforeDrawTileInfo.reserve( m_layers[currentIndex]->m_tileList.size() );
-			for( Tile* tile : m_layers[currentIndex]->m_tileList )
-			{
-				TileInfo& info = tile->getTileInfo();
-				m_beforeDrawTileInfo.push_back( info );
-			}
-
-			// Implement Flood fill and Paint tiles
-			QList<QPoint> readyToPaintTileCoords = editMapByFloodFill( currentIndex, coord );
-			if ( readyToPaintTileCoords.isEmpty() )
-			{
-				return;
-			}
-			QPoint smallestPoint = readyToPaintTileCoords[0];
-			for ( QPoint p : readyToPaintTileCoords )
-			{
-				smallestPoint.setX( qMin( smallestPoint.x(), p.x() ) );
-				smallestPoint.setY( qMin( smallestPoint.y(), p.y() ) );
-			}
-
-			bool isDefault = true;
-			m_parentWidget->isDefalutBrush( isDefault );
-			if ( isDefault )
-			{
-				QList<TileInfo> selectedTileList = getCurrentTiles();
-				QSize regionSize = getSelectedTilesRegionSize();
-
-				for( int i = 0; i < readyToPaintTileCoords.size(); ++i )
-				{
-					QPoint targetCoord = readyToPaintTileCoords[i];
-					QPoint coord = QPoint( (targetCoord.x() - smallestPoint.x()) % regionSize.width(), (targetCoord.y() - smallestPoint.y()) % regionSize.height() );
-					int index = coord.x() + coord.y() * regionSize.width();
-					paintMap( targetCoord, selectedTileList[index] );
-				}
-			}
-			else
-			{
-				for( int i = 0; i < readyToPaintTileCoords.size(); ++i )
-				{
-					QList<TileModified> modifiedList;
-					m_parentWidget->getPaintMapModified( modifiedList, readyToPaintTileCoords[i], eDrawTool::BRUSH );
-					for( TileModified m : modifiedList )
-					{
-						paintMap( m.m_coordinate, m.m_tileInfo );
-					}
-				}
-			}
-			QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, m_layers[currentIndex]->m_tileList );
-			m_undoStack->push( command );
+			mousePress_Bucket( mousePos );
 		}
 		else if ( eDrawTool::SHAPE == m_parentWidget->m_drawTool )
 		{
-			QPointF mousePos = event->scenePos();
-			if( mousePos == QPointF() )
-			{
-				return;
-			}
-			QSizeF bound = QSizeF( m_mapInfo.getTileSize().width() * m_mapInfo.getMapSize().width(), m_mapInfo.getTileSize().height() * m_mapInfo.getMapSize().height() );
-			if( mousePos.x() >= bound.width() || mousePos.y() >= bound.height() || mousePos.x() <= 0 || mousePos.y() <= 0 )
-			{
-				return;
-			}
-			QPoint coord = QPoint( qFloor( mousePos.x() / m_mapInfo.getTileSize().width() ), qFloor( mousePos.y() / m_mapInfo.getTileSize().height() ) );
-			m_lastPaintCoord = coord;
-			m_startPos = mousePos;
-
-			int currentIndex = getCurrentLayerIndex();
-			if( currentIndex == -1 )
-			{
-				return;
-			}
-			m_beforeDrawTileInfo.clear();
-			m_beforeDrawTileInfo.reserve( m_layers[currentIndex]->m_tileList.size() );
-			for( Tile* tile : m_layers[currentIndex]->m_tileList )
-			{
-				TileInfo& info = tile->getTileInfo();
-				m_beforeDrawTileInfo.push_back( info );
-			}
-			m_parentWidget->disableShortcut( true );
-
-			bool isDefault = true;
-			m_parentWidget->isDefalutBrush( isDefault );
-			if ( isDefault )
-			{
-				QList<TileInfo> selectedTileList = getCurrentTiles();
-
-				if ( selectedTileList.empty() )
-				{
-					return;
-				}
-				TileInfo t = selectedTileList[0];
-				paintMap( coord, t );
-			}
-			else
-			{
-				QList<TileModified> modifiedList;
-				m_parentWidget->getPaintMapModified( modifiedList, QPoint( coord.x(), coord.y() ), m_parentWidget->getCurrentDrawTool() );
-				for( TileModified m : modifiedList )
-				{
-					paintMap( m.m_coordinate, m.m_tileInfo );
-				}
-			}
+			mousePress_Shape( mousePos );
 		}
 		else if ( eDrawTool::MAGIC_WAND == m_parentWidget->m_drawTool )
 		{
-			QPointF mousePos = event->scenePos();
-			if( mousePos == QPointF() )
-			{
-				return;
-			}
-			QSizeF bound = QSizeF( m_mapInfo.getTileSize().width() * m_mapInfo.getMapSize().width(), m_mapInfo.getTileSize().height() * m_mapInfo.getMapSize().height() );
-			if( mousePos.x() >= bound.width() || mousePos.y() >= bound.height() || mousePos.x() <= 0 || mousePos.y() <= 0 )
-			{
-				return;
-			}
-			QPoint coord = QPoint( qFloor( mousePos.x() / m_mapInfo.getTileSize().width() ), qFloor( mousePos.y() / m_mapInfo.getTileSize().height() ) );
-
-			int currentIndex = getCurrentLayerIndex();
-			if( currentIndex == -1 )
-			{
-				return;
-			}
-			selectTilesByFloodFill( currentIndex, coord );
-			setIsShowSelection( true );
-			showSelectedTileProperties();
+			mousePress_MagicWand( mousePos );
 		}
 		else if ( eDrawTool::SELECT_SAME_TILE == m_parentWidget->m_drawTool )
 		{
-			QPointF mousePos = event->scenePos();
-			if( mousePos == QPointF() )
-			{
-				return;
-			}
-			QSizeF bound = QSizeF( m_mapInfo.getTileSize().width() * m_mapInfo.getMapSize().width(), m_mapInfo.getTileSize().height() * m_mapInfo.getMapSize().height() );
-			if( mousePos.x() >= bound.width() || mousePos.y() >= bound.height() || mousePos.x() <= 0 || mousePos.y() <= 0 )
-			{
-				return;
-			}
-			QPoint coord = QPoint( qFloor( mousePos.x() / m_mapInfo.getTileSize().width() ), qFloor( mousePos.y() / m_mapInfo.getTileSize().height() ) );
-
-			int currentIndex = getCurrentLayerIndex();
-			if( currentIndex == -1 )
-			{
-				return;
-			}
-			TileInfo currentTileInfo = m_layers[currentIndex]->m_tileList[m_mapInfo.getIndex( coord )]->m_tileInfo;
-			for( int i = 0; i < m_selectedTileItemList.size(); ++i )
-			{
-				if ( m_layers[currentIndex]->m_tileList[i]->m_tileInfo == currentTileInfo )
-				{
-					m_selectedTileItemList[i]->setSelected( true );
-				}
-				else
-				{
-					m_selectedTileItemList[i]->setSelected( false );
-				}
-			}
-
-			setIsShowSelection( true );
-			showSelectedTileProperties();
+			mousePress_SelectSameTile( mousePos );
 		}
-		// Draw or erase mode
-		else if ( eDrawTool::BRUSH == m_parentWidget->m_drawTool ||
-				eDrawTool::ERASER == m_parentWidget->m_drawTool )
+		else if ( eDrawTool::BRUSH == m_parentWidget->m_drawTool || eDrawTool::ERASER == m_parentWidget->m_drawTool )
 		{
-			m_beforeDrawTileInfo.clear();
-			int currentIndex = getCurrentLayerIndex();
-			if( currentIndex == -1 || m_layers[currentIndex]->getLayerInfo().isLock() || !m_layers[currentIndex]->getLayerInfo().isVisible() )
-			{
-				return;
-			}
-
-			m_beforeDrawTileInfo.reserve( m_layers[currentIndex]->m_tileList.size() );
-			for( Tile* tile : m_layers[currentIndex]->m_tileList )
-			{
-				TileInfo& info = tile->getTileInfo();
-				m_beforeDrawTileInfo.push_back( info );
-			}
-			m_parentWidget->disableShortcut( true );
-			QPointF mousePos = event->scenePos();
-			if( mousePos == QPointF() )
-			{
-				return;
-			}
-			m_lastPaintCoord = QPoint( -1, -1 );
-			editMapOnPoint( mousePos );
+			mousePress_BrushAndEraser( mousePos );
 		}
 	}
 	update();
@@ -928,138 +1439,26 @@ void MapScene::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
 
 	if( event->buttons() & Qt::LeftButton )
 	{
+		QPointF mousePos = event->scenePos();
+		if( mousePos == QPointF() )
+		{
+			return;
+		}
 		if( eDrawTool::MOVE == m_parentWidget->m_drawTool )
 		{
-			QPoint currentPosition = event->screenPos();
-			QPoint lastPosition = event->lastScreenPos();
-			m_view->verticalScrollBar()->setValue( m_view->verticalScrollBar()->value() - (currentPosition.y() - lastPosition.y()) );
-			m_view->horizontalScrollBar()->setValue( m_view->horizontalScrollBar()->value() - (currentPosition.x() - lastPosition.x()) );
-			return;
+			mouseMove_Move( event );
 		}
 		else if( eDrawTool::CURSOR == m_parentWidget->m_drawTool )
 		{
-			QPointF mousePos = event->scenePos();
-			if( mousePos == QPointF() || m_selectedTileItemList.isEmpty() )
-			{
-				return;
-			}
-			QSize& tileSize = m_mapInfo.getTileSize();
-			QPointF minPoint = QPointF( qMin( m_startPos.x(), mousePos.x() ), qMin( m_startPos.y(), mousePos.y() ) );
-			QPointF maxPoint = QPointF( qMax( m_startPos.x(), mousePos.x() ), qMax( m_startPos.y(), mousePos.y() ) );
-
-			m_selectedMinCoord = QPoint( qFloor( minPoint.x() / tileSize.width() ), qFloor( minPoint.y() / tileSize.height() ) );
-			m_selectedMaxCoord = QPoint( qCeil( maxPoint.x() / tileSize.width() ), qCeil( maxPoint.y() / tileSize.height() ) );
-
-			QPoint coordDiff = m_selectedMaxCoord - m_selectedMinCoord;
-			if( coordDiff.x() > 1 || coordDiff.y() > 1 )
-			{
-				m_isSelectedMoreThanOneTile = true;
-			}
-			else
-			{
-				m_isSelectedMoreThanOneTile = false;
-			}
-			for( SelectMask* mask : m_selectedTileItemList )
-			{
-				mask->setSelected( false );
-				if( mask->m_coord.x() >= m_selectedMinCoord.x() && mask->m_coord.x() < m_selectedMaxCoord.x() &&
-					mask->m_coord.y() < m_selectedMaxCoord.y() && mask->m_coord.y() >= m_selectedMinCoord.y() )
-				{
-					mask->setSelected( true );
-				}
-			}
-			setIsShowSelection( true );
-			showSelectedTileProperties();
-			
-			return;
+			mouseMove_Cursor( mousePos );
 		}
 		else if ( eDrawTool::SHAPE == m_parentWidget->m_drawTool )
 		{
-			QPointF mousePos = event->scenePos();
-			if( mousePos == QPointF() || m_selectedTileItemList.isEmpty() )
-			{
-				return;
-			}
-			QSizeF bound = QSizeF( m_mapInfo.getTileSize().width() * m_mapInfo.getMapSize().width(), m_mapInfo.getTileSize().height() * m_mapInfo.getMapSize().height() );
-			if( mousePos.x() >= bound.width() || mousePos.y() >= bound.height() || mousePos.x() <= 0 || mousePos.y() <= 0 )
-			{
-				return;
-			}
-			QPoint coord = QPoint( qFloor( mousePos.x() / m_mapInfo.getTileSize().width() ), qFloor( mousePos.y() / m_mapInfo.getTileSize().height() ) );
-			if ( m_lastPaintCoord.x() == coord.x() && m_lastPaintCoord.y() == coord.y() )
-			{
-				return;
-			}
-
-			m_lastPaintCoord = coord;
-			QSize& tileSize = m_mapInfo.getTileSize();
-			QPointF minPoint = QPointF( qMin( m_startPos.x(), mousePos.x() ), qMin( m_startPos.y(), mousePos.y() ) );
-			QPointF maxPoint = QPointF( qMax( m_startPos.x(), mousePos.x() ), qMax( m_startPos.y(), mousePos.y() ) );
-
-			m_selectedMinCoord = QPoint( qFloor( minPoint.x() / tileSize.width() ), qFloor( minPoint.y() / tileSize.height() ) );
-			m_selectedMaxCoord = QPoint( qCeil( maxPoint.x() / tileSize.width() ), qCeil( maxPoint.y() / tileSize.height() ) );
-
-			QSize regionSize = QSize( m_selectedMaxCoord.x() - m_selectedMinCoord.x(), m_selectedMaxCoord.y() - m_selectedMinCoord.y() );
-
-			for( int i = 0; i < m_beforeDrawTileInfo.size(); ++i )
-			{
-				TileInfo tile = m_beforeDrawTileInfo[i];
-				paintMap( i, tile );
-			}
-
-			bool isDefault = true;
-			m_parentWidget->isDefalutBrush( isDefault );
-			if( isDefault )
-			{
-				QList<TileInfo> selectedTileList = getCurrentTiles();
-				QSize tileRegionSize = getSelectedTilesRegionSize();
-				for( int y = 0; y < regionSize.height(); ++y )
-				{
-					for( int x = 0; x < regionSize.width(); ++x )
-					{
-						QPoint targetCoord = m_selectedMinCoord + QPoint( x, y );
-
-						QPoint tileCoord = QPoint( (targetCoord.x() - m_selectedMinCoord.x()) % tileRegionSize.width(), (targetCoord.y() - m_selectedMinCoord.y()) % tileRegionSize.height() );
-						int index = tileCoord.x() + tileCoord.y() * tileRegionSize.width();
-						paintMap( targetCoord, selectedTileList[index] );
-					}
-				}
-			}
-			else
-			{
-				QList<TileInfo> selectedTileList = getCurrentTiles();
-				QSize tileRegionSize = getSelectedTilesRegionSize();
-				for( int y = 0; y < regionSize.height(); ++y )
-				{
-					for( int x = 0; x < regionSize.width(); ++x )
-					{
-						QPoint targetCoord = m_selectedMinCoord + QPoint( x, y );
-
-						QList<TileModified> modifiedList;
-						m_parentWidget->getPaintMapModified( modifiedList, QPoint( targetCoord.x(), targetCoord.y() ), eDrawTool::BRUSH );
-						for( TileModified m : modifiedList )
-						{
-							paintMap( m.m_coordinate, m.m_tileInfo );
-						}
-					}
-				}
-			}
+			mouseMove_Shape( mousePos );
 		}
-		// Draw or erase mode
-		else if( eDrawTool::BRUSH == m_parentWidget->m_drawTool ||
-			eDrawTool::ERASER == m_parentWidget->m_drawTool )
+		else if( eDrawTool::BRUSH == m_parentWidget->m_drawTool || eDrawTool::ERASER == m_parentWidget->m_drawTool )
 		{
-			int currentIndex = getCurrentLayerIndex();
-			if( currentIndex == -1 || m_layers[currentIndex]->getLayerInfo().isLock() || !m_layers[currentIndex]->getLayerInfo().isVisible() )
-			{
-				return;
-			}
-			QPointF mousePos = event->scenePos();
-			if( mousePos == QPointF() )
-			{
-				return;
-			}
-			editMapOnPoint( mousePos );
+			mouseMove_BrushAndEraser( mousePos );
 		}
 	}
 }
@@ -1072,39 +1471,15 @@ void MapScene::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 	{
 		if( eDrawTool::MOVE == m_parentWidget->m_drawTool )
 		{
-			m_view->viewport()->setCursor( m_parentWidget->m_currentCursor );
-			m_parentWidget->disableShortcut( false );
-			return;
-		}
-		else if( eDrawTool::CURSOR == m_parentWidget->m_drawTool )
-		{
-			return;
+			mouseRelease_Move();
 		}
 		else if ( eDrawTool::SHAPE == m_parentWidget->m_drawTool )
 		{
-			int currentIndex = getCurrentLayerIndex();
-			if( currentIndex == -1 || m_layers[currentIndex]->getLayerInfo().isLock() || !m_layers[currentIndex]->getLayerInfo().isVisible() )
-			{
-				return;
-			}
-
-			QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, m_layers[currentIndex]->m_tileList );
-			m_undoStack->push( command );
-			m_parentWidget->disableShortcut( false );
+			mouseRelease_Shape();
 		}
-		// Draw or erase mode
-		else if( eDrawTool::BRUSH == m_parentWidget->m_drawTool ||
-			eDrawTool::ERASER == m_parentWidget->m_drawTool )
+		else if( eDrawTool::BRUSH == m_parentWidget->m_drawTool || eDrawTool::ERASER == m_parentWidget->m_drawTool )
 		{
-			int currentIndex = getCurrentLayerIndex();
-			if( currentIndex == -1 || m_layers[currentIndex]->getLayerInfo().isLock() || !m_layers[currentIndex]->getLayerInfo().isVisible() )
-			{
-				return;
-			}
-
-			QUndoCommand* command = new DrawCommand( m_beforeDrawTileInfo, m_layers[currentIndex]->m_tileList );
-			m_undoStack->push( command );
-			m_parentWidget->disableShortcut( false );
+			mouseRelease_BrushAndEraser();
 		}
 	}
 	update();

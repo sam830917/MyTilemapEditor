@@ -2,25 +2,55 @@
 
 #include "Core/TileInfo.h"
 #include "Core/LayerInfo.h"
+#include "Core/Layer.h"
+#include "Brush/BrushCommon.h"
 #include <QUndoCommand>
 #include <QList>
 
 class MapScene;
 class Tile;
-class Layer;
+class TileLayer;
 
+struct TileMarkerModified
+{
+	TileMarkerModified( QPoint coordinate, bool isMarked ):m_coordinate( coordinate ), m_isMarked( isMarked ) {}
+
+	QPoint m_coordinate;
+	bool m_isMarked = false;
+
+	bool operator==( const TileMarkerModified& compare ) const;
+};
+uint qHash( const TileMarkerModified key );
+
+//--------------------------------------------------------------------------------------------------------------------------
 class DrawCommand : public QUndoCommand
 {
 public:
-	DrawCommand( QList<TileInfo> tileInfoList, QList<Tile*> tiles, QUndoCommand* parent = 0 );
+	DrawCommand( MapScene* mapScene, int layerIndex, QSet<TileModified> oldTileModifiedList, QUndoCommand* parent = 0 );
 	~DrawCommand();
 
 	virtual void undo() override;
 	virtual void redo() override;
 private:
-	QList<TileInfo> m_tileInfoBeforeList;
-	QList<TileInfo> m_tileInfoAfterList;
-	QList<Tile*> m_tiles;
+	int m_index = 0;
+	MapScene* m_mapScene;
+	QSet<TileModified> m_oldTileModifiedList;
+	QSet<TileModified> m_newTileModifiedList;
+};
+
+class DrawMarkerCommand : public QUndoCommand
+{
+public:
+	DrawMarkerCommand( MapScene* mapScene, int layerIndex, QSet<TileMarkerModified> oldTileModifiedList, QUndoCommand* parent = 0 );
+	~DrawMarkerCommand();
+
+	virtual void undo() override;
+	virtual void redo() override;
+private:
+	int m_index = 0;
+	MapScene* m_mapScene;
+	QSet<TileMarkerModified> m_oldTileModifiedList;
+	QSet<TileMarkerModified> m_newTileModifiedList;
 };
 
 class LayerMoveCommand : public QUndoCommand
@@ -42,7 +72,7 @@ class LayerAddCommand : public QUndoCommand
 {
 	// Index A and Index B exchange position in the list.
 public:
-	LayerAddCommand( MapScene* mapScene, int index, const QString& name, QUndoCommand* parent = 0 );
+	LayerAddCommand( MapScene* mapScene, int index, const QString& name, eLayerType type, QUndoCommand* parent = 0 );
 	~LayerAddCommand();
 
 	virtual void undo() override;
@@ -52,6 +82,7 @@ private:
 	MapScene* m_mapScene;
 	QString m_name;
 	Layer* m_layer;
+	eLayerType m_layerType;
 };
 
 class LayerDeleteCommand : public QUndoCommand
@@ -83,4 +114,20 @@ private:
 	MapScene* m_mapScene;
 	QString m_oldName;
 	QString m_newName;
+};
+
+class LayerColorChangeCommand : public QUndoCommand
+{
+	// Index A and Index B exchange position in the list.
+public:
+	LayerColorChangeCommand( MapScene* mapScene, int index, const QColor& color, QUndoCommand* parent = 0 );
+	~LayerColorChangeCommand();
+
+	virtual void undo() override;
+	virtual void redo() override;
+private:
+	int m_index = 0;
+	MapScene* m_mapScene;
+	QColor m_oldColor;
+	QColor m_newColor;
 };

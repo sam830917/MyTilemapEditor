@@ -51,10 +51,12 @@ public slots:
 	void getTabCount( int& tabCount );
 
 	void addNewLayerIntoMap( int index, const QString& name );
+	void addNewMarkerLayerIntoMap( int index, const QString& name );
 	void changeLayerOrder( int indexA, int indexB );
 	void deleteLayerFromIndex( int index );
 	void setLayerLock( int index, bool isLock );
 	void setLayerVisible( int index, bool isVisible );
+	void setLayerColor( int index,  const QColor& color );
 	void setLayerName( int index, const QString& name );
 	void changeLayerFocus();
 
@@ -76,10 +78,11 @@ signals:
 	void getLayerIndex( int& index );
 	void getLayerGroupInfoList( int index, QList<LayerInfo>& layerInfoList );
 	void movedLayerOrder( int fromItemIndex, int toItemIndex );
-	void addedNewLayer( int index, const QString& name );
+	void addedNewLayer( int index, const QString& name, eLayerType type );
 	void addedNewLayerWithInfo( int index, LayerInfo layerInfo );
 	void deletedLayer( int index );
 	void renamedLayer( int index, const QString& name );
+	void changedColorLayer( int index, const QColor& color );
 
 	void showProperties( const QMap<QString, QString>& informationMap );
 	void addNewLayerGroup( MapInfo mapInfo, QList<LayerInfo> layerInfoList );

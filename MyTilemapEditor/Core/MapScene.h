@@ -1,11 +1,13 @@
 #pragma once
 
 #include "MapInfo.h"
+#include "UndoCommand.h"
 #include "TileInfo.h"
 #include "Core/Layer.h"
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QList>
+#include <QSet>
 #include <QUndoStack>
 
 class WorkspaceWidget;
@@ -36,7 +38,10 @@ class MapScene : public QGraphicsScene
 	friend class LayerAddCommand;
 	friend class LayerDeleteCommand;
 	friend class LayerRenameCommand;
-	friend class Layer;
+	friend class LayerColorChangeCommand;
+	friend class DrawMarkerCommand;
+	friend class TileLayer;
+	friend class MarkerLayer;
 	friend class SelectMask;
 	friend class BrushHelper;
 
@@ -46,20 +51,26 @@ public:
 	~MapScene();
 
 	MapInfo getMapInfo() const { return m_mapInfo; }
+	TileInfo getTileInfo( int tileIndex, int layerIndex ) const;
+	bool getIsMarked( int tileIndex, int layerIndex ) const;
 
 	void editMapOnPoint( const QPointF& point );
 	QList<QPoint> editMapByFloodFill( int layerIndex, const QPoint& coord );
 	void selectTilesByFloodFill( int layerIndex, const QPoint& coord );
 
 	void paintMap( int index, TileInfo tileInfo, int layerIndex );
+	void paintMap( const QPoint& coord, TileInfo tileInfo, int layerIndex );
 	void paintMap( int index, TileInfo tileInfo );
 	void paintMap( int index );
 	void paintMap( QSize coord );
 	void paintMap( QPoint coord, TileInfo tileInfo );
+	void eraseMap( int tileIndex, int layerIndex );
+	void eraseMap( const QPoint& coord, int layerIndex );
 	void eraseMap( int index );
 	void eraseMap( QPoint coord );
 
-	Layer* addNewLayer( int zValue );
+	TileLayer* addNewLayer( int zValue );
+	MarkerLayer* addNewMarkerLayer( int zValue );
 
 	void setIsShowSelection( bool isShow );
 	void updateSelection();
@@ -74,7 +85,26 @@ private:
 	void showTileProperties( const QPointF& mousePos );
 	void showSelectedTileProperties();
 	void paintTileByFloodFill( int layerIndex, const QPoint& coord, const TileInfo& currentTileInfo, QList<QPoint>& readyToPaintTileIndexes );
+	void paintTileByFloodFill( int layerIndex, const QPoint& coord, bool targetMarked, QList<QPoint>& readyToPaintTileIndexes );
 	void selectTilesByFloodFill( int layerIndex, const QPoint& coord, const TileInfo& currentTileInfo, const TileInfo& newTileInfo );
+	void selectTilesByFloodFill( int layerIndex, const QPoint& coord, bool targetMarked );
+
+	void mousePress_Move();
+	void mousePress_Cursor( const QPointF& mousePos );
+	void mousePress_Bucket( const QPointF& mousePos );
+	void mousePress_Shape ( const QPointF& mousePos );
+	void mousePress_MagicWand( const QPointF& mousePos );
+	void mousePress_SelectSameTile( const QPointF& mousePos );
+	void mousePress_BrushAndEraser( const QPointF& mousePos );
+
+	void mouseMove_Move( QGraphicsSceneMouseEvent* event );
+	void mouseMove_Cursor( const QPointF& mousePos );
+	void mouseMove_Shape( const QPointF& mousePos );
+	void mouseMove_BrushAndEraser( const QPointF& mousePos );
+
+	void mouseRelease_Move();
+	void mouseRelease_Shape();
+	void mouseRelease_BrushAndEraser();
 
 protected:
 	virtual void mousePressEvent( QGraphicsSceneMouseEvent* event ) override;
@@ -88,7 +118,8 @@ private:
 	MapInfo m_mapInfo;
 	QList<Layer*> m_layers;
 
-	QList<TileInfo> m_beforeDrawTileInfo;
+	QSet<TileModified> m_oldTileModifiedList;
+	QSet<TileMarkerModified> m_oldTileMarkerModifiedList;
 	QUndoStack* m_undoStack = Q_NULLPTR;
 
 	// Select tool

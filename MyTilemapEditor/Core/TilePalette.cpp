@@ -140,6 +140,7 @@ void TilePalette::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
 				m_selectedTileInfos.push_back( TileInfo( m_tileset, m_tileset->getTileIndex( selectedMinCoord + QPoint( x, y ) ) ) );
 			}
 		}
+		m_currentIndex = m_selectedTileInfos[0].getIndex();
 		updateGlobalTilePalette();
 	}
 	update();

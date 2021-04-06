@@ -29,5 +29,6 @@
         <file>Icon/brush_icon.png</file>
         <file>Icon/tileset_icon.png</file>
         <file>Icon/shape.png</file>
+        <file>Icon/marker_plus.png</file>
     </qresource>
 </RCC>

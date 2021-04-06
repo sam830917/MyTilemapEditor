@@ -113,45 +113,75 @@ void WorkspaceWidget::saveLayerToFile( QList<LayerInfo>& layerInfoList, int tabI
 		mapLayerEle->SetAttribute( "name", layerInfoList[i].getNmae().toStdString().c_str() );
 		mapLayerEle->SetAttribute( "isLock", layerInfoList[i].isLock() );
 		mapLayerEle->SetAttribute( "isVisible", layerInfoList[i].isVisible() );
+		if ( layerInfoList[i].getLayerType() == eLayerType::TILE_LAYER )
+		{
+			mapLayerEle->SetAttribute( "type", "TILE" );
+		}
+		else if ( layerInfoList[i].getLayerType() == eLayerType::MARKER_LAYER )
+		{
+			mapLayerEle->SetAttribute( "type", "MARKER" );
+			mapLayerEle->SetAttribute( "color", QString("%1,%2,%3").arg(layerInfoList[i].getColor().red())
+				.arg(layerInfoList[i].getColor().green()).arg(layerInfoList[i].getColor().blue()).toStdString().c_str() );
+		}
+		mapLayerEle->SetAttribute( "layerIndex", i );
 		mapLayersEle.LinkEndChild( mapLayerEle );
 	}
 }
 
 void WorkspaceWidget::saveTileToFile( QList<const Tileset*>& tilesetList, int tabIndex, XmlElement& mapRoot, XmlDocument& mapDoc )
 {
-	int count = 0;
 	MapScene* mapScene = m_mapSceneList[tabIndex];
 	for( int layerIndex = 0; layerIndex < mapScene->m_layers.size(); ++layerIndex )
 	{
 		XmlElement* mapTiles = mapDoc.NewElement( "Tiles" );
+ 		mapTiles->SetAttribute("layerIndex", layerIndex);
 		mapRoot.LinkEndChild( mapTiles );
 		Layer* layer = mapScene->m_layers[layerIndex];
-		for( int i = 0; i < layer->m_tileList.size(); ++i )
+		if ( layer->getLayerInfo().getLayerType() == eLayerType::TILE_LAYER )
 		{
-			Tile* tile = layer->m_tileList[i];
-			TileInfo tileInfo = tile->getTileInfo();
-			if( !tileInfo.isValid() )
-				continue;
+			TileLayer* tileLayer = dynamic_cast<TileLayer*>(mapScene->m_layers[layerIndex]);
+			for( int i = 0; i < tileLayer->m_tileList.size(); ++i )
+			{
+				Tile* tile = tileLayer->m_tileList[i];
+				TileInfo tileInfo = tile->getTileInfo();
+				if( !tileInfo.isValid() )
+					continue;
 
-			int tilesetNumber = tilesetList.size();
-			bool isNewTileset = true;
-			for ( int tileIndex = 0; tileIndex < tilesetList.size(); ++tileIndex )
-			{
-				if ( *tilesetList[tileIndex] == *tileInfo.getTileset() )
+				int tilesetNumber = tilesetList.size();
+				bool isNewTileset = true;
+				for( int tileIndex = 0; tileIndex < tilesetList.size(); ++tileIndex )
 				{
-					isNewTileset = false;
-					tilesetNumber = tileIndex;
+					if( *tilesetList[tileIndex] == *tileInfo.getTileset() )
+					{
+						isNewTileset = false;
+						tilesetNumber = tileIndex;
+					}
 				}
+				if( isNewTileset )
+				{
+					tilesetList.push_back( tileInfo.getTileset() );
+				}
+				XmlElement* mapTileEle = mapDoc.NewElement( "Tile" );
+				mapTileEle->SetAttribute( "index", i );
+				mapTileEle->SetAttribute( "tileset", tilesetNumber );
+				mapTileEle->SetAttribute( "tilesetIndex", tileInfo.getIndex() );
+				mapTiles->LinkEndChild( mapTileEle );
 			}
-			if ( isNewTileset )
+		}
+		else if ( layer->getLayerInfo().getLayerType() == eLayerType::MARKER_LAYER )
+		{
+			MarkerLayer* markerLayer = dynamic_cast<MarkerLayer*>(mapScene->m_layers[layerIndex]);
+			for( int i = 0; i < markerLayer->m_tileList.size(); ++i )
 			{
-				tilesetList.push_back( tileInfo.getTileset() );
+				bool isMarked = markerLayer->m_tileList[i]->isMarked();
+				if ( !isMarked )
+				{
+					continue;
+				}
+				XmlElement* mapTileEle = mapDoc.NewElement( "Tile" );
+				mapTileEle->SetAttribute( "index", i );
+				mapTiles->LinkEndChild( mapTileEle );
 			}
-			XmlElement* mapTileEle = mapDoc.NewElement( "Tile" );
-			mapTileEle->SetAttribute( "index", i );
-			mapTileEle->SetAttribute( "tileset", tilesetNumber );
-			mapTileEle->SetAttribute( "tilesetIndex", tileInfo.getIndex() );
-			mapTiles->LinkEndChild( mapTileEle );
 		}
 	}
 }
@@ -260,12 +290,27 @@ void WorkspaceWidget::insertMap( MapInfo mapInfo, QList<LayerInfo> layerInfoList
 
 	XmlElement* mapRoot = mapDoc->RootElement();
 	XmlElement* tilesetsEle = mapRoot->FirstChildElement( "Tilesets" );
+	if( layerInfoList.isEmpty() )
+	{
+		QMessageBox::critical( this, tr( "Error" ), tr( "Failed to Load Map File." ) );
+		return;
+	}
 	if( !tilesetsEle )
 	{
-		Layer* newLayer = mapScene->addNewLayer( 0 );
-		if( layerInfoList.size() > 0 )
+		// map is empty
+		for ( int i = 0; i < layerInfoList.size(); ++i )
 		{
-			newLayer->m_layerInfo = layerInfoList[0];
+			LayerInfo& info = layerInfoList[i];
+			if ( info.getLayerType() == eLayerType::TILE_LAYER )
+			{
+				TileLayer* newLayer = mapScene->addNewLayer( i );
+				newLayer->m_layerInfo = layerInfoList[i];
+			}
+			else if ( info.getLayerType() == eLayerType::MARKER_LAYER )
+			{
+				MarkerLayer* newLayer = mapScene->addNewMarkerLayer( i );
+				newLayer->m_layerInfo = layerInfoList[i];
+			}
 		}
 		return;
 	}
@@ -294,27 +339,52 @@ void WorkspaceWidget::insertMap( MapInfo mapInfo, QList<LayerInfo> layerInfoList
 	int layerIndex = 0;
 	do
 	{
-		Layer* newLayer = mapScene->addNewLayer( layerIndex );
-		if ( layerInfoList.size() > layerIndex )
+		LayerInfo& info = layerInfoList[layerIndex];
+		if( info.getLayerType() == eLayerType::TILE_LAYER )
 		{
-			newLayer->m_layerInfo = layerInfoList[layerIndex];
-		}
-
-		QMap<int, TileInfo> tileInfoMap;
-		for( XmlElement* tileEle = tilesEle->FirstChildElement( "Tile" ); tileEle; tileEle = tileEle->NextSiblingElement( "Tile" ) )
-		{
-			int index = parseXmlAttribute( *tileEle, "index", -1 );
-			int tilesetNumber = parseXmlAttribute( *tileEle, "tileset", -1 );
-			int tilesetIndex = parseXmlAttribute( *tileEle, "tilesetIndex", -1 );
-			if( tilesetIndex == -1 || index == -1 || tilesetNumber == -1 )
-				return;
-
-			if( tilesetsMap.contains( tilesetNumber ) )
+			TileLayer* newLayer = mapScene->addNewLayer( layerIndex );
+			if( layerInfoList.size() > layerIndex )
 			{
-				tileInfoMap[index] = TileInfo( tilesetsMap.value( tilesetNumber ), tilesetIndex );
+				newLayer->m_layerInfo = layerInfoList[layerIndex];
 			}
+
+			QMap<int, TileInfo> tileInfoMap;
+			for( XmlElement* tileEle = tilesEle->FirstChildElement( "Tile" ); tileEle; tileEle = tileEle->NextSiblingElement( "Tile" ) )
+			{
+				int index = parseXmlAttribute( *tileEle, "index", -1 );
+				int tilesetNumber = parseXmlAttribute( *tileEle, "tileset", -1 );
+				int tilesetIndex = parseXmlAttribute( *tileEle, "tilesetIndex", -1 );
+				if( tilesetIndex == -1 || index == -1 || tilesetNumber == -1 )
+					continue;;
+
+				if( tilesetsMap.contains( tilesetNumber ) )
+				{
+					tileInfoMap[index] = TileInfo( tilesetsMap.value( tilesetNumber ), tilesetIndex );
+				}
+			}
+			mapScene->paintMap( tileInfoMap, layerIndex );
 		}
-		mapScene->paintMap( tileInfoMap, layerIndex );
+		else if( info.getLayerType() == eLayerType::MARKER_LAYER )
+		{
+			MarkerLayer* newLayer = mapScene->addNewMarkerLayer( layerIndex );
+			if( layerInfoList.size() > layerIndex )
+			{
+				newLayer->m_layerInfo = layerInfoList[layerIndex];
+			}
+
+			QMap<int, TileInfo> tileInfoMap;
+			for( XmlElement* tileEle = tilesEle->FirstChildElement( "Tile" ); tileEle; tileEle = tileEle->NextSiblingElement( "Tile" ) )
+			{
+				int index = parseXmlAttribute( *tileEle, "index", -1 );
+				if ( index == -1 )
+				{
+					continue;
+				}
+				tileInfoMap[index] = TileInfo();
+			}
+			mapScene->paintMap( tileInfoMap, layerIndex );
+		}
+
 		layerIndex++;
 		tilesEle = tilesEle->NextSiblingElement( "Tiles" );
 	} while ( tilesEle );
@@ -569,7 +639,13 @@ void WorkspaceWidget::getTabCount( int& tabCount )
 
 void WorkspaceWidget::addNewLayerIntoMap( int index, const QString& name )
 {
-	LayerAddCommand* command = new LayerAddCommand( m_mapSceneList[m_mapTabWidget->currentIndex()], index, name );
+	LayerAddCommand* command = new LayerAddCommand( m_mapSceneList[m_mapTabWidget->currentIndex()], index, name, eLayerType::TILE_LAYER );
+	m_mapSceneList[m_mapTabWidget->currentIndex()]->m_undoStack->push( command );
+}
+
+void WorkspaceWidget::addNewMarkerLayerIntoMap( int index, const QString& name )
+{
+	LayerAddCommand* command = new LayerAddCommand( m_mapSceneList[m_mapTabWidget->currentIndex()], index, name, eLayerType::MARKER_LAYER );
 	m_mapSceneList[m_mapTabWidget->currentIndex()]->m_undoStack->push( command );
 }
 
@@ -601,6 +677,15 @@ void WorkspaceWidget::setLayerVisible( int index, bool isVisible )
 	MapScene* mapScene = m_mapSceneList[m_mapTabWidget->currentIndex()];
 
 	mapScene->m_layers[index]->setIsVisible( isVisible );
+	m_mapSceneList[m_mapTabWidget->currentIndex()]->update();
+}
+
+void WorkspaceWidget::setLayerColor( int index, const QColor& color )
+{
+	MapScene* mapScene = m_mapSceneList[m_mapTabWidget->currentIndex()];
+
+	LayerColorChangeCommand* command = new LayerColorChangeCommand( mapScene, index, color );
+	mapScene->m_undoStack->push( command );
 	m_mapSceneList[m_mapTabWidget->currentIndex()]->update();
 }
 
@@ -775,11 +860,16 @@ void WorkspaceWidget::exportPNGFile()
 		for ( int i = 0; i < currentMapScene->m_layers.size(); ++i )
 		{
 			Layer* layer = currentMapScene->m_layers[i];
-			Layer* cloneLayer = cloneScene->addNewLayer( layer->getOrder() );
-			
-			for ( int tileIndex = 0; tileIndex < layer->m_tileList.size(); ++tileIndex )
+			if ( layer->getLayerInfo().getLayerType() != eLayerType::TILE_LAYER )
 			{
-				cloneLayer->m_tileList[tileIndex]->m_tileInfo = layer->m_tileList[tileIndex]->m_tileInfo;
+				continue;
+			}
+			TileLayer* tileLayer = dynamic_cast<TileLayer*>(layer);
+			TileLayer* cloneLayer = cloneScene->addNewLayer( tileLayer->getOrder() );
+			
+			for ( int tileIndex = 0; tileIndex < tileLayer->m_tileList.size(); ++tileIndex )
+			{
+				cloneLayer->m_tileList[tileIndex]->m_tileInfo = tileLayer->m_tileList[tileIndex]->m_tileInfo;
 				cloneLayer->m_tileList[tileIndex]->update();
 			}
 		}

@@ -81,6 +81,7 @@ private:
 	QShortcut* m_workspaceSwitchTabShortcut;
 	QShortcut* m_workspaceCloseTabShortcut;
 	QShortcut* m_newLayerShortcut;
+	QShortcut* m_newMarkerLayerShortcut;
 	QShortcut* m_raiseLayerShortcut;
 	QShortcut* m_lowerLayerShortcut;
 

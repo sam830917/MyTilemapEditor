@@ -35,6 +35,7 @@ BrushWidget::BrushWidget( const QString& title, QWidget* parent /*= Q_NULLPTR */
 BrushWidget::~BrushWidget()
 {
 	delete m_brushParser;
+	m_brushParser = nullptr;
 }
 
 void BrushWidget::addBrush( const QString& filePath )
