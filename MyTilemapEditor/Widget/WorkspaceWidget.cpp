@@ -859,12 +859,17 @@ void WorkspaceWidget::exportPNGFile()
 		QStyleOptionGraphicsItem opt;
 		for ( int i = 0; i < currentMapScene->m_layers.size(); ++i )
 		{
-			TileLayer* layer = dynamic_cast<TileLayer*>(currentMapScene->m_layers[i]);
-			TileLayer* cloneLayer = cloneScene->addNewLayer( layer->getOrder() );
-			
-			for ( int tileIndex = 0; tileIndex < layer->m_tileList.size(); ++tileIndex )
+			Layer* layer = currentMapScene->m_layers[i];
+			if ( layer->getLayerInfo().getLayerType() != eLayerType::TILE_LAYER )
 			{
-				cloneLayer->m_tileList[tileIndex]->m_tileInfo = layer->m_tileList[tileIndex]->m_tileInfo;
+				continue;
+			}
+			TileLayer* tileLayer = dynamic_cast<TileLayer*>(layer);
+			TileLayer* cloneLayer = cloneScene->addNewLayer( tileLayer->getOrder() );
+			
+			for ( int tileIndex = 0; tileIndex < tileLayer->m_tileList.size(); ++tileIndex )
+			{
+				cloneLayer->m_tileList[tileIndex]->m_tileInfo = tileLayer->m_tileList[tileIndex]->m_tileInfo;
 				cloneLayer->m_tileList[tileIndex]->update();
 			}
 		}

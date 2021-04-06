@@ -110,6 +110,7 @@ MapScene::MapScene( MapInfo mapInfo, WorkspaceWidget* parent )
 {
 	m_view = new MapView( this );
 	m_undoStack = new QUndoStack( this );
+	m_undoStack->setUndoLimit( 30 );
 
 	QSize mapSize = m_mapInfo.getMapSize();
 	QSize tileSize = m_mapInfo.getTileSize();
@@ -154,8 +155,6 @@ MapScene::MapScene( MapInfo mapInfo, WorkspaceWidget* parent )
 			m_selectedTileItemList.push_back( mask );
 		}
 	}
-
-	m_undoStack->setUndoLimit( 30 );
 }
 
 MapScene::MapScene( MapInfo mapInfo )
@@ -894,6 +893,7 @@ void MapScene::paintMap( int index, TileInfo tileInfo, int layerIndex )
 	default:
 		break;
 	}
+	update();
 	m_parentWidget->markCurrentSceneForModified();
 }
 

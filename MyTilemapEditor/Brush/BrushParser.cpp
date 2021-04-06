@@ -110,6 +110,11 @@ void BrushParser::initialBrushFile( const QString& filePath )
 
 BrushParser::~BrushParser()
 {
+	for ( int i = 0; i < m_brushes.size(); ++i )
+	{
+		delete m_brushes[i];
+	}
+	m_brushes.clear();
 }
 
 QList<AddBrushItem*> BrushParser::createBrushUI( const QString& brushName )

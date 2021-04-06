@@ -236,6 +236,10 @@ void LayerAddCommand::redo()
 	default:
 		break;
 	}
+	for( int i = m_index; i < m_mapScene->m_layers.size(); ++i )
+	{
+		m_mapScene->m_layers[i]->setOrder( i );
+	}
 	m_mapScene->m_parentWidget->addedNewLayer( m_index, m_name, m_layerType );
 }
 
