@@ -1,15 +1,8 @@
-MyTilemapEditor User Manual
+MyTilemapEditor
 ======================================================
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: User Manual
 
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   manual/introduction
