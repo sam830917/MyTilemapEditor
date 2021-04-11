@@ -6,3 +6,5 @@ MyTilemapEditor
    :caption: User Manual
 
    manual/introduction
+   manual/layers
+   manual/scriptableBrush

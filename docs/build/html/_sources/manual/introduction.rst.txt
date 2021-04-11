@@ -18,4 +18,22 @@ Besides, it can also generate Tile Palette as well in case the user can
 keep editing it.
 
 .. figure:: ../images/introduction/preview.png
-   :alt: Tiled Window
+   :alt: MyTilemapEditor Preview
+
+Getting Started
+---------------
+
+New Project
+~~~~~~~~~~~
+
+When opening up MyTilemapEditor for the first time, the first thing you need to do is create a project.
+
+.. figure:: ../images/introduction/new_window.png
+   :alt: MyTilemapEditor New Window
+   
+
+New Map
+~~~~~~~~~~~
+
+New Tileset
+~~~~~~~~~~~
