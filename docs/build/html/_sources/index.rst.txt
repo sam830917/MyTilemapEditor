@@ -8,3 +8,4 @@ MyTilemapEditor
    manual/introduction
    manual/layers
    manual/scriptableBrush
+   manual/output
