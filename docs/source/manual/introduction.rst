@@ -35,5 +35,27 @@ When opening up MyTilemapEditor for the first time, the first thing you need to 
 New Map
 ~~~~~~~~~~~
 
+To create a new map, choose File -> New -> Map. The following dialog will pop up:
+
+.. figure:: ../images/introduction/new_map.png
+   :alt: New Map
+   
+Here, we choose the initial map name, map size and tile size.
+
 New Tileset
 ~~~~~~~~~~~
+
+After creating our map, we will see the tile grid and an initial tile layer will be added to the map. 
+However, before we can start using any tiles, we need to add a tileset. Choose File -> New -> Tileset to open the New Tileset dialog:
+
+.. figure:: ../images/introduction/new_tileset.png
+   :alt: New Tileset
+   
+Click the :guilabel:`Import` button and select a image. 
+This example tileset uses a tile size of 32x32.
+You can see the preview in the right side.
+
+When we have the map and the tileset, MyTilemapEditor should look as follows and ready to go:
+
+.. figure:: ../images/introduction/project_ready.png
+   :alt: Tileset and Map Created
