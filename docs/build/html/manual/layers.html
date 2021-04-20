@@ -7,12 +7,13 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Layers (TODO) &mdash; MyTilemapEditor UserManual  documentation</title>
+  <title>Layers &mdash; MyTilemapEditor UserManual  documentation</title>
   
 
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/style.css" type="text/css" />
 
   
   
@@ -87,12 +88,17 @@
               <p class="caption"><span class="caption-text">User Manual</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Layers (TODO)</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#layer-types">Layer Types</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Layers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#layer-types">Layer Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#tile-layers">Tile Layers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#marker-layers">Marker Layers</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#use-cases">Use Cases</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="scriptableBrush.html">Scriptable Brush (TODO)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Output (TODO)</a></li>
 </ul>
 
             
@@ -141,7 +147,7 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Layers (TODO)</li>
+      <li>Layers</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -160,13 +166,57 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="layers-todo">
-<h1>Layers (TODO)<a class="headerlink" href="#layers-todo" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="layers">
+<h1>Layers<a class="headerlink" href="#layers" title="Permalink to this headline">¶</a></h1>
+<p>A map supports various sorts of content, and this content is organized into two different layers.
+There are two types of layers, Tile Layer and Marker Layer.
+The order of the layers determines the rendering order of your content.
+Layers can be hidden, made only partially visible and can be locked.</p>
+<div class="figure align-default">
+<img alt="Layer window" src="../_images/layer_window.png" />
+</div>
 <div class="section" id="layer-types">
 <h2>Layer Types<a class="headerlink" href="#layer-types" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="tile-layers">
+<h3>Tile Layers<a class="headerlink" href="#tile-layers" title="Permalink to this headline">¶</a></h3>
+<p>Tile layers provide a way of storing a large area filled with tile data.
+The data is a simple array of the tileset references and the index of tile.</p>
+</div>
+<div class="section" id="marker-layers">
+<h3>Marker Layers<a class="headerlink" href="#marker-layers" title="Permalink to this headline">¶</a></h3>
+<p>Marker Layer allows the user to mark certain areas in the map.
+You can treat the Marker Layer as true/false layer.
+When the tiles are marked, they will have low opacity rectangle in the layer.
+You can change the color for the Marker Layer by clicking the color button on the layer.</p>
+<div class="figure align-default">
+<img alt="Change Marker Layer Color" src="../_images/select_color.png" />
+</div>
+</div>
 </div>
 <div class="section" id="use-cases">
 <h2>Use Cases<a class="headerlink" href="#use-cases" title="Permalink to this headline">¶</a></h2>
+<p>You can have custom data for the output XML file by using Marker Layer. For example, to mark an area as collider.</p>
+<div class="figure align-default">
+<img alt="Layer window" src="../_images/marker_layer_eg1.png" />
+</div>
+<div class="figure align-default">
+<img alt="Layer window" src="../_images/marker_layer_eg2.png" />
+</div>
+<p>Then you can parse the XML file by the Marker Layer name in your game.
+Here is snippet.</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;Layers&gt;</span>
+    <span class="nt">&lt;Layer</span> <span class="na">name=</span><span class="s">&quot;Collider&quot;</span> <span class="na">isLock=</span><span class="s">&quot;false&quot;</span> <span class="na">isVisible=</span><span class="s">&quot;true&quot;</span> <span class="na">type=</span><span class="s">&quot;MARKER&quot;</span> <span class="na">color=</span><span class="s">&quot;255,0,4&quot;</span> <span class="na">layerIndex=</span><span class="s">&quot;0&quot;</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;/Layers&gt;</span>
+<span class="nt">&lt;Tiles</span> <span class="na">layerIndex=</span><span class="s">&quot;0&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;Tile</span> <span class="na">index=</span><span class="s">&quot;64&quot;</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;Tile</span> <span class="na">index=</span><span class="s">&quot;94&quot;</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;Tile</span> <span class="na">index=</span><span class="s">&quot;124&quot;</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;Tile</span> <span class="na">index=</span><span class="s">&quot;154&quot;</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;Tile</span> <span class="na">index=</span><span class="s">&quot;184&quot;</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;Tile</span> <span class="na">index=</span><span class="s">&quot;214&quot;</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;/Tiles&gt;</span>
+</pre></div>
+</div>
 </div>
 </div>
 

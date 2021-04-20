@@ -55,7 +55,7 @@ Click the :guilabel:`Import` button and select a image.
 This example tileset uses a tile size of 32x32.
 You can see the preview in the right side.
 
-When we have the map and the tileset, MyTilemapEditor should look as follows:
+When we have the map and the tileset, MyTilemapEditor should look as follows and ready to go:
 
 .. figure:: ../images/introduction/project_ready.png
    :alt: Tileset and Map Created

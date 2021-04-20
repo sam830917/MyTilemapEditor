@@ -7,12 +7,13 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Scriptable Brush (TODO) &mdash; MyTilemapEditor UserManual  documentation</title>
+  <title>Scriptable Brush &mdash; MyTilemapEditor UserManual  documentation</title>
   
 
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/style.css" type="text/css" />
 
   
   
@@ -38,7 +39,8 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="prev" title="Layers (TODO)" href="layers.html" /> 
+    <link rel="next" title="Output (TODO)" href="output.html" />
+    <link rel="prev" title="Layers" href="layers.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -86,12 +88,20 @@
               <p class="caption"><span class="caption-text">User Manual</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="layers.html">Layers (TODO)</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Scriptable Brush (TODO)</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#default-types">Default Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="layers.html">Layers</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Scriptable Brush</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#default-types">Default Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#same-tile-brush">Same Tile Brush</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#large-item-brush">Large Item Brush</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#random-brush">Random Brush</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#road-brush">Road Brush</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#land-brush">Land Brush</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#custom-type">Custom Type</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Output (TODO)</a></li>
 </ul>
 
             
@@ -140,7 +150,7 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Scriptable Brush (TODO)</li>
+      <li>Scriptable Brush</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -159,10 +169,66 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="scriptable-brush-todo">
-<h1>Scriptable Brush (TODO)<a class="headerlink" href="#scriptable-brush-todo" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="scriptable-brush">
+<h1>Scriptable Brush<a class="headerlink" href="#scriptable-brush" title="Permalink to this headline">¶</a></h1>
+<p>The implementation of the scriptable brush system which is based on the brush JavaScript files.
+A brush JavaScript file contains variables, painting logic, erasing logic and setup functions.</p>
+<ul class="simple">
+<li><p>All brush files are loaded while editor is opening.</p></li>
+<li><p>A brush file can create a brush instance by selecting the brush type in the drop-down list and clicking new brush
+button on the brush window and assign variable through the editor. After a new brush instance is created, an XML
+file will be generated for saving the assigned variable’s value.</p></li>
+<li><p>All of the brush instances will contain a name variable. This variable is for the XML file name and displaying name in the brush window.</p></li>
+</ul>
+<div class="figure align-default">
+<img alt="MyTilemapEditor Preview" src="../_images/brush_window.png" />
+</div>
 <div class="section" id="default-types">
 <h2>Default Types<a class="headerlink" href="#default-types" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="same-tile-brush">
+<h3>Same Tile Brush<a class="headerlink" href="#same-tile-brush" title="Permalink to this headline">¶</a></h3>
+<p>Same tile brush includes one variable which saves a tile. It can paint the specific tile into the map.</p>
+</div>
+<div class="section" id="large-item-brush">
+<h3>Large Item Brush<a class="headerlink" href="#large-item-brush" title="Permalink to this headline">¶</a></h3>
+<p>Large item brush includes an array of tiles, a width value, and a height value. It can paint all the tiles in the array
+base on the width and height from left to right, top to bottom.</p>
+<div class="figure align-default">
+<img alt="MyTilemapEditor Preview" src="../_images/large_item_brush.png" />
+</div>
+</div>
+<div class="section" id="random-brush">
+<h3>Random Brush<a class="headerlink" href="#random-brush" title="Permalink to this headline">¶</a></h3>
+<p>Random brush includes an array of tiles. When the paint function is called, it will pick a random tile in the array
+and paint the tile into the map.</p>
+<div class="figure align-default">
+<img alt="MyTilemapEditor Preview" src="../_images/random_brush.png" />
+</div>
+</div>
+<div class="section" id="road-brush">
+<h3>Road Brush<a class="headerlink" href="#road-brush" title="Permalink to this headline">¶</a></h3>
+<p>Road brush includes an array of tiles with grids. The feature of this brush is to paint a continuing road.
+Based on the top, right, bottom, and left side of the tile, it will try to paint the best tile,
+in the array of tiles, in the giving coordinate. In order to paint a road, the user has to define
+the road information, helping editor to determine that every edge of tile should connect the way or not.</p>
+<div class="figure align-default">
+<img alt="MyTilemapEditor Preview" src="../_images/road_brush.png" />
+</div>
+<p>For example, if the user tries to paint in the (1, 1) coordinate, the editor will check the tile on
+the top coordinate that is this tile in the array of defined tile. If so, get the value of the bottom
+edge in the top coordinate, and do the similar steps with the left, bottom, and right sides’ coordinate.
+As the result, the editor can pick a tile that fits within the (1, 1) coordinate, but if there is no best
+solution, it will stay empty tile.</p>
+<div class="figure align-default">
+<img alt="MyTilemapEditor Preview" src="../_images/road_brush2.png" />
+</div>
+</div>
+<div class="section" id="land-brush">
+<h3>Land Brush<a class="headerlink" href="#land-brush" title="Permalink to this headline">¶</a></h3>
+<p>Land brush includes an array of tiles with grids. The feature of this brush is to paint a 9- slicing terrain
+into the map. Land brush is similar to the road brush, but instead of defining the edges of the tile, the user
+should define the corner of the tile.</p>
+</div>
 </div>
 <div class="section" id="custom-type">
 <h2>Custom Type<a class="headerlink" href="#custom-type" title="Permalink to this headline">¶</a></h2>
@@ -175,7 +241,8 @@
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="layers.html" class="btn btn-neutral float-left" title="Layers (TODO)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="output.html" class="btn btn-neutral float-right" title="Output (TODO)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="layers.html" class="btn btn-neutral float-left" title="Layers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

@@ -1,0 +1,7 @@
+.figure img {
+    padding: 4px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin: 0px auto 5px auto;
+}
