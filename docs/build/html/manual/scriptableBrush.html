@@ -39,7 +39,7 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Output (TODO)" href="output.html" />
+    <link rel="next" title="Output" href="output.html" />
     <link rel="prev" title="Layers" href="layers.html" /> 
 </head>
 
@@ -98,10 +98,15 @@
 <li class="toctree-l3"><a class="reference internal" href="#land-brush">Land Brush</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#custom-type">Custom Type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#custom-type">Custom Type</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#basic-functions">Basic Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#support-functions">Support Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#support-variable-types">Support Variable Types</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="output.html">Output (TODO)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Output</a></li>
 </ul>
 
             
@@ -194,7 +199,7 @@ file will be generated for saving the assigned variable’s value.</p></li>
 <p>Large item brush includes an array of tiles, a width value, and a height value. It can paint all the tiles in the array
 base on the width and height from left to right, top to bottom.</p>
 <div class="figure align-default">
-<img alt="MyTilemapEditor Preview" src="../_images/large_item_brush.png" />
+<img alt="Large Item Brush" src="../_images/large_item_brush.png" />
 </div>
 </div>
 <div class="section" id="random-brush">
@@ -202,7 +207,7 @@ base on the width and height from left to right, top to bottom.</p>
 <p>Random brush includes an array of tiles. When the paint function is called, it will pick a random tile in the array
 and paint the tile into the map.</p>
 <div class="figure align-default">
-<img alt="MyTilemapEditor Preview" src="../_images/random_brush.png" />
+<img alt="Random Brush" src="../_images/random_brush.png" />
 </div>
 </div>
 <div class="section" id="road-brush">
@@ -212,7 +217,7 @@ Based on the top, right, bottom, and left side of the tile, it will try to paint
 in the array of tiles, in the giving coordinate. In order to paint a road, the user has to define
 the road information, helping editor to determine that every edge of tile should connect the way or not.</p>
 <div class="figure align-default">
-<img alt="MyTilemapEditor Preview" src="../_images/road_brush.png" />
+<img alt="Road Brush" src="../_images/road_brush.png" />
 </div>
 <p>For example, if the user tries to paint in the (1, 1) coordinate, the editor will check the tile on
 the top coordinate that is this tile in the array of defined tile. If so, get the value of the bottom
@@ -220,18 +225,76 @@ edge in the top coordinate, and do the similar steps with the left, bottom, and 
 As the result, the editor can pick a tile that fits within the (1, 1) coordinate, but if there is no best
 solution, it will stay empty tile.</p>
 <div class="figure align-default">
-<img alt="MyTilemapEditor Preview" src="../_images/road_brush2.png" />
+<img alt="Road Brush 2" src="../_images/road_brush2.png" />
 </div>
 </div>
 <div class="section" id="land-brush">
 <h3>Land Brush<a class="headerlink" href="#land-brush" title="Permalink to this headline">¶</a></h3>
-<p>Land brush includes an array of tiles with grids. The feature of this brush is to paint a 9- slicing terrain
+<p>Land brush includes an array of tiles with grids. The feature of this brush is to paint a 9-slicing terrain
 into the map. Land brush is similar to the road brush, but instead of defining the edges of the tile, the user
 should define the corner of the tile.</p>
+<div class="figure align-default">
+<img alt="Land Brush" src="../_images/land_brush.png" />
+</div>
 </div>
 </div>
 <div class="section" id="custom-type">
 <h2>Custom Type<a class="headerlink" href="#custom-type" title="Permalink to this headline">¶</a></h2>
+<p>In the application path, Brushes folder includes all the scriptable brushes. You can add you own brush file following
+the format below.</p>
+<div class="section" id="basic-functions">
+<h3>Basic Functions<a class="headerlink" href="#basic-functions" title="Permalink to this headline">¶</a></h3>
+<p>The brush files contain 4 basic functions which be called in different situations.</p>
+<dl class="simple">
+<dt>Startup()<span class="classifier">void</span></dt><dd><p>This function will be called when current brush file is loaded. In most cases, you should expose variables in here.</p>
+</dd>
+<dt>Update()<span class="classifier">void</span></dt><dd><p>This function will be called after user creates a new brush file and assigns values into expose variables.</p>
+</dd>
+<dt>Draw(coordX<span class="classifier">int, coordY</span><span class="classifier">int)</span><span class="classifier">void</span></dt><dd><p>This function will be called when user wants to paint tile into map. Input is the coordinate of the user clicked location.</p>
+</dd>
+<dt>Erase(coordX<span class="classifier">int, coordY</span><span class="classifier">int)</span><span class="classifier">void</span></dt><dd><p>This function will be called when user wants to erase tiles in the map. Input is the coordinate of the user clicked location.</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="support-functions">
+<h3>Support Functions<a class="headerlink" href="#support-functions" title="Permalink to this headline">¶</a></h3>
+<p>Based on the basic functions, there are several support functions for the user to program the scriptable brush.</p>
+<dl class="simple">
+<dt>ExposeVariable(variableName<span class="classifier">string, labelName</span><span class="classifier">string, variableType</span><span class="classifier">enum)</span><span class="classifier">void</span></dt><dd><p>This function is for generate UI and assign value to specific variable. This is most important function, because it communicates with editor and provides variable name as well as variable type.</p>
+</dd>
+<dt>helper.setTile(coordX<span class="classifier">int, coordY</span><span class="classifier">int, tile</span><span class="classifier">Asset)</span><span class="classifier">void</span></dt><dd><p>This function is for painting tile into current map, but it will not update immediately. All the changes will be updated after Draw or Erase functions.</p>
+</dd>
+<dt>helper.eraseTile(coordX<span class="classifier">int, coordY</span><span class="classifier">int)</span><span class="classifier">void</span></dt><dd><p>This function is for erasing tile in the map.</p>
+</dd>
+<dt>helper.isSameTile(coordX<span class="classifier">int, coordY</span><span class="classifier">int, tile</span><span class="classifier">Asset)</span><span class="classifier">bool</span></dt><dd><p>This function is for compare between tile in the coordinate and tile in the parameter are the same tile.</p>
+</dd>
+<dt>helper.isConatainTile(coordX<span class="classifier">int, coordY</span><span class="classifier">int, tiles</span><span class="classifier">AssetArray)</span><span class="classifier">bool</span></dt><dd><p>This function is for checking the tiles contain the tile in the coordinate.</p>
+</dd>
+<dt>helper.getRandomInRange(lowNumber<span class="classifier">int, highNumber</span><span class="classifier">int)</span><span class="classifier">int</span></dt><dd><p>Get random integer number within range.</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="support-variable-types">
+<h3>Support Variable Types<a class="headerlink" href="#support-variable-types" title="Permalink to this headline">¶</a></h3>
+<p>For every exposed variable, editor will generate UI base on the variable type. In the MyTilemapEditor, it equips the following variable types.</p>
+<dl class="simple">
+<dt>String</dt><dd><p>A single input box which allows user typing text.</p>
+</dd>
+<dt>Integer</dt><dd><p>A single input box with up and down arrow buttons which allows user typing numeric text. The range of number is from -2147483648 to 2147483647.</p>
+</dd>
+<dt>Single Tile</dt><dd><p>A tile selector is a button. When the user clicking on the rectangle button, it will pop up a dialog that allows the user to choose a tile from the tilesets, and the selected tile will be represented on the button. If there is no selected tile, the magenta color will be used for the button.</p>
+</dd>
+<dt>Tile Array</dt><dd><p>This type of variable contains an array of tiles. The user can add a tile by clicking the plus button and delete a tile by clicking the minus button. On the tile selecting dialog, it allows selecting more than one tile.</p>
+</dd>
+<dt>Tile with Grid edge only Array</dt><dd><p>Tile with Grid is a type that has a tile button surround with 3 by 3 buttons. The buttons represent the Boolean type. In this case, green is true, and red is false. The user can click on the buttons to switch between green color and red color.</p>
+</dd>
+<dt>Tile with Grid corner only Array</dt><dd><p>This also a Tile with Grid type, but it only allows the user to modify the corner of buttons and tile itself.</p>
+</dd>
+</dl>
+<div class="figure align-default">
+<img alt="Support Variable Type" src="../_images/support_variable_type.png" />
+</div>
+</div>
 </div>
 </div>
 
@@ -241,7 +304,7 @@ should define the corner of the tile.</p>
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="output.html" class="btn btn-neutral float-right" title="Output (TODO)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="output.html" class="btn btn-neutral float-right" title="Output" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
         <a href="layers.html" class="btn btn-neutral float-left" title="Layers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
