@@ -1,5 +1,5 @@
 # MyTilemapEditor
-http://sam-chu.com/projects/TilemapEditor.html
+[User Manual](https://mytilemapeditor.readthedocs.io/en/latest/index.html)
 ## Description
 MyTilemapEditor is a 2D tile map editor with a scriptable brush. 
 MyTilemapEditor can create a map in any size. It can also import sprite sheet and slice the sprite sheet into sprites that can use to paint on the map. 
